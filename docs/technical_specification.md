@@ -198,8 +198,7 @@ The frontend will consist of the following main pages and components, each fetch
 - **Features:**
   - Bio text.
   - Contact email and social media links.
-  - Optional: Profile photo.
-- **Data Source:** `/api/about` for bio, email, and social links.
+  - Profile photo.
 
 ### 6.3 Work Page
 - **Purpose:** Showcase professional accomplishments with sub-sections.
@@ -220,7 +219,6 @@ The frontend will consist of the following main pages and components, each fetch
 - **Features:**
   - Interactive, chronological view of career milestones.
   - Clickable milestones with descriptions and links.
-- **Data Source:** `/api/timeline`
 
 ### 6.4 Blog Page
 - **Purpose:** Share thoughts with interactive features.
@@ -276,11 +274,9 @@ The frontend will consist of the following main pages and components, each fetch
 ---
 
 ### Summary of Key Decisions
-- **Database-Driven:** All dynamic content (books, bookshelves, projects, gigs, timeline entries, blog posts, about info) is stored in PostgreSQL and accessed via API endpoints.
+- **Database-Driven:** dynamic content (books, bookshelves, projects, gigs, blog posts) is stored in PostgreSQL and accessed via API endpoints.
 - **API Communication:** Axios is used for all HTTP requests from the frontend to the backend.
 - **Navigation:** 'Work' in the navbar shows a dropdown on hover for Projects, Gigs, and Timeline.
 - **About Page:** Includes contact information (email, social links) fetched from the database.
 - **Styling:** Tailwind CSS ensures a consistent, responsive design.
 - **No API Integration:** Goodreads data is pre-loaded into the database via a script, not fetched in real-time.
-
-This PRD provides a comprehensive plan for building your personal website, ensuring it is database-powered, performant, and easy to maintain. Let me know if you need further clarification or adjustments!

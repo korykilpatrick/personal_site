@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                    // Compile to ES6 for modern browser support
+    "lib": [                            // Include libraries for DOM and ESNext features
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,                    // Allow JavaScript files to be compiled (useful if mixing JS/TS)
+    "skipLibCheck": true,               // Skip type checking of declaration files for faster compilation
+    "esModuleInterop": true,            // Enable interop between CommonJS and ES Modules
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules without exports
+    "strict": true,                     // Enable all strict type-checking options
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file name casing
+    "module": "esnext",                 // Use ESNext module system for modern JS
+    "moduleResolution": "node",         // Resolve modules using Node.js style
+    "resolveJsonModule": true,          // Allow importing JSON files
+    "isolatedModules": true,            // Ensure each file can be safely transpiled independently
+    "noEmit": false,                    // Allow TypeScript to emit output (Webpack handles this, but set to false for flexibility)
+    "jsx": "react-jsx",                 // Use React's new JSX transform (no need to import React in every file)
+    "outDir": "./dist",                 // Output compiled files to dist/ (though Webpack overrides this)
+    "rootDir": "./src",                 // Treat src/ as the root directory for source files
+    "baseUrl": ".",                     // Set base directory for module resolution
+    "paths": {                          // Map paths for cleaner imports (optional)
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  },
+  "include": [
+    "src/**/*"                          // Include all files in src/
+  ],
+  "exclude": [
+    "node_modules",                     // Exclude node_modules
+    "dist"                              // Exclude dist/ to avoid conflicts with output
+  ]
+}
