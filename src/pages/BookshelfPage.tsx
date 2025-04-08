@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 
@@ -19,32 +19,41 @@ interface Bookshelf {
 
 const BookshelfPage: React.FC = () => {
   const [selectedShelf, setSelectedShelf] = useState<number | null>(null);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [booksLoading, setBooksLoading] = useState<boolean>(true);
+  const [booksError, setBooksError] = useState<Error | null>(null);
   
-  // Fetch bookshelves
+  // Fetch bookshelves - this should only happen once when component mounts
   const { 
     data: bookshelves, 
     loading: shelvesLoading, 
     error: shelvesError 
   } = useApi<Bookshelf[]>(apiService.getBookshelves);
   
-  // Fetch books from selected shelf or all books
-  const { 
-    data: books,
-    loading: booksLoading,
-    error: booksError,
-    fetchData: fetchBooks
-  } = useApi<Book[]>(
-    () => selectedShelf
-      ? apiService.getBooksByShelf(selectedShelf)
-      : apiService.getBooks(),
-    { autoFetch: true }
-  );
-
-  // Refetch books when selected shelf changes
-  React.useEffect(() => {
+  // Fetch books only when selected shelf changes
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setBooksLoading(true);
+      setBooksError(null);
+      
+      try {
+        const fetchedBooks = selectedShelf
+          ? await apiService.getBooksByShelf(selectedShelf)
+          : await apiService.getBooks();
+        
+        setBooks(fetchedBooks);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setBooksError(error);
+      } finally {
+        setBooksLoading(false);
+      }
+    };
+    
     fetchBooks();
-  }, [selectedShelf, fetchBooks]);
-
+  }, [selectedShelf]); // Only re-run when selected shelf changes
+  
+  // Combined loading and error states
   const loading = shelvesLoading || booksLoading;
   const error = shelvesError || booksError;
 
@@ -73,7 +82,7 @@ const BookshelfPage: React.FC = () => {
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">My Bookshelf</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error.message}</p>
+          <p>{error instanceof Error ? error.message : String(error)}</p>
         </div>
       </div>
     );
