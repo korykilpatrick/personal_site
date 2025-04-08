@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define base API URL
-const API_BASE_URL = process.env.API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -44,8 +44,10 @@ export const apiService = {
   },
   
   // Project related endpoints
-  getProjects: async () => {
-    const response = await apiClient.get('/projects');
+  getProjects: async (tag?: string) => {
+    const response = await apiClient.get('/projects', {
+      params: tag ? { tag } : undefined
+    });
     return response.data;
   },
   
@@ -66,8 +68,8 @@ export const apiService = {
   },
   
   // Blog related endpoints
-  getPosts: async () => {
-    const response = await apiClient.get('/posts');
+  getPosts: async (params?: { tag?: string; q?: string }) => {
+    const response = await apiClient.get('/posts', { params });
     return response.data;
   },
   

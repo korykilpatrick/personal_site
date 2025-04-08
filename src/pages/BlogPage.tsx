@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 import { formatDate } from '../utils/dateUtils';
 
@@ -12,60 +13,40 @@ interface Post {
 }
 
 const BlogPage: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [allTags, setAllTags] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        // For development, use mock data
-        // In production, use: const data = await apiService.getPosts();
-        const data: Post[] = [
-          {
-            id: 1,
-            title: 'Getting Started with React and TypeScript',
-            excerpt: 'Learn how to set up a new project with React and TypeScript to improve your development experience.',
-            date: '2023-06-15',
-            tags: ['React', 'TypeScript', 'Web Development'],
-          },
-          {
-            id: 2,
-            title: 'The Power of Meditation in Software Development',
-            excerpt: 'How regular meditation practice can improve focus, problem-solving, and overall code quality.',
-            date: '2023-05-22',
-            tags: ['Productivity', 'Spirituality', 'Mental Health'],
-          },
-          {
-            id: 3,
-            title: 'Building a Personal Website with React and Tailwind',
-            excerpt: 'A step-by-step guide to creating your own portfolio website using modern web technologies.',
-            date: '2023-04-10',
-            tags: ['React', 'Tailwind CSS', 'Portfolio'],
-          },
-        ];
-
-        setPosts(data);
-        
-        // Extract all unique tags
-        const tags = data.flatMap(post => post.tags);
-        const uniqueTags = Array.from(new Set(tags));
-        setAllTags(uniqueTags);
-        
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load blog posts');
-        setLoading(false);
+  
+  // Fetch blog posts
+  const {
+    data: posts,
+    loading,
+    error,
+    fetchData: fetchPosts
+  } = useApi<Post[]>(
+    () => {
+      if (searchQuery) {
+        return apiService.getPosts({ q: searchQuery });
+      } else if (selectedTags.length === 1) {
+        return apiService.getPosts({ tag: selectedTags[0] });
+      } else {
+        return apiService.getPosts();
       }
-    };
-
+    }
+  );
+  
+  // Re-fetch posts when search or tags change
+  React.useEffect(() => {
     fetchPosts();
-  }, []);
-
+  }, [searchQuery, selectedTags, fetchPosts]);
+  
+  // Extract all unique tags from posts
+  const allTags = React.useMemo(() => {
+    if (!posts) return [];
+    
+    const tags = posts.flatMap(post => post.tags || []);
+    return Array.from(new Set(tags));
+  }, [posts]);
+  
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag)
@@ -73,17 +54,16 @@ const BlogPage: React.FC = () => {
         : [...prev, tag]
     );
   };
-
-  const filteredPosts = posts.filter(post => {
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.some(tag => post.tags.includes(tag));
+  
+  // Filter posts client-side if multiple tags are selected (since the API only supports one tag)
+  const filteredPosts = React.useMemo(() => {
+    if (!posts) return [];
+    if (selectedTags.length <= 1) return posts; // Already filtered by API
     
-    const matchesSearch = searchQuery === '' ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesTags && matchesSearch;
-  });
+    return posts.filter(post => 
+      selectedTags.some(tag => post.tags.includes(tag))
+    );
+  }, [posts, selectedTags]);
 
   if (loading) {
     return (
@@ -101,7 +81,7 @@ const BlogPage: React.FC = () => {
       <div className="max-w-4xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Blog</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
+          <p>{error.message}</p>
         </div>
       </div>
     );
@@ -167,7 +147,7 @@ const BlogPage: React.FC = () => {
         </div>
       </div>
 
-      {filteredPosts.length === 0 ? (
+      {!filteredPosts || filteredPosts.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <p className="text-xl text-gray-600">No posts found matching your criteria</p>
         </div>

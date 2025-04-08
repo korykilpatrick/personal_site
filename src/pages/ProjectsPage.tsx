@@ -1,97 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 import MarkdownToJsx from 'markdown-to-jsx';
+
+interface ProjectLink {
+  title: string;
+  url: string;
+  icon?: string;
+}
 
 interface Project {
   id: number;
   title: string;
   description: string;
   media_urls: string[];
-  links: {
-    title: string;
-    url: string;
-    icon?: string;
-  }[];
+  links: ProjectLink[];
   writeup?: string;
   tags?: string[];
 }
 
 const ProjectsPage: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [allTags, setAllTags] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        // For development, use mock data
-        // In production, use: const data = await apiService.getProjects();
-        const data: Project[] = [
-          {
-            id: 1,
-            title: 'Personal Portfolio Website',
-            description: 'A responsive personal website built with React, TypeScript, and Tailwind CSS.',
-            media_urls: ['https://via.placeholder.com/800x450?text=Portfolio+Screenshot'],
-            links: [
-              { title: 'GitHub', url: 'https://github.com/yourusername/portfolio', icon: 'github' },
-              { title: 'Live Demo', url: '#', icon: 'external-link' }
-            ],
-            writeup: '## Personal Portfolio Website\n\nThis website showcases my work as a software engineer and provides a platform for my blog posts.\n\n### Technologies Used\n\n- React\n- TypeScript\n- Tailwind CSS\n- Node.js\n- Express\n- PostgreSQL\n\n### Features\n\n- Responsive design that works on all devices\n- Interactive timeline of my professional journey\n- Blog with filtering and search functionality\n- Bookshelf integrated with Goodreads\n- Dark mode support',
-            tags: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js']
-          },
-          {
-            id: 2,
-            title: 'E-commerce Platform',
-            description: 'A full-stack e-commerce solution with product management, cart functionality, and payment processing.',
-            media_urls: ['https://via.placeholder.com/800x450?text=E-commerce+Screenshot'],
-            links: [
-              { title: 'GitHub', url: 'https://github.com/yourusername/ecommerce', icon: 'github' }
-            ],
-            writeup: '## E-commerce Platform\n\nA complete e-commerce solution built from scratch.\n\n### Technologies Used\n\n- React\n- Redux\n- Node.js\n- Express\n- MongoDB\n- Stripe Payment Integration\n\n### Features\n\n- User authentication and profiles\n- Product catalog with categories and filters\n- Shopping cart and checkout process\n- Payment processing with Stripe\n- Order history and tracking\n- Admin dashboard for inventory management',
-            tags: ['React', 'Redux', 'Node.js', 'MongoDB']
-          },
-          {
-            id: 3,
-            title: 'Weather Dashboard',
-            description: 'A weather application that displays current conditions and forecasts using the OpenWeather API.',
-            media_urls: ['https://via.placeholder.com/800x450?text=Weather+App+Screenshot'],
-            links: [
-              { title: 'GitHub', url: 'https://github.com/yourusername/weather-app', icon: 'github' },
-              { title: 'Live Demo', url: '#', icon: 'external-link' }
-            ],
-            writeup: '## Weather Dashboard\n\nA sleek weather application that provides current conditions and forecasts.\n\n### Technologies Used\n\n- JavaScript\n- HTML5\n- CSS3\n- OpenWeather API\n\n### Features\n\n- Current weather conditions\n- 5-day forecast\n- Location search\n- Responsive design\n- Geolocation support',
-            tags: ['JavaScript', 'API Integration', 'CSS3']
-          }
-        ];
-        
-        setProjects(data);
-        
-        // Extract all unique tags
-        const tags = data.flatMap(project => project.tags || []);
-        const uniqueTags = Array.from(new Set(tags));
-        setAllTags(uniqueTags);
-        
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load projects');
-        setLoading(false);
-      }
-    };
-
+  
+  // Fetch projects based on selected tag
+  const {
+    data: projects,
+    loading,
+    error,
+    fetchData: fetchProjects
+  } = useApi<Project[]>(
+    () => apiService.getProjects(selectedTag || undefined)
+  );
+  
+  // Re-fetch projects when selected tag changes
+  React.useEffect(() => {
     fetchProjects();
-  }, []);
-
+  }, [selectedTag, fetchProjects]);
+  
+  // Extract all unique tags from projects
+  const allTags = React.useMemo(() => {
+    if (!projects) return [];
+    
+    const tags = projects.flatMap(project => project.tags || []);
+    return Array.from(new Set(tags));
+  }, [projects]);
+  
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
   };
-
-  const filteredProjects = selectedTag
-    ? projects.filter(project => project.tags?.includes(selectedTag))
-    : projects;
 
   if (loading) {
     return (
@@ -109,7 +66,7 @@ const ProjectsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Projects</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
+          <p>{error.message}</p>
         </div>
       </div>
     );
@@ -141,13 +98,13 @@ const ProjectsPage: React.FC = () => {
         </div>
       )}
 
-      {filteredProjects.length === 0 ? (
+      {!projects || projects.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <p className="text-xl text-gray-600">No projects found matching the selected filter</p>
         </div>
       ) : (
         <div className="space-y-12">
-          {filteredProjects.map((project) => (
+          {projects.map((project) => (
             <div key={project.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               {project.media_urls && project.media_urls.length > 0 && (
                 <div className="relative overflow-hidden aspect-video">
@@ -155,6 +112,10 @@ const ProjectsPage: React.FC = () => {
                     src={project.media_urls[0]}
                     alt={`Screenshot of ${project.title}`}
                     className="w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://via.placeholder.com/800x450?text=Project+Screenshot';
+                    }}
                   />
                 </div>
               )}
