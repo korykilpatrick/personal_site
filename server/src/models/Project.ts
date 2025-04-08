@@ -31,7 +31,8 @@ export const ProjectModel = {
     // Parse JSON fields
     return projects.map((project) => ({
       ...project,
-      media_urls: JSON.parse(project.media_urls || '[]'),
+      // media_urls is already in JSONB format, no need to parse
+      media_urls: project.media_urls || [],
       links: JSON.parse(project.project_links || '[]'),
       tags: JSON.parse(project.project_tags || '[]'),
     }));
@@ -48,7 +49,8 @@ export const ProjectModel = {
     // Parse JSON fields
     return {
       ...project,
-      media_urls: JSON.parse(project.media_urls || '[]'),
+      // media_urls is already in JSONB format, no need to parse
+      media_urls: project.media_urls || [],
       links: JSON.parse(project.project_links || '[]'),
       tags: JSON.parse(project.project_tags || '[]'),
     };
@@ -66,7 +68,8 @@ export const ProjectModel = {
     // Parse JSON fields
     return projects.map((project) => ({
       ...project,
-      media_urls: JSON.parse(project.media_urls || '[]'),
+      // media_urls is already in JSONB format, no need to parse
+      media_urls: project.media_urls || [],
       links: JSON.parse(project.project_links || '[]'),
       tags: JSON.parse(project.project_tags || '[]'),
     }));
@@ -80,7 +83,8 @@ export const ProjectModel = {
     const { links, tags, ...rest } = project;
     const projectData = {
       ...rest,
-      media_urls: JSON.stringify(project.media_urls || []),
+      // media_urls should be passed directly as it's a JSONB field
+      media_urls: project.media_urls || [],
       project_links: JSON.stringify(links || []),
       project_tags: JSON.stringify(tags || []),
     };
@@ -91,7 +95,7 @@ export const ProjectModel = {
     // Parse JSON fields in the returned project
     return {
       ...newProject,
-      media_urls: JSON.parse(newProject.media_urls || '[]'),
+      media_urls: newProject.media_urls || [],
       links: JSON.parse(newProject.project_links || '[]'),
       tags: JSON.parse(newProject.project_tags || '[]'),
     };
@@ -108,7 +112,8 @@ export const ProjectModel = {
     const updateData: any = { ...rest, updated_at: new Date() };
     
     // Stringify JSON fields if they exist
-    if (project.media_urls) updateData.media_urls = JSON.stringify(project.media_urls);
+    // Pass media_urls directly as it's a JSONB field
+    if (project.media_urls) updateData.media_urls = project.media_urls;
     if (links) updateData.project_links = JSON.stringify(links);
     if (tags) updateData.project_tags = JSON.stringify(tags);
     
@@ -122,7 +127,7 @@ export const ProjectModel = {
     // Parse JSON fields
     return {
       ...updatedProject,
-      media_urls: JSON.parse(updatedProject.media_urls || '[]'),
+      media_urls: updatedProject.media_urls || [],
       links: JSON.parse(updatedProject.project_links || '[]'),
       tags: JSON.parse(updatedProject.project_tags || '[]'),
     };
