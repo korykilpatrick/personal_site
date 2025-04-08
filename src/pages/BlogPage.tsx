@@ -16,28 +16,43 @@ const BlogPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Fetch blog posts
-  const {
-    data: posts,
-    loading,
-    error,
-    fetchData: fetchPosts
-  } = useApi<Post[]>(
-    () => {
-      if (searchQuery) {
-        return apiService.getPosts({ q: searchQuery });
-      } else if (selectedTags.length === 1) {
-        return apiService.getPosts({ tag: selectedTags[0] });
-      } else {
-        return apiService.getPosts();
-      }
-    }
-  );
+  // Local state for posts data
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   
-  // Re-fetch posts when search or tags change
+  // Fetch posts when search or tags change
   React.useEffect(() => {
-    fetchPosts();
-  }, [searchQuery, selectedTags, fetchPosts]);
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let fetchedPosts;
+        if (searchQuery) {
+          fetchedPosts = await apiService.getPosts({ q: searchQuery });
+        } else if (selectedTags.length === 1) {
+          fetchedPosts = await apiService.getPosts({ tag: selectedTags[0] });
+        } else {
+          fetchedPosts = await apiService.getPosts();
+        }
+        
+        setPosts(fetchedPosts);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Debounce search queries to avoid too many API calls
+    const timerId = setTimeout(() => {
+      fetchPosts();
+    }, searchQuery ? 500 : 0); // Add 500ms delay for search, but no delay for tag filters
+    
+    return () => clearTimeout(timerId);
+  }, [searchQuery, selectedTags]); // Only re-run when search or selected tags change
   
   // Extract all unique tags from posts
   const allTags = React.useMemo(() => {
@@ -81,7 +96,7 @@ const BlogPage: React.FC = () => {
       <div className="max-w-4xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Blog</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error.message}</p>
+          <p>{error instanceof Error ? error.message : String(error)}</p>
         </div>
       </div>
     );

@@ -23,20 +23,30 @@ const ProjectsPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
-  // Fetch projects based on selected tag
-  const {
-    data: projects,
-    loading,
-    error,
-    fetchData: fetchProjects
-  } = useApi<Project[]>(
-    () => apiService.getProjects(selectedTag || undefined)
-  );
+  // Local state for projects data
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   
-  // Re-fetch projects when selected tag changes
+  // Fetch projects only when selected tag changes
   React.useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const fetchedProjects = await apiService.getProjects(selectedTag || undefined);
+        setProjects(fetchedProjects);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     fetchProjects();
-  }, [selectedTag, fetchProjects]);
+  }, [selectedTag]); // Only re-run when selected tag changes
   
   // Extract all unique tags from projects
   const allTags = React.useMemo(() => {
@@ -66,7 +76,7 @@ const ProjectsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Projects</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error.message}</p>
+          <p>{error instanceof Error ? error.message : String(error)}</p>
         </div>
       </div>
     );
