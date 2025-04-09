@@ -114,7 +114,7 @@ const BookshelfPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto py-8">
+      <div className="max-w-6xl mx-auto py-8 bg-stone-50">
         <Loading className="h-64" />
       </div>
     );
@@ -122,17 +122,17 @@ const BookshelfPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto py-8">
+      <div className="max-w-6xl mx-auto py-8 bg-stone-50">
         <ErrorDisplay error={error} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
+    <div className="max-w-6xl mx-auto py-8 bg-stone-50 min-h-screen">
       {/* Personal Note Section */}
-      <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-sm">
-        <p className="text-lg text-gray-700 italic">
+      <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-100 rounded-lg shadow-sm">
+        <p className="text-lg text-stone-700 italic">
           I've always found solace in books. This collection represents my journey through different
           worlds, ideas, and perspectives. Each book has left its mark on me in some way. I hope you
           find something here that piques your interest too!
@@ -144,7 +144,7 @@ const BookshelfPage: React.FC = () => {
         {/* Filtering and Sorting Controls - horizontal layout */}
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">Sort By</span>
+            <span className="text-sm font-medium text-stone-700 mr-2">Sort By</span>
             <SortDropdown
               options={sortOptions}
               selected={sortBy}
@@ -154,7 +154,7 @@ const BookshelfPage: React.FC = () => {
           </div>
 
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">Bookshelves</span>
+            <span className="text-sm font-medium text-stone-700 mr-2">Bookshelves</span>
             <MultiSelectDropdown
               label="Select Shelves"
               items={bookshelves.map((shelf) => ({ id: shelf.id, label: shelf.name }))}
@@ -181,7 +181,7 @@ const BookshelfPage: React.FC = () => {
             {selectedShelves.length > 1 && (
               <button
                 onClick={clearSelection}
-                className="text-xs underline text-gray-500 hover:text-gray-700 self-center ml-2"
+                className="text-xs underline text-stone-500 hover:text-stone-700 self-center ml-2"
               >
                 Clear all
               </button>
@@ -191,27 +191,58 @@ const BookshelfPage: React.FC = () => {
 
         {/* Display Controls */}
         <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-500">Showing {sortedBooks.length} books</div>
+          <div className="text-sm text-stone-500">Showing {sortedBooks.length} books</div>
         </div>
       </div>
 
-      {/* Books Grid */}
+      {/* Books Grid - Styling the container */}
       {sortedBooks.length === 0 ? (
         <EmptyState message="No books found with the current filters" />
       ) : (
+        // Outer container for scroll
         <div
-          className="overflow-x-auto" // Keep horizontal scroll for when minWidth forces overflow
+          className="overflow-x-auto pb-4"
           style={{
             scrollbarWidth: 'thin',
-            scrollbarColor: '#cbd5e0 #f8fafc',
+            scrollbarColor: '#a8a29e #f5f5f4', // stone-400 stone-100
           }}
         >
+          {/* The "Shelf" container - Revised shelf gradient positioning */}
           <div
-            className="grid gap-6"
-            style={{
-              // Grid will auto-fill based on min book width
-              gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
-            }}
+            className="grid gap-4 p-6 rounded-t-2xl rounded-b-lg shadow-md 
+                       border-t-4 border-x-4 border-b-8 border-stone-800" 
+            style={(() => {
+              const rowHeight = bookSize.height + 16; // bookSize.height + gap-4 (16px)
+              const shelfThickness = 8; 
+              const shelfColor = '#44210a'; 
+              const existingBgImage = `
+                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%),
+                linear-gradient(135deg, #572f11 0%, #44210a 100%)
+              `;
+              const existingBgSize = '12px 12px, 12px 12px, 100% 100%, 100% 100%';
+
+              return {
+                gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
+                perspective: '1000px',
+                // Revised repeating gradient: draws shelf at the top of the block
+                backgroundImage: `
+                  ${existingBgImage},
+                  repeating-linear-gradient(
+                    to bottom,
+                    ${shelfColor} 0,
+                    ${shelfColor} ${shelfThickness}px,
+                    transparent ${shelfThickness}px,
+                    transparent ${rowHeight}px 
+                  )
+                `,
+                backgroundSize: `${existingBgSize}, 100% ${rowHeight}px`,
+                // Revised position: Align top of gradient block with the top of the gap below books
+                backgroundPosition: `0 0, 0 0, 0 0, 0 0, 0 ${24 + bookSize.height}px`, 
+                boxShadow: 'inset 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+              };
+            })()}
           >
             {sortedBooks.map((book) => (
               <BookCard key={book.id} book={book} bookSize={bookSize} />

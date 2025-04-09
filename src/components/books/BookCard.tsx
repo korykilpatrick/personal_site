@@ -61,31 +61,29 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
   );
 
   return (
-    <div className="flex justify-center"> {/* Container for centering */}
+    <div className="flex justify-center last:border-r-0">
       <div
-        className="relative overflow-hidden rounded-lg shadow-md" // Base styles, removed hover/transition from div
+        className="relative overflow-hidden rounded-lg shadow-md 
+                   transition-all duration-200 ease-out 
+                   transform hover:-translate-y-1 hover:scale-105 hover:translate-z-10 hover:shadow-xl"
         style={{
           width: `${bookSize.width}px`,
           height: `${bookSize.height}px`,
+          transformStyle: 'preserve-3d',
         }}
       >
         <Tooltip content={tooltipContent} side="right" sideOffset={15} delayDuration={200}>
-          {/* Tooltip now wraps the anchor tag directly */}
           <a
             href={book.book_link || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            // Apply interactive styles directly to the anchor/trigger
             className="block w-full h-full rounded-lg 
-                       transition-all duration-200 ease-out 
-                       transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg 
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" // Added focus styles
+                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             aria-label={`View details for ${book.title}`}
           >
             <img
               src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
               alt={`Cover of ${book.title}`}
-              // Apply styles to image to ensure it fills the transformed anchor
               className="w-full h-full object-cover rounded-lg"
               onError={handleImageError}
               loading="lazy"
