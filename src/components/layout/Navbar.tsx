@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
               link.dropdown ? (
                 <div
                   key={link.name}
-                  className="relative group"
+                  className="relative group pb-2"
                   onMouseEnter={() => setIsWorkDropdownOpen(true)}
                   onMouseLeave={() => setIsWorkDropdownOpen(false)}
                 >
@@ -70,7 +70,7 @@ const Navbar: React.FC = () => {
                     </svg>
                   </button>
                   {isWorkDropdownOpen && (
-                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-2">
+                    <div className="absolute left-0 mt-0 -mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-2">
                       {link.items?.map((item) => (
                         <Link
                           key={item.name}
