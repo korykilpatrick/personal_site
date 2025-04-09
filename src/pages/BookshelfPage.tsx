@@ -9,6 +9,7 @@ import {
   FilterPill,
   SortDropdown,
 } from '../components/ui';
+import { BookCard } from '../components/books';
 import useMultiSelect from '../hooks/useMultiSelect';
 import useDynamicBookSize from '../hooks/useDynamicBookSize';
 import { Book, Bookshelf } from '../../types';
@@ -110,15 +111,6 @@ const BookshelfPage: React.FC = () => {
   }, [books, sortBy]);
 
   // Note: We're now using the toggleShelfSelection from useMultiSelect
-
-  // Function to render star ratings
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={i < rating ? 'text-yellow-400' : 'text-gray-300'}>
-        ★
-      </span>
-    ));
-  };
 
   if (loading) {
     return (
@@ -222,46 +214,7 @@ const BookshelfPage: React.FC = () => {
             }}
           >
             {sortedBooks.map((book) => (
-              <div key={book.id} className="group flex justify-center">
-                {' '}
-                {/* Center book within its grid cell */}
-                <div
-                  className="relative overflow-hidden rounded-lg shadow-md transition transform hover:-translate-y-1 hover:shadow-xl"
-                  style={{
-                    width: `${bookSize.width}px`,
-                    height: `${bookSize.height}px`, // Use height from hook
-                  }}
-                >
-                  <a href={book.book_link || '#'} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
-                      alt={`Cover of ${book.title}`}
-                      className="w-full h-full object-cover" // Use h-full for consistency
-                      style={
-                        {
-                          // No need for inline width/height here as parent div controls it
-                          // width: `${bookSize.width}px`, // REMOVED
-                          // height: `${bookSize.height}px` // REMOVED
-                        }
-                      }
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://via.placeholder.com/150x225?text=No+Cover';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 text-white">
-                      <h3 className="font-bold text-sm line-clamp-2 mb-1">{book.title}</h3>
-                      <p className="text-xs text-gray-300 mb-1">{book.author}</p>
-                      <div className="flex text-xs">{renderStars(book.rating || 0)}</div>
-                      {book.date_read && (
-                        <p className="text-xs text-gray-300 mt-1">
-                          Read: {new Date(book.date_read).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  </a>
-                </div>
-              </div>
+              <BookCard key={book.id} book={book} bookSize={bookSize} />
             ))}
           </div>
         </div>

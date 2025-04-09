@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/korykilpatrick/personal_site#readme",
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.0",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",

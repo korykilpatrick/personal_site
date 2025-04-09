@@ -6,3 +6,4 @@ export { default as EmptyState } from './EmptyState';
 export { default as MultiSelectDropdown } from './MultiSelectDropdown';
 export { default as FilterPill } from './FilterPill';
 export { default as SortDropdown } from './SortDropdown';
+export { default as Tooltip } from './Tooltip';
