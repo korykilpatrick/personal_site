@@ -24,7 +24,6 @@ const useDynamicBookSize = ({
   minWidth = DEFAULT_MIN_WIDTH,
   aspectRatio = DEFAULT_ASPECT_RATIO,
 }: UseSimplifiedBookSizeProps): BookSize => {
-
   const bookSize = useMemo(() => {
     // Calculate height based on the minimum width and aspect ratio
     const finalHeight = Math.floor(minWidth * aspectRatio);
@@ -36,4 +35,4 @@ const useDynamicBookSize = ({
   return bookSize;
 };
 
-export default useDynamicBookSize; 
+export default useDynamicBookSize;

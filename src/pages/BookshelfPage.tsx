@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../api/apiService';
-import { Loading, ErrorDisplay, FilterButton, EmptyState } from '../components/ui';
+import {
+  Loading,
+  ErrorDisplay,
+  FilterButton,
+  EmptyState,
+  MultiSelectDropdown,
+  FilterPill,
+  SortDropdown,
+} from '../components/ui';
 import useMultiSelect from '../hooks/useMultiSelect';
 import useDynamicBookSize from '../hooks/useDynamicBookSize';
 import { Book, Bookshelf } from '../../types';
@@ -141,48 +149,53 @@ const BookshelfPage: React.FC = () => {
 
       {/* Controls Section */}
       <div className="mb-8 space-y-4">
-        {/* Bookshelves in compact layout */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bookshelves</label>
-          <div className="flex flex-wrap gap-1 mb-4">
-            <FilterButton
-              label="All Books"
-              active={selectedShelves.length === 0}
-              onClick={() => clearSelection()}
-              className="text-xs px-2 py-0.5 m-0.5 font-semibold"
+        {/* Filtering and Sorting Controls - horizontal layout */}
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-700 mr-2">Sort By</span>
+            <SortDropdown
+              options={sortOptions}
+              selected={sortBy}
+              onChange={setSortBy}
+              className="w-40"
             />
-            {bookshelves.map((shelf) => (
-              <FilterButton
-                key={shelf.id}
-                label={shelf.name}
-                active={selectedShelves.includes(shelf.id)}
-                onClick={() => toggleShelfSelection(shelf.id)}
-                className="text-xs px-2 py-0.5 m-0.5"
-              />
-            ))}
+          </div>
+
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-700 mr-2">Bookshelves</span>
+            <MultiSelectDropdown
+              label="Select Shelves"
+              items={bookshelves.map((shelf) => ({ id: shelf.id, label: shelf.name }))}
+              selectedItems={selectedShelves}
+              toggleItem={toggleShelfSelection}
+              className="w-40"
+            />
           </div>
         </div>
 
-        {/* Filtering and Sorting Controls */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="w-48">
-            <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">
-              Sort By
-            </label>
-            <select
-              id="sortBy"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+        {/* Selected bookshelves pills */}
+        {selectedShelves.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {bookshelves
+              .filter((shelf) => selectedShelves.includes(shelf.id))
+              .map((shelf) => (
+                <FilterPill
+                  key={shelf.id}
+                  label={shelf.name}
+                  onRemove={() => toggleShelfSelection(shelf.id)}
+                />
               ))}
-            </select>
+
+            {selectedShelves.length > 1 && (
+              <button
+                onClick={clearSelection}
+                className="text-xs underline text-gray-500 hover:text-gray-700 self-center ml-2"
+              >
+                Clear all
+              </button>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Display Controls */}
         <div className="flex items-center gap-4">
@@ -209,12 +222,14 @@ const BookshelfPage: React.FC = () => {
             }}
           >
             {sortedBooks.map((book) => (
-              <div key={book.id} className="group flex justify-center"> {/* Center book within its grid cell */}
-                <div 
+              <div key={book.id} className="group flex justify-center">
+                {' '}
+                {/* Center book within its grid cell */}
+                <div
                   className="relative overflow-hidden rounded-lg shadow-md transition transform hover:-translate-y-1 hover:shadow-xl"
-                  style={{ 
-                    width: `${bookSize.width}px`, 
-                    height: `${bookSize.height}px` // Use height from hook
+                  style={{
+                    width: `${bookSize.width}px`,
+                    height: `${bookSize.height}px`, // Use height from hook
                   }}
                 >
                   <a href={book.book_link || '#'} target="_blank" rel="noopener noreferrer">
@@ -222,11 +237,13 @@ const BookshelfPage: React.FC = () => {
                       src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
                       alt={`Cover of ${book.title}`}
                       className="w-full h-full object-cover" // Use h-full for consistency
-                      style={{ 
-                        // No need for inline width/height here as parent div controls it
-                        // width: `${bookSize.width}px`, // REMOVED
-                        // height: `${bookSize.height}px` // REMOVED
-                      }}
+                      style={
+                        {
+                          // No need for inline width/height here as parent div controls it
+                          // width: `${bookSize.width}px`, // REMOVED
+                          // height: `${bookSize.height}px` // REMOVED
+                        }
+                      }
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = 'https://via.placeholder.com/150x225?text=No+Cover';

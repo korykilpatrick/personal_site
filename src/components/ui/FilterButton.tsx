@@ -1,22 +1,17 @@
 import React from 'react';
+import { Button } from '../common';
+import type { ButtonProps } from '../common/Button';
 
-interface FilterButtonProps {
+interface FilterButtonProps extends Omit<ButtonProps, 'variant' | 'children'> {
   label: string;
   active: boolean;
-  onClick: () => void;
-  className?: string;
 }
 
-const FilterButton: React.FC<FilterButtonProps> = ({ label, active, onClick, className = '' }) => {
+const FilterButton: React.FC<FilterButtonProps> = ({ label, active, className = '', ...props }) => {
   return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 rounded-md transition ${
-        active ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-      } ${className}`}
-    >
+    <Button variant={active ? 'primary' : 'secondary'} className={className} {...props}>
       {label}
-    </button>
+    </Button>
   );
 };
 
