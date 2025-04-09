@@ -18,7 +18,7 @@ apiClient.interceptors.response.use(
   (error) => {
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
-  }
+  },
 );
 
 // API service methods
@@ -28,17 +28,17 @@ export const apiService = {
     const response = await apiClient.get<Book[]>('/books');
     return response.data;
   },
-  
+
   getBookById: async (id: number): Promise<BookWithShelves> => {
     const response = await apiClient.get<BookWithShelves>(`/books/${id}`);
     return response.data;
   },
-  
+
   getBookshelves: async (): Promise<Bookshelf[]> => {
     const response = await apiClient.get<Bookshelf[]>('/bookshelves');
     return response.data;
   },
-  
+
   getBooksByShelf: async (shelfId: number | undefined): Promise<Book[]> => {
     if (shelfId === undefined) {
       return apiService.getBooks();
@@ -46,37 +46,63 @@ export const apiService = {
     const response = await apiClient.get<Book[]>(`/bookshelves/${shelfId}/books`);
     return response.data;
   },
-  
-  // Project related endpoints
-  getProjects: async (tag?: string): Promise<Project[]> => {
-    const response = await apiClient.get<Project[]>('/projects', {
-      params: tag ? { tag } : undefined
+
+  getBooksByShelves: async (shelfIds: number[]): Promise<Book[]> => {
+    if (shelfIds.length === 0) {
+      return apiService.getBooks();
+    }
+
+    // Using Promise.all to fetch books from multiple shelves in parallel
+    const promises = shelfIds.map((id) => apiClient.get<Book[]>(`/bookshelves/${id}/books`));
+
+    const responses = await Promise.all(promises);
+
+    // Combine books from all shelves and remove duplicates
+    const allBooks = responses.flatMap((response) => response.data);
+    const uniqueBooks = allBooks.filter(
+      (book, index, self) => index === self.findIndex((b) => b.id === book.id),
+    );
+
+    return uniqueBooks;
+  },
+
+  getSortedBooks: async (sortBy: string = 'date_read'): Promise<Book[]> => {
+    const response = await apiClient.get<Book[]>('/books', {
+      params: { sort: sortBy },
     });
     return response.data;
   },
-  
+
+  // Project related endpoints
+  getProjects: async (tag?: string): Promise<Project[]> => {
+    const response = await apiClient.get<Project[]>('/projects', {
+      params: tag ? { tag } : undefined,
+    });
+    return response.data;
+  },
+
   getProjectById: async (id: number): Promise<Project> => {
     const response = await apiClient.get<Project>(`/projects/${id}`);
     return response.data;
   },
-  
+
   // Gig related endpoints
   getGigs: async (): Promise<Gig[]> => {
     const response = await apiClient.get<Gig[]>('/gigs');
     return response.data;
   },
-  
+
   getGigById: async (id: number): Promise<Gig> => {
     const response = await apiClient.get<Gig>(`/gigs/${id}`);
     return response.data;
   },
-  
+
   // Blog related endpoints
   getPosts: async (params?: { tag?: string; q?: string }): Promise<Post[]> => {
     const response = await apiClient.get<Post[]>('/posts', { params });
     return response.data;
   },
-  
+
   getPostById: async (id: number): Promise<Post> => {
     const response = await apiClient.get<Post>(`/posts/${id}`);
     return response.data;
