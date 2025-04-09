@@ -26,7 +26,11 @@ const BookshelfPage: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
 
   // UI state
-  const { selectedItems: selectedShelves, toggleSelection: toggleShelfSelection } = useMultiSelect<number>([]);
+  const {
+    selectedItems: selectedShelves,
+    toggleSelection: toggleShelfSelection,
+    clearSelection,
+  } = useMultiSelect<number>([]);
   const [sortBy, setSortBy] = useState<string>('date_read');
   const [booksPerRow, setBooksPerRow] = useState(6);
 
@@ -140,23 +144,30 @@ const BookshelfPage: React.FC = () => {
 
       {/* Controls Section */}
       <div className="mb-8 space-y-4">
+        {/* Bookshelves in compact layout */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Bookshelves</label>
+          <div className="flex flex-wrap gap-1 mb-4">
+            <FilterButton
+              label="All Books"
+              active={selectedShelves.length === 0}
+              onClick={() => clearSelection()}
+              className="text-xs px-2 py-0.5 m-0.5 font-semibold"
+            />
+            {bookshelves.map((shelf) => (
+              <FilterButton
+                key={shelf.id}
+                label={shelf.name}
+                active={selectedShelves.includes(shelf.id)}
+                onClick={() => toggleShelfSelection(shelf.id)}
+                className="text-xs px-2 py-0.5 m-0.5"
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Filtering and Sorting Controls */}
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bookshelves</label>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border border-gray-200 rounded-md">
-              {bookshelves.map((shelf) => (
-                <FilterButton
-                  key={shelf.id}
-                  label={shelf.name}
-                  active={selectedShelves.includes(shelf.id)}
-                  onClick={() => toggleShelfSelection(shelf.id)}
-                  className="text-sm px-3 py-1"
-                />
-              ))}
-            </div>
-          </div>
-
           <div className="w-48">
             <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">
               Sort By
