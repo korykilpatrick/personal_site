@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../api/apiService';
 import { Loading, ErrorDisplay, FilterButton, EmptyState } from '../components/ui';
 import useMultiSelect from '../hooks/useMultiSelect';
+import useDynamicBookSize from '../hooks/useDynamicBookSize';
 import { Book, Bookshelf } from '../../types';
 
 // Sort options for the books
@@ -32,7 +33,11 @@ const BookshelfPage: React.FC = () => {
     clearSelection,
   } = useMultiSelect<number>([]);
   const [sortBy, setSortBy] = useState<string>('date_read');
-  const [booksPerRow, setBooksPerRow] = useState(6);
+
+  // Calculate dynamic book size using the simplified custom hook
+  const bookSize = useDynamicBookSize({
+    minWidth: 100, // Adjusted minimum width for better default appearance
+  });
 
   // Fetch bookshelves on mount
   useEffect(() => {
@@ -105,14 +110,6 @@ const BookshelfPage: React.FC = () => {
         ★
       </span>
     ));
-  };
-
-  // Handle books per row change
-  const handleBooksPerRowChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0 && value <= 12) {
-      setBooksPerRow(value);
-    }
   };
 
   if (loading) {
@@ -189,21 +186,6 @@ const BookshelfPage: React.FC = () => {
 
         {/* Display Controls */}
         <div className="flex items-center gap-4">
-          <div>
-            <label htmlFor="booksPerRow" className="block text-sm font-medium text-gray-700 mb-1">
-              Books Per Row: {booksPerRow}
-            </label>
-            <input
-              id="booksPerRow"
-              type="range"
-              min="1"
-              max="12"
-              value={booksPerRow}
-              onChange={handleBooksPerRowChange}
-              className="w-48"
-            />
-          </div>
-
           <div className="text-sm text-gray-500">Showing {sortedBooks.length} books</div>
         </div>
       </div>
@@ -213,7 +195,7 @@ const BookshelfPage: React.FC = () => {
         <EmptyState message="No books found with the current filters" />
       ) : (
         <div
-          className="overflow-x-auto"
+          className="overflow-x-auto" // Keep horizontal scroll for when minWidth forces overflow
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#cbd5e0 #f8fafc',
@@ -222,18 +204,29 @@ const BookshelfPage: React.FC = () => {
           <div
             className="grid gap-6"
             style={{
-              gridTemplateColumns: `repeat(${booksPerRow}, minmax(120px, 1fr))`,
-              minWidth: `${booksPerRow * 140}px`,
+              // Grid will auto-fill based on min book width
+              gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
             }}
           >
             {sortedBooks.map((book) => (
-              <div key={book.id} className="group">
-                <div className="relative overflow-hidden rounded-lg shadow-md transition transform hover:-translate-y-1 hover:shadow-xl">
+              <div key={book.id} className="group flex justify-center"> {/* Center book within its grid cell */}
+                <div 
+                  className="relative overflow-hidden rounded-lg shadow-md transition transform hover:-translate-y-1 hover:shadow-xl"
+                  style={{ 
+                    width: `${bookSize.width}px`, 
+                    height: `${bookSize.height}px` // Use height from hook
+                  }}
+                >
                   <a href={book.book_link || '#'} target="_blank" rel="noopener noreferrer">
                     <img
                       src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
                       alt={`Cover of ${book.title}`}
-                      className="w-full h-auto object-cover"
+                      className="w-full h-full object-cover" // Use h-full for consistency
+                      style={{ 
+                        // No need for inline width/height here as parent div controls it
+                        // width: `${bookSize.width}px`, // REMOVED
+                        // height: `${bookSize.height}px` // REMOVED
+                      }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = 'https://via.placeholder.com/150x225?text=No+Cover';

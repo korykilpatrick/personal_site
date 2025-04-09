@@ -7,12 +7,7 @@ interface FilterButtonProps {
   className?: string;
 }
 
-const FilterButton: React.FC<FilterButtonProps> = ({ 
-  label, 
-  active, 
-  onClick, 
-  className = '' 
-}) => {
+const FilterButton: React.FC<FilterButtonProps> = ({ label, active, onClick, className = '' }) => {
   return (
     <button
       onClick={onClick}

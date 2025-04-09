@@ -20,13 +20,13 @@ describe('App component', () => {
     render(
       <BrowserRouter>
         <App />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
-    
+
     // Check for navbar and footer
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
     expect(screen.getByTestId('footer')).toBeInTheDocument();
-    
+
     // Check that the home page is rendered by default
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
   });

@@ -95,7 +95,7 @@ const Navbar: React.FC = () => {
                 >
                   {link.name}
                 </Link>
-              )
+              ),
             )}
           </div>
 
@@ -187,7 +187,7 @@ const Navbar: React.FC = () => {
                 >
                   {link.name}
                 </Link>
-              )
+              ),
             )}
           </div>
         )}

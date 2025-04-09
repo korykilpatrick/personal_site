@@ -8,7 +8,7 @@ interface TagProps {
 
 const Tag: React.FC<TagProps> = ({ label, onClick, className = '' }) => {
   return (
-    <span 
+    <span
       className={`px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >

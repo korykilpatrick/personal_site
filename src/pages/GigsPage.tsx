@@ -18,11 +18,7 @@ interface Gig {
 
 const GigsPage: React.FC = () => {
   // Fetch professional experience
-  const { 
-    data: gigs, 
-    loading, 
-    error 
-  } = useApi<Gig[]>(apiService.getGigs);
+  const { data: gigs, loading, error } = useApi<Gig[]>(apiService.getGigs);
 
   if (loading) {
     return (
@@ -49,7 +45,7 @@ const GigsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold mb-6">Professional Experience</h1>
-      
+
       {!gigs || gigs.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <p className="text-xl text-gray-600">No professional experience found</p>
@@ -57,7 +53,10 @@ const GigsPage: React.FC = () => {
       ) : (
         <div className="space-y-8">
           {gigs.map((gig) => (
-            <div key={gig.id} className="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary">
+            <div
+              key={gig.id}
+              className="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary"
+            >
               <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
                 <div>
                   <h2 className="text-2xl font-bold text-primary">{gig.role}</h2>
@@ -65,9 +64,9 @@ const GigsPage: React.FC = () => {
                 </div>
                 <div className="text-textSecondary font-medium mt-1 md:mt-0">{gig.duration}</div>
               </div>
-              
+
               <p className="text-textSecondary mb-4 whitespace-pre-line">{gig.achievements}</p>
-              
+
               {gig.links && gig.links.length > 0 && (
                 <div className="flex flex-wrap gap-3">
                   {gig.links.map((link, index) => (

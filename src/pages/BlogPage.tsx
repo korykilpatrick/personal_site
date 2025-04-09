@@ -12,18 +12,18 @@ interface Post extends ApiPost {
 const BlogPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  
+
   // Local state for posts data
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  
+
   // Fetch posts when search or tags change
   React.useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         let fetchedPosts;
         if (searchQuery) {
@@ -33,13 +33,13 @@ const BlogPage: React.FC = () => {
         } else {
           fetchedPosts = await apiService.getPosts();
         }
-        
+
         // Convert ApiPost to local Post type by transforming published_at to date
-        const formattedPosts = fetchedPosts.map(post => ({
+        const formattedPosts = fetchedPosts.map((post) => ({
           ...post,
-          date: post.published_at ? post.published_at.toString() : ''
+          date: post.published_at ? post.published_at.toString() : '',
         }));
-        
+
         setPosts(formattedPosts);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
@@ -48,39 +48,38 @@ const BlogPage: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     // Debounce search queries to avoid too many API calls
-    const timerId = setTimeout(() => {
-      fetchPosts();
-    }, searchQuery ? 500 : 0); // Add 500ms delay for search, but no delay for tag filters
-    
+    const timerId = setTimeout(
+      () => {
+        fetchPosts();
+      },
+      searchQuery ? 500 : 0,
+    ); // Add 500ms delay for search, but no delay for tag filters
+
     return () => clearTimeout(timerId);
   }, [searchQuery, selectedTags]); // Only re-run when search or selected tags change
-  
+
   // Extract all unique tags from posts
   const allTags = React.useMemo(() => {
     if (!posts) return [];
-    
-    const tags = posts.flatMap(post => post.tags || []);
+
+    const tags = posts.flatMap((post) => post.tags || []);
     return Array.from(new Set(tags));
   }, [posts]);
-  
+
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
-  
+
   // Filter posts client-side if multiple tags are selected (since the API only supports one tag)
   const filteredPosts = React.useMemo(() => {
     if (!posts) return [];
     if (selectedTags.length <= 1) return posts; // Already filtered by API
-    
-    return posts.filter(post => 
-      selectedTags.some(tag => post.tags?.includes(tag) || false)
-    );
+
+    return posts.filter((post) => selectedTags.some((tag) => post.tags?.includes(tag) || false));
   }, [posts, selectedTags]);
 
   if (loading) {
@@ -108,7 +107,7 @@ const BlogPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold mb-6">Blog</h1>
-      
+
       <div className="mb-8">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="md:w-2/3">
@@ -131,21 +130,34 @@ const BlogPage: React.FC = () => {
                 }}
               >
                 <option value="">All Topics</option>
-                {allTags.map(tag => (
-                  <option key={tag} value={tag}>{tag}</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
                 </svg>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-2 mb-4">
-          {allTags.map(tag => (
+          {allTags.map((tag) => (
             <button
               key={tag}
               onClick={() => toggleTag(tag)}
@@ -171,10 +183,13 @@ const BlogPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          {filteredPosts.map(post => (
+          {filteredPosts.map((post) => (
             <article key={post.id} className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-2">
-                <Link to={`/blog/${post.id}`} className="text-textPrimary hover:text-primary transition">
+                <Link
+                  to={`/blog/${post.id}`}
+                  className="text-textPrimary hover:text-primary transition"
+                >
                   {post.title}
                 </Link>
               </h2>
@@ -182,8 +197,8 @@ const BlogPage: React.FC = () => {
                 <time dateTime={post.date}>{formatDate(post.date)}</time>
                 <span className="mx-2">•</span>
                 <div className="flex flex-wrap gap-2">
-                  {post.tags?.map(tag => (
-                    <span 
+                  {post.tags?.map((tag) => (
+                    <span
                       key={tag}
                       className="cursor-pointer hover:text-primary"
                       onClick={() => toggleTag(tag)}
