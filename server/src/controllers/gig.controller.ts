@@ -12,7 +12,7 @@ export const GigController = {
    */
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const gigs = await GigModel.getAll();
+      const gigs = await GigModel.getAllApi();
       res.status(StatusCodes.OK).json(gigs);
     } catch (error) {
       logger.error('Error fetching gigs', { error });
@@ -27,7 +27,7 @@ export const GigController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const gig = await GigModel.getById(id);
+      const gig = await GigModel.getByIdApi(id);
       
       if (!gig) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Gig not found' });
@@ -45,7 +45,7 @@ export const GigController = {
    */
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const newGig = await GigModel.create(req.body);
+      const newGig = await GigModel.createFromApi(req.body);
       res.status(StatusCodes.CREATED).json(newGig);
     } catch (error) {
       logger.error('Error creating gig', { error, payload: req.body });
@@ -60,7 +60,7 @@ export const GigController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const updatedGig = await GigModel.update(id, req.body);
+      const updatedGig = await GigModel.updateFromApi(id, req.body);
       
       if (!updatedGig) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Gig not found' });

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import BookModel from '../models/Book';
-import logger from '../utils/logger';
+import BookService from '../services/BookService';
 
 /**
  * BookController for handling book-related requests
@@ -12,10 +11,9 @@ export const BookController = {
    */
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const books = await BookModel.getAll();
+      const books = await BookService.getAll();
       res.status(StatusCodes.OK).json(books);
     } catch (error) {
-      logger.error('Error fetching books', { error });
       next(error);
     }
   },
@@ -27,7 +25,7 @@ export const BookController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const book = await BookModel.getWithShelves(id);
+      const book = await BookService.getWithShelves(id);
       
       if (!book) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
@@ -35,7 +33,6 @@ export const BookController = {
       
       res.status(StatusCodes.OK).json(book);
     } catch (error) {
-      logger.error('Error fetching book', { error, bookId: req.params.id });
       next(error);
     }
   },
@@ -45,10 +42,9 @@ export const BookController = {
    */
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const newBook = await BookModel.create(req.body);
+      const newBook = await BookService.create(req.body);
       res.status(StatusCodes.CREATED).json(newBook);
     } catch (error) {
-      logger.error('Error creating book', { error, payload: req.body });
       next(error);
     }
   },
@@ -60,7 +56,7 @@ export const BookController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const updatedBook = await BookModel.update(id, req.body);
+      const updatedBook = await BookService.update(id, req.body);
       
       if (!updatedBook) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
@@ -68,7 +64,6 @@ export const BookController = {
       
       res.status(StatusCodes.OK).json(updatedBook);
     } catch (error) {
-      logger.error('Error updating book', { error, bookId: req.params.id, payload: req.body });
       next(error);
     }
   },
@@ -80,7 +75,7 @@ export const BookController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const deleted = await BookModel.delete(id);
+      const deleted = await BookService.delete(id);
       
       if (!deleted) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
@@ -88,7 +83,6 @@ export const BookController = {
       
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
-      logger.error('Error deleting book', { error, bookId: req.params.id });
       next(error);
     }
   },

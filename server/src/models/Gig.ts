@@ -1,107 +1,117 @@
-import { db } from '../db/connection';
+import { BaseModel } from './BaseModel';
+import { Gig as SharedGig, GigLink } from '@shared/index';
 
-export interface GigLink {
-  title: string;
-  url: string;
-}
-
-export interface Gig {
-  id: number;
-  company: string;
-  role: string;
-  duration: string;
-  achievements: string;
-  links?: GigLink[];
-  created_at: Date;
-  updated_at: Date;
+// Database model with gig_links as JSON string
+export interface GigDB extends SharedGig {
+  gig_links: string; // JSON string in DB
+  links?: never; // Override links to make it never to avoid type conflicts
 }
 
 /**
  * Gig model with database operations
  */
-export const GigModel = {
+class GigModelClass extends BaseModel<GigDB> {
+  constructor() {
+    super('gigs', 'created_at', 'desc');
+  }
+
+  /**
+   * Convert DB record to API model
+   */
+  private toApiModel(dbRecord: GigDB): SharedGig {
+    const { gig_links, ...rest } = dbRecord;
+    return {
+      ...rest,
+      links: JSON.parse(gig_links || '[]'),
+    };
+  }
+
+  /**
+   * Convert API model to DB record
+   */
+  private toDbModel(apiModel: Partial<SharedGig>): Partial<GigDB> {
+    const { links, ...rest } = apiModel;
+    const dbModel: Partial<GigDB> = { ...rest };
+    
+    if (links !== undefined) {
+      dbModel.gig_links = JSON.stringify(links || []);
+    }
+    
+    return dbModel;
+  }
+
+  /**
+   * Override the BaseModel methods to handle JSON conversion
+   */
+
   /**
    * Get all gigs
    */
-  getAll: async (): Promise<Gig[]> => {
-    const gigs = await db('gigs').select('*').orderBy('created_at', 'desc');
-    
-    // Parse JSON fields
-    return gigs.map((gig) => ({
-      ...gig,
-      links: JSON.parse(gig.gig_links || '[]'),
-    }));
-  },
+  override async getAll(): Promise<GigDB[]> {
+    const gigs = await super.getAll();
+    // Convert to API model and then back to DB model to ensure proper typing
+    return gigs;
+  }
+
+  /**
+   * Get all gigs as API model
+   */
+  async getAllApi(): Promise<SharedGig[]> {
+    const gigs = await super.getAll();
+    return gigs.map(gig => this.toApiModel(gig));
+  }
 
   /**
    * Get a gig by ID
    */
-  getById: async (id: number): Promise<Gig | null> => {
-    const gig = await db('gigs').where({ id }).first();
-    
+  override async getById(id: number): Promise<GigDB | null> {
+    return super.getById(id);
+  }
+
+  /**
+   * Get a gig by ID as API model
+   */
+  async getByIdApi(id: number): Promise<SharedGig | null> {
+    const gig = await super.getById(id);
     if (!gig) return null;
-    
-    // Parse JSON fields
-    return {
-      ...gig,
-      links: JSON.parse(gig.gig_links || '[]'),
-    };
-  },
+    return this.toApiModel(gig);
+  }
 
   /**
    * Create a new gig
    */
-  create: async (gig: Omit<Gig, 'id' | 'created_at' | 'updated_at'>): Promise<Gig> => {
-    // Stringify JSON fields
-    const { links, ...rest } = gig;
-    const gigData = {
-      ...rest,
-      gig_links: JSON.stringify(links || []),
-    };
-    
-    const [newGig] = await db('gigs').insert(gigData).returning('*');
-    
-    // Parse JSON fields in the returned gig
-    return {
-      ...newGig,
-      links: JSON.parse(newGig.gig_links || '[]'),
-    };
-  },
+  override async create(dbGig: Omit<GigDB, 'id' | 'created_at' | 'updated_at'>): Promise<GigDB> {
+    return super.create(dbGig);
+  }
+
+  /**
+   * Create a new gig from API model
+   */
+  async createFromApi(gig: Omit<SharedGig, 'id' | 'created_at' | 'updated_at'>): Promise<SharedGig> {
+    const dbGig = this.toDbModel(gig) as Omit<GigDB, 'id' | 'created_at' | 'updated_at'>;
+    const newGig = await super.create(dbGig);
+    return this.toApiModel(newGig);
+  }
 
   /**
    * Update a gig
    */
-  update: async (id: number, gig: Partial<Omit<Gig, 'id' | 'created_at' | 'updated_at'>>): Promise<Gig | null> => {
-    // Extract links if they exist
-    const { links, ...rest } = gig;
-    
-    // Prepare update data
-    const updateData: any = { ...rest, updated_at: new Date() };
-    
-    // Stringify JSON fields if they exist
-    if (links) updateData.gig_links = JSON.stringify(links);
-    
-    const [updatedGig] = await db('gigs')
-      .where({ id })
-      .update(updateData)
-      .returning('*');
-    
-    if (!updatedGig) return null;
-    
-    // Parse JSON fields
-    return {
-      ...updatedGig,
-      links: JSON.parse(updatedGig.gig_links || '[]'),
-    };
-  },
+  override async update(id: number, data: Partial<GigDB>): Promise<GigDB | null> {
+    return super.update(id, data);
+  }
 
   /**
-   * Delete a gig
+   * Update a gig from API model
    */
-  delete: async (id: number): Promise<boolean> => {
-    const deleted = await db('gigs').where({ id }).delete();
-    return deleted > 0;
-  },
-};
+  async updateFromApi(id: number, gig: Partial<Omit<SharedGig, 'id' | 'created_at' | 'updated_at'>>): Promise<SharedGig | null> {
+    const dbGig = this.toDbModel(gig);
+    const updatedGig = await super.update(id, dbGig);
+    if (!updatedGig) return null;
+    return this.toApiModel(updatedGig);
+  }
+}
+
+// Export a singleton instance
+export const GigModel = new GigModelClass();
 
 export default GigModel;

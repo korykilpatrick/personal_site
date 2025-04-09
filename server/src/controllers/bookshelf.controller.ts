@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import BookshelfModel from '../models/Bookshelf';
-import logger from '../utils/logger';
+import BookshelfService from '../services/BookshelfService';
 
 /**
  * BookshelfController for handling bookshelf-related requests
@@ -12,10 +11,9 @@ export const BookshelfController = {
    */
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const bookshelves = await BookshelfModel.getAll();
+      const bookshelves = await BookshelfService.getAll();
       res.status(StatusCodes.OK).json(bookshelves);
     } catch (error) {
-      logger.error('Error fetching bookshelves', { error });
       next(error);
     }
   },
@@ -27,7 +25,7 @@ export const BookshelfController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const bookshelf = await BookshelfModel.getById(id);
+      const bookshelf = await BookshelfService.getById(id);
       
       if (!bookshelf) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Bookshelf not found' });
@@ -35,7 +33,6 @@ export const BookshelfController = {
       
       res.status(StatusCodes.OK).json(bookshelf);
     } catch (error) {
-      logger.error('Error fetching bookshelf', { error, bookshelfId: req.params.id });
       next(error);
     }
   },
@@ -47,7 +44,7 @@ export const BookshelfController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const bookshelfWithBooks = await BookshelfModel.getWithBooks(id);
+      const bookshelfWithBooks = await BookshelfService.getWithBooks(id);
       
       if (!bookshelfWithBooks) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Bookshelf not found' });
@@ -55,7 +52,6 @@ export const BookshelfController = {
       
       res.status(StatusCodes.OK).json(bookshelfWithBooks.books);
     } catch (error) {
-      logger.error('Error fetching books in bookshelf', { error, bookshelfId: req.params.id });
       next(error);
     }
   },
@@ -65,10 +61,9 @@ export const BookshelfController = {
    */
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const newBookshelf = await BookshelfModel.create(req.body);
+      const newBookshelf = await BookshelfService.create(req.body);
       res.status(StatusCodes.CREATED).json(newBookshelf);
     } catch (error) {
-      logger.error('Error creating bookshelf', { error, payload: req.body });
       next(error);
     }
   },
@@ -80,7 +75,7 @@ export const BookshelfController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const updatedBookshelf = await BookshelfModel.update(id, req.body);
+      const updatedBookshelf = await BookshelfService.update(id, req.body);
       
       if (!updatedBookshelf) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Bookshelf not found' });
@@ -88,7 +83,6 @@ export const BookshelfController = {
       
       res.status(StatusCodes.OK).json(updatedBookshelf);
     } catch (error) {
-      logger.error('Error updating bookshelf', { error, bookshelfId: req.params.id, payload: req.body });
       next(error);
     }
   },
@@ -100,7 +94,7 @@ export const BookshelfController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const deleted = await BookshelfModel.delete(id);
+      const deleted = await BookshelfService.delete(id);
       
       if (!deleted) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Bookshelf not found' });
@@ -108,7 +102,6 @@ export const BookshelfController = {
       
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
-      logger.error('Error deleting bookshelf', { error, bookshelfId: req.params.id });
       next(error);
     }
   },
@@ -125,15 +118,10 @@ export const BookshelfController = {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Book ID is required' });
       }
       
-      await BookshelfModel.addBook(shelfId, bookId);
+      await BookshelfService.addBook(shelfId, bookId);
       
       res.status(StatusCodes.OK).json({ message: 'Book added to bookshelf' });
     } catch (error) {
-      logger.error('Error adding book to bookshelf', { 
-        error, 
-        bookshelfId: req.params.id, 
-        bookId: req.body.bookId 
-      });
       next(error);
     }
   },
@@ -146,7 +134,7 @@ export const BookshelfController = {
       const shelfId = parseInt(req.params.id, 10);
       const bookId = parseInt(req.params.bookId, 10);
       
-      const removed = await BookshelfModel.removeBook(shelfId, bookId);
+      const removed = await BookshelfService.removeBook(shelfId, bookId);
       
       if (!removed) {
         return res.status(StatusCodes.NOT_FOUND).json({ 
@@ -156,11 +144,6 @@ export const BookshelfController = {
       
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
-      logger.error('Error removing book from bookshelf', { 
-        error, 
-        bookshelfId: req.params.id, 
-        bookId: req.params.bookId 
-      });
       next(error);
     }
   },

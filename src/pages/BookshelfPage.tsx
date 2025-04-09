@@ -1,27 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
-
-interface Book {
-  id: number;
-  title: string;
-  author: string;
-  img_url: string;
-  img_url_small: string;
-  book_link: string;
-  rating: number;
-}
-
-interface Bookshelf {
-  id: number;
-  name: string;
-}
+import { Loading, ErrorDisplay, FilterButton, EmptyState } from '../components/ui';
+import { Book, Bookshelf } from '../../types';
 
 const BookshelfPage: React.FC = () => {
   const [selectedShelf, setSelectedShelf] = useState<number | null>(null);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [booksLoading, setBooksLoading] = useState<boolean>(true);
-  const [booksError, setBooksError] = useState<Error | null>(null);
   
   // Fetch bookshelves - this should only happen once when component mounts
   const { 
@@ -30,28 +14,22 @@ const BookshelfPage: React.FC = () => {
     error: shelvesError 
   } = useApi<Bookshelf[]>(apiService.getBookshelves);
   
-  // Fetch books only when selected shelf changes
-  useEffect(() => {
-    const fetchBooks = async () => {
-      setBooksLoading(true);
-      setBooksError(null);
-      
-      try {
-        const fetchedBooks = selectedShelf
-          ? await apiService.getBooksByShelf(selectedShelf)
-          : await apiService.getBooks();
-        
-        setBooks(fetchedBooks);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setBooksError(error);
-      } finally {
-        setBooksLoading(false);
-      }
-    };
-    
-    fetchBooks();
-  }, [selectedShelf]); // Only re-run when selected shelf changes
+  // Use the improved useApi hook for books with dependency on selectedShelf
+  const fetchBooksFn = selectedShelf 
+    ? apiService.getBooksByShelf 
+    : apiService.getBooks;
+  
+  const {
+    data: books,
+    loading: booksLoading,
+    error: booksError
+  } = useApi<Book[], [number?]>(
+    fetchBooksFn,
+    {
+      dependencies: [selectedShelf],
+      initialParams: selectedShelf ? [selectedShelf] : []
+    }
+  );
   
   // Combined loading and error states
   const loading = shelvesLoading || booksLoading;
@@ -70,9 +48,7 @@ const BookshelfPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">My Bookshelf</h1>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <Loading className="h-64" />
       </div>
     );
   }
@@ -81,9 +57,7 @@ const BookshelfPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">My Bookshelf</h1>
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error instanceof Error ? error.message : String(error)}</p>
-        </div>
+        <ErrorDisplay error={error} />
       </div>
     );
   }
@@ -95,35 +69,31 @@ const BookshelfPage: React.FC = () => {
       {bookshelves && bookshelves.length > 0 && (
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
-            <button
+            <FilterButton
+              label="All Books"
+              active={!selectedShelf}
               onClick={() => setSelectedShelf(null)}
-              className={`px-4 py-2 rounded-md transition ${!selectedShelf ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              All Books
-            </button>
+            />
             {bookshelves.map((shelf) => (
-              <button
+              <FilterButton
                 key={shelf.id}
+                label={shelf.name}
+                active={selectedShelf === shelf.id}
                 onClick={() => setSelectedShelf(shelf.id)}
-                className={`px-4 py-2 rounded-md transition ${selectedShelf === shelf.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                {shelf.name}
-              </button>
+              />
             ))}
           </div>
         </div>
       )}
 
       {!books || books.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <p className="text-xl text-gray-600">No books found in this shelf</p>
-        </div>
+        <EmptyState message="No books found in this shelf" />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {books.map((book) => (
             <div key={book.id} className="group">
               <div className="relative overflow-hidden rounded-lg shadow-md transition transform hover:-translate-y-1 hover:shadow-xl">
-                <a href={book.book_link} target="_blank" rel="noopener noreferrer">
+                <a href={book.book_link || '#'} target="_blank" rel="noopener noreferrer">
                   <img
                     src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
                     alt={`Cover of ${book.title}`}
@@ -136,7 +106,7 @@ const BookshelfPage: React.FC = () => {
                   <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 text-white">
                     <h3 className="font-bold text-sm line-clamp-2 mb-1">{book.title}</h3>
                     <p className="text-xs text-gray-300 mb-1">{book.author}</p>
-                    <div className="flex text-xs">{renderStars(book.rating)}</div>
+                    <div className="flex text-xs">{renderStars(book.rating || 0)}</div>
                   </div>
                 </a>
               </div>

@@ -1,52 +1,26 @@
 import React, { useState } from 'react';
-import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 import MarkdownToJsx from 'markdown-to-jsx';
-
-interface ProjectLink {
-  title: string;
-  url: string;
-  icon?: string;
-}
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  media_urls: string[];
-  links: ProjectLink[];
-  writeup?: string;
-  tags?: string[];
-}
+import { Loading, ErrorDisplay, FilterButton, Tag, EmptyState } from '../components/ui';
+import useApi from '../hooks/useApi';
+import { Project } from '../../types';
 
 const ProjectsPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
-  // Local state for projects data
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  // Fetch projects only when selected tag changes
-  React.useEffect(() => {
-    const fetchProjects = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const fetchedProjects = await apiService.getProjects(selectedTag || undefined);
-        setProjects(fetchedProjects);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProjects();
-  }, [selectedTag]); // Only re-run when selected tag changes
+  // Use the improved useApi hook with automatic dependency tracking
+  const { 
+    data: projects, 
+    loading, 
+    error 
+  } = useApi<Project[], [string | undefined]>(
+    apiService.getProjects, 
+    {
+      dependencies: [selectedTag],
+      initialParams: [selectedTag || undefined]
+    }
+  );
   
   // Extract all unique tags from projects
   const allTags = React.useMemo(() => {
@@ -64,9 +38,7 @@ const ProjectsPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Projects</h1>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <Loading className="h-64" />
       </div>
     );
   }
@@ -75,9 +47,7 @@ const ProjectsPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">Projects</h1>
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error instanceof Error ? error.message : String(error)}</p>
-        </div>
+        <ErrorDisplay error={error} />
       </div>
     );
   }
@@ -89,29 +59,25 @@ const ProjectsPage: React.FC = () => {
       {allTags.length > 0 && (
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedTag(null)}
-              className={`px-4 py-2 rounded-md transition ${!selectedTag ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              All Projects
-            </button>
+            <FilterButton 
+              label="All Projects" 
+              active={!selectedTag} 
+              onClick={() => setSelectedTag(null)} 
+            />
             {allTags.map((tag) => (
-              <button
+              <FilterButton
                 key={tag}
+                label={tag}
+                active={selectedTag === tag}
                 onClick={() => setSelectedTag(tag)}
-                className={`px-4 py-2 rounded-md transition ${selectedTag === tag ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                {tag}
-              </button>
+              />
             ))}
           </div>
         </div>
       )}
 
       {!projects || projects.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <p className="text-xl text-gray-600">No projects found matching the selected filter</p>
-        </div>
+        <EmptyState message="No projects found matching the selected filter" />
       ) : (
         <div className="space-y-12">
           {projects.map((project) => (
@@ -133,13 +99,11 @@ const ProjectsPage: React.FC = () => {
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.tags?.map(tag => (
-                    <span 
+                    <Tag 
                       key={tag}
-                      className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium cursor-pointer"
+                      label={tag}
                       onClick={() => setSelectedTag(tag)}
-                    >
-                      {tag}
-                    </span>
+                    />
                   ))}
                 </div>
                 

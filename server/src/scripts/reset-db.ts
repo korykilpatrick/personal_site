@@ -35,7 +35,7 @@ async function resetDatabase() {
     `;
     const checkResult = await client.query(checkQuery, [dbName]);
     
-    if (checkResult.rowCount > 0) {
+    if (checkResult.rowCount !== null && checkResult.rowCount > 0) {
       // Database exists, terminate all connections and drop it
       const terminateQuery = `
         SELECT pg_terminate_backend(pg_stat_activity.pid)

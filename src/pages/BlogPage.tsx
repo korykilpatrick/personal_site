@@ -3,13 +3,10 @@ import { Link } from 'react-router-dom';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 import { formatDate } from '../utils/dateUtils';
+import { Post as ApiPost } from '../../types';
 
-interface Post {
-  id: number;
-  title: string;
-  excerpt: string;
+interface Post extends ApiPost {
   date: string;
-  tags: string[];
 }
 
 const BlogPage: React.FC = () => {
@@ -37,7 +34,13 @@ const BlogPage: React.FC = () => {
           fetchedPosts = await apiService.getPosts();
         }
         
-        setPosts(fetchedPosts);
+        // Convert ApiPost to local Post type by transforming published_at to date
+        const formattedPosts = fetchedPosts.map(post => ({
+          ...post,
+          date: post.published_at ? post.published_at.toString() : ''
+        }));
+        
+        setPosts(formattedPosts);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
@@ -76,7 +79,7 @@ const BlogPage: React.FC = () => {
     if (selectedTags.length <= 1) return posts; // Already filtered by API
     
     return posts.filter(post => 
-      selectedTags.some(tag => post.tags.includes(tag))
+      selectedTags.some(tag => post.tags?.includes(tag) || false)
     );
   }, [posts, selectedTags]);
 
@@ -179,7 +182,7 @@ const BlogPage: React.FC = () => {
                 <time dateTime={post.date}>{formatDate(post.date)}</time>
                 <span className="mx-2">•</span>
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map(tag => (
+                  {post.tags?.map(tag => (
                     <span 
                       key={tag}
                       className="cursor-pointer hover:text-primary"
