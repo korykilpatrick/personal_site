@@ -2,75 +2,70 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
+  // Sample recent blog posts
+  const recentPosts = [
+    {
+      id: 1,
+      title: 'Exploring the Creative Process',
+      excerpt: 'Thoughts on finding inspiration and maintaining creative momentum in daily life...',
+      date: 'April 4, 2025',
+      slug: '/blog/exploring-creative-process',
+    },
+    {
+      id: 2,
+      title: 'Books That Changed My Perspective',
+      excerpt: 'A reflection on three books that fundamentally shifted how I see the world...',
+      date: 'March 21, 2025',
+      slug: '/blog/books-changed-perspective',
+    },
+    {
+      id: 3,
+      title: 'Learning to Embrace Imperfection',
+      excerpt: 'Why perfectionism holds us back and how to find beauty in the imperfect...',
+      date: 'March 8, 2025',
+      slug: '/blog/embrace-imperfection',
+    },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <section className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">
-          Hello, I'm <span className="text-primary">Your Name</span>
-        </h1>
-        <p className="text-xl mb-8 text-textSecondary">
-          A software engineer and creative problem solver passionate about building and exploring.
-        </p>
-        <div className="flex flex-wrap gap-4">
-          <Link
-            to="/projects"
-            className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-primary/90 transition"
-          >
-            View My Work
-            <svg
-              className="w-5 h-5 ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </Link>
-          <Link
-            to="/about"
-            className="inline-flex items-center px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary/10 transition"
-          >
-            About Me
-          </Link>
+    <div className="container">
+      <section className="mb-10">
+        <div className="prose">
+          <h1>Hello, I'm <span className="text-primary">Kory</span></h1>
+          <p>
+            Welcome to my little corner of the internet. I write about technology, creativity, books, 
+            and life's small wonders.
+          </p>
+          <p className="italic text-textSecondary border-l border-sky-200 pl-3 text-xs md:text-sm">
+            "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate, 
+            to have it make some difference that you have lived and lived well." — Ralph Waldo Emerson
+          </p>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Projects</h2>
-          <p className="mb-4">
-            Explore my software engineering projects showcasing problem-solving skills and technical
-            expertise.
-          </p>
-          <Link to="/projects" className="text-primary hover:underline inline-flex items-center">
-            Browse Projects
-            <svg
-              className="w-4 h-4 ml-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+      <section className="mb-14">
+        <h2 className="mb-5">Recent Writings</h2>
+        <div className="space-y-6">
+          {recentPosts.map(post => (
+            <article key={post.id} className="border-b border-sky-100 pb-5">
+              <h3 className="mb-1">
+                <Link to={post.slug} className="hover:text-primary no-underline">
+                  {post.title}
+                </Link>
+              </h3>
+              <p className="text-xs text-textSecondary mb-2">{post.date}</p>
+              <p className="mb-2 text-sm">{post.excerpt}</p>
+              <Link to={post.slug} className="text-primary text-xs font-sans">
+                Continue reading →
+              </Link>
+            </article>
+          ))}
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Blog</h2>
-          <p className="mb-4">
-            Read my thoughts on technology, spirituality, mythology, productivity, and more.
-          </p>
-          <Link to="/blog" className="text-primary hover:underline inline-flex items-center">
-            Read Articles
+        <div className="mt-6">
+          <Link to="/blog" className="text-primary font-sans text-xs inline-flex items-center">
+            View all posts
             <svg
-              className="w-4 h-4 ml-1"
+              className="w-3 h-3 ml-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -83,41 +78,23 @@ const HomePage: React.FC = () => {
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Bookshelf</h2>
-          <p className="mb-4">
-            Discover books I've read and enjoyed, synced with my Goodreads account.
+        <div>
+          <h2 className="mb-2">Bookshelf</h2>
+          <p className="mb-2 text-xs md:text-sm">
+            A curated collection of books that have shaped my thinking and brought me joy.
           </p>
-          <Link to="/bookshelf" className="text-primary hover:underline inline-flex items-center">
-            Explore Books
-            <svg
-              className="w-4 h-4 ml-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
+          <Link to="/bookshelf" className="text-primary font-sans text-xs">
+            Browse my bookshelf →
           </Link>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Professional Experience</h2>
-          <p className="mb-4">
-            View my career journey through an interactive timeline of professional milestones.
+        <div>
+          <h2 className="mb-2">Projects</h2>
+          <p className="mb-2 text-xs md:text-sm">
+            Creative and technical projects I've built, from web applications to exploratory ideas.
           </p>
-          <Link to="/timeline" className="text-primary hover:underline inline-flex items-center">
-            View Timeline
-            <svg
-              className="w-4 h-4 ml-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
+          <Link to="/projects" className="text-primary font-sans text-xs">
+            See my work →
           </Link>
         </div>
       </section>

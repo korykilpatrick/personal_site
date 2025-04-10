@@ -4,14 +4,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#0e7490', // teal-700
-        secondary: '#7c3aed', // violet-600
-        background: '#f8fafc', // slate-50
-        textPrimary: '#1e293b', // slate-800
-        textSecondary: '#64748b', // slate-500
+        primary: '#3b82f6', // blue-500 - warm blue
+        secondary: '#1d4ed8', // blue-700 - deeper blue accent
+        background: '#f0f9ff', // sky-50 - soft blue background
+        textPrimary: '#334155', // slate-700 - softer than black
+        textSecondary: '#64748b', // slate-500 - muted text
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Merriweather"', 'Georgia', 'serif'],
       },
     },
   },

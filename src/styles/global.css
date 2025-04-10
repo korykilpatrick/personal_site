@@ -1,37 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    @apply text-textPrimary antialiased;
+    @apply text-textPrimary;
   }
 
   body {
-    @apply bg-background min-h-screen;
+    @apply bg-background min-h-screen font-serif leading-loose text-sm md:text-base bg-gradient-to-br from-sky-50 to-background;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-normal tracking-wide;
   }
 
   h1 {
-    @apply text-4xl font-bold mb-4;
+    @apply text-2xl md:text-3xl mb-5;
   }
 
   h2 {
-    @apply text-3xl font-bold mb-3;
+    @apply text-xl md:text-2xl mb-3;
   }
 
   h3 {
-    @apply text-2xl font-bold mb-2;
+    @apply text-lg md:text-xl mb-2;
   }
 
   h4 {
-    @apply text-xl font-semibold mb-2;
+    @apply text-base md:text-lg mb-2;
   }
 
   p {
-    @apply mb-4;
+    @apply mb-4 text-sm md:text-base;
   }
 
   a {
-    @apply text-primary hover:text-primary/80 transition duration-200;
+    @apply text-primary hover:text-secondary underline-offset-2 transition duration-200 hover:decoration-sky-200;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-xl mx-auto px-4 md:px-0;
+  }
+  
+  .prose {
+    @apply max-w-none leading-relaxed;
+  }
+  
+  .prose p {
+    @apply mb-4 text-sm md:text-base;
+  }
+  
+  .prose img {
+    @apply rounded-md my-6;
   }
 }
