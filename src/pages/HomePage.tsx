@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="container">
+    <>
       <section className="mb-10">
         <div className="prose">
           <h1>Hello, I'm <span className="text-primary">Kory</span></h1>
@@ -98,7 +98,7 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
       </section>
-    </div>
+    </>
   );
 };
 

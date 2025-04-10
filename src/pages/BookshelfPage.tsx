@@ -113,23 +113,15 @@ const BookshelfPage: React.FC = () => {
   // Note: We're now using the toggleShelfSelection from useMultiSelect
 
   if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto py-8 bg-stone-50">
-        <Loading className="h-64" />
-      </div>
-    );
+    return <Loading className="h-64" />;
   }
 
   if (error) {
-    return (
-      <div className="max-w-6xl mx-auto py-8 bg-stone-50">
-        <ErrorDisplay error={error} />
-      </div>
-    );
+    return <ErrorDisplay error={error} />;
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 bg-stone-50 min-h-screen">
+    <>
       {/* Personal Note Section */}
       <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-100 rounded-lg shadow-sm">
         <p className="text-lg text-stone-700 italic">
@@ -250,7 +242,7 @@ const BookshelfPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

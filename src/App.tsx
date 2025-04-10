@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ProjectsPage from './pages/ProjectsPage';
@@ -17,14 +18,14 @@ const App: React.FC = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/gigs" element={<GigsPage />} />
-          <Route path="/timeline" element={<TimelinePage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/bookshelf" element={<BookshelfPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/" element={<Layout><HomePage /></Layout>} />
+          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+          <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
+          <Route path="/gigs" element={<Layout><GigsPage /></Layout>} />
+          <Route path="/timeline" element={<Layout><TimelinePage /></Layout>} />
+          <Route path="/blog" element={<Layout><BlogPage /></Layout>} />
+          <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
+          <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
         </Routes>
       </main>
       <Footer />
