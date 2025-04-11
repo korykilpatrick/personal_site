@@ -38,11 +38,11 @@ const WorkPage: React.FC = () => {
           <p className="text-xl text-gray-600">No work experience found</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {workEntries.map((workEntry) => (
             <div
               key={workEntry.id}
-              className="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary"
+              className="bg-white p-2 rounded-lg shadow-md border-l-4 border-primary"
             >
               <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
                 <div>
