@@ -2,8 +2,8 @@ import express from 'express';
 import bookRoutes from './book.routes';
 import bookshelfRoutes from './bookshelf.routes';
 import projectRoutes from './project.routes';
-import gigRoutes from './gig.routes';
-import postRoutes from './post.routes';
+import workEntryRoutes from './work_entry.routes';
+// import postRoutes from './post.routes'; // Removed
 import config from '../config/config';
 
 const router = express.Router();
@@ -21,7 +21,7 @@ router.get('/health', (req, res) => {
 router.use('/books', bookRoutes);
 router.use('/bookshelves', bookshelfRoutes);
 router.use('/projects', projectRoutes);
-router.use('/gigs', gigRoutes);
-router.use('/posts', postRoutes);
+router.use('/work', workEntryRoutes);
+// router.use('/posts', postRoutes); // Removed
 
 export default router;

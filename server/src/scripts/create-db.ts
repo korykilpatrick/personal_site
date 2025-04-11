@@ -86,31 +86,18 @@ async function createDatabase() {
       });
       logger.info('Projects table created');
 
-      // Create gigs table
-      await db.schema.createTable('gigs', (table) => {
+      // Create work_entries table (renamed from gigs)
+      await db.schema.createTable('work_entries', (table) => {
         table.increments('id').primary();
         table.string('company').notNullable();
         table.string('role').notNullable();
         table.string('duration').notNullable();
         table.text('achievements').notNullable();
-        table.jsonb('links').nullable();
+        table.jsonb('work_entry_links').nullable(); // Updated column name
         table.timestamp('created_at').notNullable().defaultTo(db.fn.now());
         table.timestamp('updated_at').notNullable().defaultTo(db.fn.now());
       });
-      logger.info('Gigs table created');
-
-      // Create posts table
-      await db.schema.createTable('posts', (table) => {
-        table.increments('id').primary();
-        table.string('title').notNullable();
-        table.text('content').notNullable();
-        table.date('date').notNullable();
-        table.jsonb('tags').nullable();
-        table.text('excerpt').nullable();
-        table.timestamp('created_at').notNullable().defaultTo(db.fn.now());
-        table.timestamp('updated_at').notNullable().defaultTo(db.fn.now());
-      });
-      logger.info('Posts table created');
+      logger.info('Work entries table created'); // Updated log message
       
       logger.info('All tables created successfully');
     } else {

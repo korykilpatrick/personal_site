@@ -1,34 +1,34 @@
 import express from 'express';
-import GigController from '../controllers/gig.controller';
+import WorkEntryController from '../controllers/work_entry.controller';
 import { validate } from '../middleware/validation';
 import { body, param } from 'express-validator';
 
 const router = express.Router();
 
 /**
- * Gig routes
+ * Work Entry routes
  */
 
 /**
- * @route GET /api/gigs
- * @desc Get all gigs
+ * @route GET /api/work
+ * @desc Get all work entries
  */
-router.get('/', GigController.getAll);
+router.get('/', WorkEntryController.getAll);
 
 /**
- * @route GET /api/gigs/:id
- * @desc Get a gig by ID
+ * @route GET /api/work/:id
+ * @desc Get a work entry by ID
  */
 router.get(
   '/:id',
   [param('id').isInt().withMessage('ID must be an integer')],
   validate,
-  GigController.getById
+  WorkEntryController.getById
 );
 
 /**
- * @route POST /api/gigs
- * @desc Create a new gig
+ * @route POST /api/work
+ * @desc Create a new work entry
  */
 router.post(
   '/',
@@ -40,12 +40,12 @@ router.post(
     body('links').optional().isArray().withMessage('Links must be an array'),
   ],
   validate,
-  GigController.create
+  WorkEntryController.create
 );
 
 /**
- * @route PUT /api/gigs/:id
- * @desc Update a gig
+ * @route PUT /api/work/:id
+ * @desc Update a work entry
  */
 router.put(
   '/:id',
@@ -58,18 +58,18 @@ router.put(
     body('links').optional().isArray().withMessage('Links must be an array'),
   ],
   validate,
-  GigController.update
+  WorkEntryController.update
 );
 
 /**
- * @route DELETE /api/gigs/:id
- * @desc Delete a gig
+ * @route DELETE /api/work/:id
+ * @desc Delete a work entry
  */
 router.delete(
   '/:id',
   [param('id').isInt().withMessage('ID must be an integer')],
   validate,
-  GigController.delete
+  WorkEntryController.delete
 );
 
 export default router;
