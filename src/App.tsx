@@ -6,9 +6,7 @@ import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ProjectsPage from './pages/ProjectsPage';
-import GigsPage from './pages/GigsPage';
-import TimelinePage from './pages/TimelinePage';
-import BlogPage from './pages/BlogPage';
+import WorkPage from './pages/WorkPage';
 import BookshelfPage from './pages/BookshelfPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -21,9 +19,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
-          <Route path="/gigs" element={<Layout><GigsPage /></Layout>} />
-          <Route path="/timeline" element={<Layout><TimelinePage /></Layout>} />
-          <Route path="/blog" element={<Layout><BlogPage /></Layout>} />
+          <Route path="/work" element={<Layout><WorkPage /></Layout>} />
           <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
           <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
         </Routes>

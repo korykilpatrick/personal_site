@@ -31,7 +31,7 @@ const HomePage: React.FC = () => {
     <>
       <section className="mb-10">
         <div className="prose">
-          <h1>Hello, I'm <span className="text-primary">Kory</span></h1>
+          <h1 className="text-4xl">Hello, I'm <span className="text-primary">Kory</span></h1>
           <p>
             Welcome to my little corner of the internet. I write about technology, creativity, books, 
             and life's small wonders.
@@ -44,11 +44,11 @@ const HomePage: React.FC = () => {
       </section>
 
       <section className="mb-14">
-        <h2 className="mb-5">Recent Writings</h2>
+        <h2 className="text-2xl mb-5">Recent Writings</h2>
         <div className="space-y-6">
           {recentPosts.map(post => (
             <article key={post.id} className="border-b border-sky-100 pb-5">
-              <h3 className="mb-1">
+              <h3 className="text-xl mb-1">
                 <Link to={post.slug} className="hover:text-primary no-underline">
                   {post.title}
                 </Link>
@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h2 className="mb-2">Bookshelf</h2>
+          <h2 className="text-2xl mb-2">Bookshelf</h2>
           <p className="mb-2 text-xs md:text-sm">
             A curated collection of books that have shaped my thinking and brought me joy.
           </p>
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
         </div>
 
         <div>
-          <h2 className="mb-2">Projects</h2>
+          <h2 className="text-2xl mb-2">Projects</h2>
           <p className="mb-2 text-xs md:text-sm">
             Creative and technical projects I've built, from web applications to exploratory ideas.
           </p>

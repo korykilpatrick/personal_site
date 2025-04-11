@@ -6,12 +6,10 @@ import App from '../App';
 // Mock the components to avoid rendering the entire app
 jest.mock('../components/layout/Navbar', () => () => <div data-testid="navbar">Navbar</div>);
 jest.mock('../components/layout/Footer', () => () => <div data-testid="footer">Footer</div>);
-jest.mock('../pages/HomePage', () => () => <div data-testid="home-page">Home Page</div>);
+jest.mock('../pages/HomePage', () => () => <div>Home Page</div>);
 jest.mock('../pages/AboutPage', () => () => <div>About Page</div>);
 jest.mock('../pages/ProjectsPage', () => () => <div>Projects Page</div>);
-jest.mock('../pages/GigsPage', () => () => <div>Gigs Page</div>);
-jest.mock('../pages/TimelinePage', () => () => <div>Timeline Page</div>);
-jest.mock('../pages/BlogPage', () => () => <div>Blog Page</div>);
+jest.mock('../pages/WorkPage', () => () => <div>Work Page</div>);
 jest.mock('../pages/BookshelfPage', () => () => <div>Bookshelf Page</div>);
 jest.mock('../pages/NotFoundPage', () => () => <div>Not Found Page</div>);
 

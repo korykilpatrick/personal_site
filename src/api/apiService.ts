@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Book, BookWithShelves, Bookshelf, Project, Gig, Post } from '../../types';
+import { Book, BookWithShelves, Bookshelf, Project, WorkEntry } from '../../types';
 
 // Define base API URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -86,25 +86,14 @@ export const apiService = {
     return response.data;
   },
 
-  // Gig related endpoints
-  getGigs: async (): Promise<Gig[]> => {
-    const response = await apiClient.get<Gig[]>('/gigs');
+  // Work Entry related endpoints
+  getWorkEntries: async (): Promise<WorkEntry[]> => {
+    const response = await apiClient.get<WorkEntry[]>('/work');
     return response.data;
   },
 
-  getGigById: async (id: number): Promise<Gig> => {
-    const response = await apiClient.get<Gig>(`/gigs/${id}`);
-    return response.data;
-  },
-
-  // Blog related endpoints
-  getPosts: async (params?: { tag?: string; q?: string }): Promise<Post[]> => {
-    const response = await apiClient.get<Post[]>('/posts', { params });
-    return response.data;
-  },
-
-  getPostById: async (id: number): Promise<Post> => {
-    const response = await apiClient.get<Post>(`/posts/${id}`);
+  getWorkEntryById: async (id: number): Promise<WorkEntry> => {
+    const response = await apiClient.get<WorkEntry>(`/work/${id}`);
     return response.data;
   },
 };

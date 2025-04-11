@@ -1,29 +1,16 @@
 import React from 'react';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
+// Import shared types
+import { WorkEntry, WorkEntryLink } from '../../types';
 
-interface GigLink {
-  title: string;
-  url: string;
-}
-
-interface Gig {
-  id: number;
-  company: string;
-  role: string;
-  duration: string;
-  achievements: string;
-  links?: GigLink[];
-}
-
-const GigsPage: React.FC = () => {
-  // Fetch professional experience
-  const { data: gigs, loading, error } = useApi<Gig[]>(apiService.getGigs);
+const WorkPage: React.FC = () => {
+  // Fetch work experience - use renamed API call
+  const { data: workEntries, loading, error } = useApi<WorkEntry[]>(apiService.getWorkEntries);
 
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto py-8">
-        <h1 className="text-4xl font-bold mb-6">Professional Experience</h1>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
@@ -34,7 +21,6 @@ const GigsPage: React.FC = () => {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto py-8">
-        <h1 className="text-4xl font-bold mb-6">Professional Experience</h1>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <p>{error.message}</p>
         </div>
@@ -44,32 +30,30 @@ const GigsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6">Professional Experience</h1>
-
-      {!gigs || gigs.length === 0 ? (
+      {!workEntries || workEntries.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <p className="text-xl text-gray-600">No professional experience found</p>
+          <p className="text-xl text-gray-600">No work experience found</p>
         </div>
       ) : (
         <div className="space-y-8">
-          {gigs.map((gig) => (
+          {workEntries.map((workEntry) => (
             <div
-              key={gig.id}
+              key={workEntry.id}
               className="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary"
             >
               <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-primary">{gig.role}</h2>
-                  <h3 className="text-xl font-semibold text-textPrimary mb-1">{gig.company}</h3>
+                  <h2 className="text-xl font-bold text-primary">{workEntry.role}</h2>
+                  <h3 className="text-lg font-semibold text-textPrimary mb-1">{workEntry.company}</h3>
                 </div>
-                <div className="text-textSecondary font-medium mt-1 md:mt-0">{gig.duration}</div>
+                <div className="text-textSecondary font-medium mt-1 md:mt-0">{workEntry.duration}</div>
               </div>
 
-              <p className="text-textSecondary mb-4 whitespace-pre-line">{gig.achievements}</p>
+              <p className="text-textSecondary mb-4 whitespace-pre-line">{workEntry.achievements}</p>
 
-              {gig.links && gig.links.length > 0 && (
+              {workEntry.links && workEntry.links.length > 0 && (
                 <div className="flex flex-wrap gap-3">
-                  {gig.links.map((link, index) => (
+                  {workEntry.links.map((link, index) => (
                     <a
                       key={index}
                       href={link.url}
@@ -104,4 +88,4 @@ const GigsPage: React.FC = () => {
   );
 };
 
-export default GigsPage;
+export default WorkPage;

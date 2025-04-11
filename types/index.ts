@@ -82,36 +82,22 @@ export interface Project extends BaseRecord {
 }
 
 /**
- * Gig link interface
+ * Work Entry link interface
  */
-export interface GigLink {
+export interface WorkEntryLink {
   title: string;
   url: string;
 }
 
 /**
- * Gig model
+ * Work Entry model
  */
-export interface Gig extends BaseRecord {
+export interface WorkEntry extends BaseRecord {
   company: string;
   role: string;
   duration: string;
   achievements: string;
-  links?: GigLink[];
-}
-
-/**
- * Post model
- */
-export interface Post extends BaseRecord {
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  featured_image?: string;
-  tags?: string[];
-  status: 'draft' | 'published';
-  published_at?: Date | string;
+  links?: WorkEntryLink[]; // Use new link type
 }
 
 /**

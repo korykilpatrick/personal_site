@@ -14,6 +14,20 @@ module.exports = {
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
         serif: ['"Merriweather"', 'Georgia', 'serif'],
       },
+      fontSize: {
+        // Example adjustments - refine as needed
+        'xs': '.75rem',    // 12px
+        'sm': '.875rem',   // 14px
+        'base': '1rem',    // 16px
+        'lg': '1.125rem',  // 18px
+        'xl': '1.25rem',   // 20px
+        '2xl': '1.5rem',   // 24px
+        '3xl': '1.75rem',  // 28px - Reduced from 1.875rem
+        '4xl': '2rem',     // 32px - Reduced from 2.25rem
+        '5xl': '2.5rem',   // 40px - Reduced from 3rem
+        '6xl': '3rem',     // 48px - Reduced from 3.75rem
+        '7xl': '3.5rem',   // 56px - Reduced from 4.5rem
+      }
     },
   },
   plugins: [],

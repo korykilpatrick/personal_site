@@ -9,30 +9,15 @@ const Navbar: React.FC = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const [isWorkDropdownOpen, setIsWorkDropdownOpen] = useState(false);
-  
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { 
-      name: 'Work',
-      path: '#',
-      dropdown: true,
-      items: [
-        { name: 'Projects', path: '/projects' },
-        { name: 'Gigs', path: '/gigs' },
-        { name: 'Timeline', path: '/timeline' },
-      ],
-    },
-    { name: 'Blog', path: '/blog' },
+    { name: 'Projects', path: '/projects' },
+    { name: 'Work', path: '/work' },
     { name: 'Bookshelf', path: '/bookshelf' },
     { name: 'About', path: '/about' },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === path;
-    }
-    return location.pathname.startsWith(path);
+    return location.pathname.startsWith(path) && path !== '/';
   };
 
   return (
@@ -49,61 +34,19 @@ const Navbar: React.FC = () => {
           
           {/* Nav links in center */}
           <div className="justify-self-center flex space-x-6 font-sans text-xs tracking-wider">
-            {navLinks.map((link) =>
-              link.dropdown ? (
-                <div
-                  key={link.name}
-                  className="relative group"
-                  onMouseEnter={() => setIsWorkDropdownOpen(true)}
-                  onMouseLeave={() => setIsWorkDropdownOpen(false)}
-                >
-                  <button className="flex items-center text-textSecondary hover:text-primary hover:bg-sky-50 px-2 py-1 rounded-sm">
-                    {link.name}
-                    <svg
-                      className="w-3 h-3 ml-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                  {isWorkDropdownOpen && (
-                    <div className="absolute left-0 mt-1 w-36 bg-white rounded shadow-md z-10 py-1">
-                      {link.items?.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          className={`block text-xs px-3 py-2 hover:bg-sky-50 ${
-                            isActive(item.path) ? 'text-primary' : 'text-textSecondary'
-                          } no-underline`}
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`px-2 py-1 rounded-sm no-underline ${
-                    isActive(link.path) 
-                      ? 'text-primary border-b border-primary'
-                      : 'text-textSecondary hover:text-primary hover:bg-sky-50'
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`px-2 py-1 rounded-sm no-underline ${
+                  isActive(link.path)
+                    ? 'text-primary border-b border-primary'
+                    : 'text-textSecondary hover:text-primary hover:bg-sky-50'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
           
           {/* Social icons on right */}
@@ -199,63 +142,20 @@ const Navbar: React.FC = () => {
           {/* Mobile menu content */}
           {isMenuOpen && (
             <div className="mt-3 flex flex-col items-center space-y-2 py-2 w-full">
-              {navLinks.map((link) =>
-                link.dropdown ? (
-                  <div key={link.name} className="w-full text-center">
-                    <button
-                      className="flex items-center justify-center w-full py-1 px-2 text-xs text-textSecondary hover:bg-sky-50 rounded-sm"
-                      onClick={() => setIsWorkDropdownOpen(!isWorkDropdownOpen)}
-                    >
-                      {link.name}
-                      <svg
-                        className={`w-3 h-3 ml-1 transition-transform ${
-                          isWorkDropdownOpen ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-                    {isWorkDropdownOpen && (
-                      <div className="mt-1 py-1 bg-sky-50/50">
-                        {link.items?.map((item) => (
-                          <Link
-                            key={item.name}
-                            to={item.path}
-                            className={`block py-1 px-2 text-xs ${
-                              isActive(item.path) ? 'text-primary' : 'text-textSecondary'
-                            }`}
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {item.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    className={`px-2 py-1 rounded-sm no-underline ${
-                      isActive(link.path) 
-                        ? 'text-primary border-b border-primary'
-                        : 'text-textSecondary hover:text-primary hover:bg-sky-50'
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                )
-              )}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`block py-1 px-2 text-xs no-underline ${
+                    isActive(link.path)
+                      ? 'text-primary'
+                      : 'text-textSecondary'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
               <div className="flex justify-center space-x-6 pt-2 mt-2 border-t border-sky-100 w-full">
                 <a
                   href="https://github.com/korykilpatrick"

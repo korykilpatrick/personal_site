@@ -34,7 +34,6 @@ const ProjectsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <h1 className="text-4xl font-bold mb-6">Projects</h1>
         <Loading className="h-64" />
       </div>
     );
@@ -43,7 +42,6 @@ const ProjectsPage: React.FC = () => {
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <h1 className="text-4xl font-bold mb-6">Projects</h1>
         <ErrorDisplay error={error} />
       </div>
     );
@@ -51,8 +49,6 @@ const ProjectsPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6">Projects</h1>
-
       {allTags.length > 0 && (
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
@@ -100,7 +96,7 @@ const ProjectsPage: React.FC = () => {
                   ))}
                 </div>
 
-                <h2 className="text-2xl font-bold mb-2">{project.title}</h2>
+                <h2 className="text-lg font-bold mb-2">{project.title}</h2>
                 <p className="text-textSecondary mb-4">{project.description}</p>
 
                 <div className="flex flex-wrap gap-3 mb-6">
