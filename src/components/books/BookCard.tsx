@@ -38,25 +38,26 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
 
   // Content for the tooltip
   const tooltipContent = (
-    <div className="flex flex-col gap-1 text-left">
-      <h3 className="font-bold text-sm">{book.title}</h3>
-      <p className="text-xs text-gray-300">by {book.author}</p>
+    <div className="flex flex-col gap-0.5 text-left">
+      <h3 className="font-bold text-xs leading-tight">{book.title}</h3>
+      <p className="text-xs text-gray-300 leading-tight">by {book.author}</p>
       {book.rating !== null && book.rating !== undefined && (
          <div className="flex text-xs items-center">
-          <span className="mr-1">Rating:</span> {renderStars(book.rating)}
+          <span className="mr-0.5 text-xs">Rating:</span> {renderStars(book.rating)}
          </div>
       )}
-      {book.date_read && (
-        <p className="text-xs text-gray-300 mt-1">
-          Read: {new Date(book.date_read).toLocaleDateString()}
-        </p>
-      )}
-      {/* Add other metadata as needed, e.g., genre, pages */}
-       {book.date_pub && (
-        <p className="text-xs text-gray-400 mt-1">
-          Published: {new Date(book.date_pub).toLocaleDateString()}
-        </p>
-      )}
+      <div className="flex text-xs text-gray-300 gap-2">
+        {book.date_read && (
+          <span className="leading-tight">
+            Read: {new Date(book.date_read).toLocaleDateString()}
+          </span>
+        )}
+        {book.date_pub && (
+          <span className="leading-tight">
+            Pub: {new Date(book.date_pub).toLocaleDateString()}
+          </span>
+        )}
+      </div>
     </div>
   );
 

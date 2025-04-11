@@ -23,10 +23,10 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
     >
       {/* The "Shelf" container */}
       <div
-        className="grid gap-4 p-6 rounded-t-2xl rounded-b-lg shadow-md 
+        className="grid gap-2 p-4 rounded-t-2xl rounded-b-lg shadow-md 
                    border-t-4 border-x-4 border-b-8 border-stone-800"
         style={(() => {
-          const rowHeight = bookSize.height + 16; // bookSize.height + gap-4 (16px)
+          const rowHeight = bookSize.height + 8; // bookSize.height + gap-2 (8px)
           const shelfThickness = 8;
           const shelfColor = '#44210a';
           const existingBgImage = `

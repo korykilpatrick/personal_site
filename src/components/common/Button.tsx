@@ -25,9 +25,9 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'text-xs px-2 py-1 rounded',
-    md: 'text-sm px-4 py-2 rounded-md',
-    lg: 'text-base px-6 py-3 rounded-lg',
+    sm: 'text-xs px-1.5 py-0.5 rounded',
+    md: 'text-xs px-3 py-1.5 rounded',
+    lg: 'text-sm px-4 py-2 rounded-md',
   };
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;

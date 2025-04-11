@@ -26,7 +26,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
   // Create trigger button
   const trigger = (
-    <Button variant="outline" className="w-full px-4 py-2 flex justify-between">
+    <Button variant="outline" className="w-full px-2.5 py-1 flex justify-between text-xs">
       <span className="mr-1">{displayLabel}</span>
       <Icon name="chevron-down" className="ml-auto text-gray-600" />
     </Button>
@@ -34,9 +34,9 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
   return (
     <Dropdown trigger={trigger} className={className}>
-      <div className="py-1 max-h-60 overflow-y-auto">
+      <div className="py-0.5 max-h-60 overflow-y-auto">
         {items.map((item) => (
-          <div key={item.id} className="px-3 py-2">
+          <div key={item.id} className="px-2 py-1">
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"

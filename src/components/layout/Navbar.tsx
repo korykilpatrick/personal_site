@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="border-b border-sky-100 py-5 mb-6 px-6">
+    <header className="border-b border-sky-100 py-3 mb-4 px-4">
       <nav>
         {/* Desktop Navigation */}
         <div className="hidden md:grid grid-cols-3 items-center">

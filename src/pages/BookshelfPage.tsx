@@ -48,7 +48,7 @@ const BookshelfPage: React.FC = () => {
 
   // Calculate dynamic book size using the simplified custom hook
   const bookSize = useDynamicBookSize({
-    minWidth: 100, // Adjusted minimum width for better default appearance
+    minWidth: 85, // More compact minimum width for dense display
   });
 
   // Fetch bookshelves on mount

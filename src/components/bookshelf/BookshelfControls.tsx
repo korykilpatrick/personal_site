@@ -29,34 +29,36 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   bookCount,
 }) => {
   return (
-    <div className="mb-8 space-y-4">
-      {/* Filtering and Sorting Controls - horizontal layout */}
-      <div className="flex flex-wrap items-center gap-6">
+    <div className="mb-5 space-y-2">
+      {/* Filtering and Sorting Controls - compact horizontal layout */}
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center">
-          <span className="text-sm font-medium text-stone-700 mr-2">Sort By</span>
+          <span className="text-xs font-medium text-stone-700 mr-1.5">Sort By</span>
           <SortDropdown
             options={sortOptions}
             selected={selectedSortBy}
             onChange={onSortChange}
-            className="w-40"
+            className="w-36"
           />
         </div>
 
         <div className="flex items-center">
-          <span className="text-sm font-medium text-stone-700 mr-2">Bookshelves</span>
+          <span className="text-xs font-medium text-stone-700 mr-1.5">Bookshelves</span>
           <MultiSelectDropdown
             label="Select Shelves"
             items={allBookshelves.map((shelf) => ({ id: shelf.id, label: shelf.name }))}
             selectedItems={selectedShelfIds}
             toggleItem={onToggleShelf}
-            className="w-40"
+            className="w-36"
           />
         </div>
+        
+        <div className="text-xs text-stone-500 ml-auto">Showing {bookCount} books</div>
       </div>
 
       {/* Selected bookshelves pills */}
       {selectedShelfIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-1.5 mt-2">
           {allBookshelves
             .filter((shelf) => selectedShelfIds.includes(shelf.id))
             .map((shelf) => (
@@ -70,18 +72,13 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           {selectedShelfIds.length > 1 && (
             <button
               onClick={onClearShelves}
-              className="text-xs underline text-stone-500 hover:text-stone-700 self-center ml-2"
+              className="text-xs underline text-stone-500 hover:text-stone-700 self-center ml-1"
             >
               Clear all
             </button>
           )}
         </div>
       )}
-
-      {/* Display Controls */}
-      <div className="flex items-center gap-4">
-        <div className="text-sm text-stone-500">Showing {bookCount} books</div>
-      </div>
     </div>
   );
 };

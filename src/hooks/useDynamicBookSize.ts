@@ -10,7 +10,7 @@ interface BookSize {
   height: number;
 }
 
-const DEFAULT_MIN_WIDTH = 80; // Minimum realistic book cover width
+const DEFAULT_MIN_WIDTH = 70; // Smaller minimum book cover width for density
 const DEFAULT_ASPECT_RATIO = 1.5; // Standard book cover ratio (height = width * 1.5)
 
 /**
