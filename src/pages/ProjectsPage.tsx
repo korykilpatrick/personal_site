@@ -9,15 +9,21 @@ const ProjectsPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  // Use the improved useApi hook with automatic dependency tracking
+  // Updated useApi call:
+  // - Pass auto-fetch parameters directly as the second argument.
+  // - Removed the options object containing dependencies and initialParams.
   const {
     data: projects,
     loading,
     error,
-  } = useApi<Project[], [string | undefined]>(apiService.getProjects, {
-    dependencies: [selectedTag],
-    initialParams: [selectedTag || undefined],
-  });
+    // Note: The returned function is now named fetchDataCallback internally in useApi,
+    // but we can still destructure it as fetchData here.
+    fetchData,
+  } = useApi<Project[], [string | undefined]>(
+    apiService.getProjects,
+    [selectedTag || undefined] // Parameters for automatic fetching
+    // No third argument needed if using default options (e.g., autoFetch=true)
+  );
 
   // Extract all unique tags from projects
   const allTags = React.useMemo(() => {
@@ -83,7 +89,8 @@ const ProjectsPage: React.FC = () => {
                     className="w-full h-full object-cover object-top"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = 'https://via.placeholder.com/800x450?text=Project+Screenshot';
+                      target.src = '';
+                      target.onerror = null;
                     }}
                   />
                 </div>

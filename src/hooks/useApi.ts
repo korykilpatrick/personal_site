@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-interface UseApiOptions<T, P extends any[]> {
+interface UseApiOptions<T> {
   initialData?: T;
   onSuccess?: (data: T) => void;
   onError?: (error: Error) => void;
   autoFetch?: boolean;
-  dependencies?: any[];
-  initialParams?: P;
 }
 
 interface UseApiResult<T, P extends any[]> {
@@ -19,41 +17,34 @@ interface UseApiResult<T, P extends any[]> {
 /**
  * Custom hook for making API requests
  * @param fetchFn - Async function to fetch data
+ * @param autoFetchParams - Parameters to use for automatic fetching when they change. Pass an empty array if no params.
  * @param options - Hook configuration options
  * @returns Object with data, loading state, error, and fetch function
  */
 const useApi = <T, P extends any[] = []>(
   fetchFn: (...params: P) => Promise<T>,
-  options: UseApiOptions<T, P> = {},
+  autoFetchParams: P,
+  options: UseApiOptions<T> = {},
 ): UseApiResult<T, P> => {
   const {
     initialData = null,
     onSuccess,
     onError,
     autoFetch = true,
-    dependencies = [],
-    initialParams = [] as unknown as P,
   } = options;
 
   const [data, setData] = useState<T | null>(initialData);
   const [loading, setLoading] = useState<boolean>(autoFetch);
   const [error, setError] = useState<Error | null>(null);
 
-  // Keep track of the current parameters
-  const paramsRef = useRef<P>(initialParams);
+  const isMounted = useRef(false);
 
-  const fetchData = useCallback(
+  const fetchDataCallback = useCallback(
     async (...params: P): Promise<T> => {
       setLoading(true);
       setError(null);
-
-      // Update the current parameters
-      if (params.length > 0) {
-        paramsRef.current = params;
-      }
-
       try {
-        const result = await fetchFn(...paramsRef.current);
+        const result = await fetchFn(...params);
         setData(result);
         if (onSuccess) onSuccess(result);
         return result;
@@ -63,19 +54,28 @@ const useApi = <T, P extends any[] = []>(
         if (onError) onError(error);
         throw error;
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 0);
       }
     },
-    [fetchFn, onSuccess, onError, ...dependencies],
+    [fetchFn, onSuccess, onError],
   );
 
   useEffect(() => {
-    if (autoFetch) {
-      fetchData(...paramsRef.current);
+    if (isMounted.current) {
+      if (autoFetch) {
+        fetchDataCallback(...autoFetchParams);
+      }
+    } else {
+      isMounted.current = true;
+      if (autoFetch) {
+        fetchDataCallback(...autoFetchParams);
+      } else {
+        setLoading(false);
+      }
     }
-  }, [autoFetch, fetchData]);
+  }, [autoFetch, fetchDataCallback, ...autoFetchParams]);
 
-  return { data, loading, error, fetchData };
+  return { data, loading, error, fetchData: fetchDataCallback };
 };
 
 export default useApi;

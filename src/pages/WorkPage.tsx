@@ -5,8 +5,11 @@ import apiService from '../api/apiService';
 import { WorkEntry, WorkEntryLink } from '../../types';
 
 const WorkPage: React.FC = () => {
-  // Fetch work experience - use renamed API call
-  const { data: workEntries, loading, error } = useApi<WorkEntry[]>(apiService.getWorkEntries);
+  // Fetch work experience - Pass empty array [] as the second argument for autoFetchParams
+  const { data: workEntries, loading, error } = useApi<WorkEntry[]>(
+    apiService.getWorkEntries, // fetchFn
+    [] // autoFetchParams (no params needed for this call)
+  );
 
   if (loading) {
     return (
