@@ -78,7 +78,7 @@ const ProjectsPage: React.FC = () => {
       {!projects || projects.length === 0 ? (
         <EmptyState message="No projects found matching the selected filter" />
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-1">
           {projects.map((project) => (
             <div key={project.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-4 md:p-5 flex flex-col md:flex-row gap-4 md:items-start">
