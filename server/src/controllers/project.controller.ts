@@ -100,6 +100,19 @@ export const ProjectController = {
       next(error);
     }
   },
+
+  /**
+   * Get the total count of projects
+   */
+  getCount: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const count = await ProjectModel.getCount(); // Assume this method exists on the model
+      res.status(StatusCodes.OK).json({ count });
+    } catch (error) {
+      logger.error('Error fetching project count', { error });
+      next(error);
+    }
+  },
 };
 
 export default ProjectController;

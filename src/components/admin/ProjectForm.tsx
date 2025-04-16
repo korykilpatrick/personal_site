@@ -1,8 +1,9 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { Project, ProjectFormData } from '../../types/project'; // Import shared types
 import { Button, Select } from '../common'; // Import common components
-import { ErrorDisplay } from '../ui';
-import { Input, Textarea, FormField, MediaEntriesInput, MediaEntry } from '../forms'; // Import new form components and FormField
+import { ErrorDisplay, Loading } from '../ui';
+import { Input, Textarea, FormField, MediaEntriesInput, MediaEntry, TagInput, LinkListInput } from '../forms'; // Import new form components and FormField
+import { parseCommaSeparatedString } from '../../utils/helpers'; // Import from utils
 
 // REMOVE local Project interface definition
 // interface Project { ... }
@@ -23,13 +24,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   isLoading, 
   onCancel 
 }) => {
-  const [formData, setFormData] = useState<Omit<ProjectFormData, 'media_urls'>>({
-    // State now excludes media_urls, handled separately
+  const [formData, setFormData] = useState<Omit<ProjectFormData, 'media_urls' | 'project_tags' | 'project_links'> & { project_tags: string[]; project_links: string[] }>({
     title: '',
     description: '',
-    project_links: '',
+    project_links: [], // Initialize as array
     writeup: '',
-    project_tags: ''
+    project_tags: []
   });
   // State specifically for media URLs
   const [mediaEntries, setMediaEntries] = useState<MediaEntry[]>([]); 
@@ -37,13 +37,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
 
   useEffect(() => {
     if (initialData) {
-      // Populate regular form fields
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
-        project_links: initialData.project_links || '',
+        project_links: parseCommaSeparatedString(initialData.project_links), // Use imported helper
         writeup: initialData.writeup || '',
-        project_tags: initialData.project_tags || ''
+        project_tags: parseCommaSeparatedString(initialData.project_tags) // Use imported helper
       });
       // Parse and populate media entries
       try {
@@ -61,14 +60,27 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       }
     } else {
       // Reset everything for create mode
-      setFormData({ title: '', description: '', project_links: '', writeup: '', project_tags: '' });
+      setFormData({ title: '', description: '', project_links: [], writeup: '', project_tags: [] });
       setMediaEntries([]);
     }
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Ensure complex fields are not handled here
+    if (name !== 'project_tags' && name !== 'project_links') {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Specific handler for tags
+  const handleTagsChange = (tags: string[]) => {
+    setFormData(prev => ({ ...prev, project_tags: tags }));
+  };
+
+  // Specific handler for links
+  const handleLinksChange = (links: string[]) => {
+    setFormData(prev => ({ ...prev, project_links: links }));
   };
 
   // --- Media Entry Handlers ---
@@ -98,16 +110,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         return;
     }
 
-    // Combine form data and stringified media entries
-    const fullProjectData: ProjectFormData = {
+    // Convert arrays back to strings for submission
+    const projectDataForSubmit: ProjectFormData = {
       ...formData,
+      project_tags: formData.project_tags.join(', '),
+      project_links: formData.project_links.join(', '), // Join links
       media_urls: JSON.stringify(mediaEntries)
     };
 
     try {
-      await onSubmit(fullProjectData); 
+      await onSubmit(projectDataForSubmit); 
       if (!initialData) {
-        setFormData({ title: '', description: '', project_links: '', writeup: '', project_tags: '' });
+        setFormData({ title: '', description: '', project_links: [], writeup: '', project_tags: [] });
         setMediaEntries([]); // Clear media entries too
       }
     } catch (submitError: any) {
@@ -155,17 +169,16 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       </FormField>
       {/* --- End Media URLs Section --- */}
 
-      <FormField label="Project Links:" htmlFor="project_links">
-        <Input
-          type="text"
+      {/* Use LinkListInput for project_links */}
+      <FormField label="Project Links:" htmlFor="project_links"> 
+        <LinkListInput
           id="project_links"
-          name="project_links"
           value={formData.project_links}
-          onChange={handleChange}
+          onChange={handleLinksChange} // Use specific handler
           disabled={isLoading}
-          placeholder="e.g., https://github.com/user/repo, https://live-demo.com"
+          placeholder="https://github.com/user/repo"
         />
-        <small className="text-gray-500 text-sm mt-1 block">Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
+        <small className="text-gray-500 text-sm mt-1 block">Add relevant project links (e.g., GitHub, live demo).</small>
       </FormField>
 
       <FormField label="Write-up/Details (Markdown):" htmlFor="writeup">
@@ -178,24 +191,30 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         />
       </FormField>
 
-      <FormField label="Tags:" htmlFor="project_tags">
-        <Input
-          type="text"
+      {/* Use TagInput for project_tags */}
+      <FormField label="Tags:" htmlFor="project_tags"> 
+        <TagInput
           id="project_tags"
-          name="project_tags"
-          value={formData.project_tags}
-          onChange={handleChange}
+          value={formData.project_tags} 
+          onChange={handleTagsChange} // Use specific handler
           disabled={isLoading}
-          placeholder="e.g., React, TypeScript, Node.js"
+          placeholder="Add tags (e.g., React, Node.js)..."
         />
-        <small className="text-gray-500 text-sm mt-1 block">Enter tags separated by commas. Whitespace around commas will be ignored.</small>
+        <small className="text-gray-500 text-sm mt-1 block">Press Enter or Comma to add a tag. Backspace removes the last tag.</small>
       </FormField>
 
       {error && <ErrorDisplay error={error} />}
 
       <div className="flex items-center space-x-2 pt-4">
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Saving...' : (initialData ? 'Update Project' : 'Create Project')}
+          {isLoading ? (
+            <>
+              <Loading size="small" className="mr-2 inline-block" /> 
+              Saving...
+            </>
+          ) : (
+            initialData ? 'Update Project' : 'Create Project'
+          )}
         </Button>
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>

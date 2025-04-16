@@ -1,8 +1,9 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { WorkEntry, WorkEntryFormData } from '../../types/work';
 import { Button } from '../common'; // Corrected import path
-import { ErrorDisplay } from '../ui'; // Corrected import path
-import { Input, Textarea, FormField } from '../forms'; // Import new form components and FormField
+import { ErrorDisplay, Loading } from '../ui'; // Corrected import path
+import { Input, Textarea, FormField, LinkListInput } from '../forms'; // Import new form components and FormField
+import { parseCommaSeparatedString } from '../../utils/helpers'; // Import from utils
 
 interface WorkFormProps {
   initialData?: WorkEntry | null;
@@ -17,12 +18,12 @@ const WorkForm: React.FC<WorkFormProps> = ({
   isLoading,
   onCancel
 }) => {
-  const [formData, setFormData] = useState<WorkEntryFormData>({
+  const [formData, setFormData] = useState<Omit<WorkEntryFormData, 'work_entry_links'> & { work_entry_links: string[] }>({
     company: '',
     role: '',
     duration: '',
     achievements: '',
-    work_entry_links: ''
+    work_entry_links: [] // Initialize as array
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -33,26 +34,38 @@ const WorkForm: React.FC<WorkFormProps> = ({
         role: initialData.role || '',
         duration: initialData.duration || '',
         achievements: initialData.achievements || '',
-        work_entry_links: initialData.work_entry_links || ''
+        work_entry_links: parseCommaSeparatedString(initialData.work_entry_links) // Use imported helper
       });
     } else {
         // Clear form when initialData is null (e.g., switching from edit to create)
-        setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: '' });
+        setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: [] });
     }
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name !== 'work_entry_links') {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleLinksChange = (links: string[]) => {
+    setFormData(prev => ({ ...prev, work_entry_links: links }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      await onSubmit(formData);
+      // Convert links array back to string for submission
+      const workDataForSubmit: WorkEntryFormData = {
+          ...formData,
+          work_entry_links: formData.work_entry_links.join(', ') // Join links
+      };
+
+      await onSubmit(workDataForSubmit);
       if (!initialData) { // Clear form on create success only
-        setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: '' });
+        setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: [] });
       }
     } catch (submitError: any) {
       console.error("Work form submission error:", submitError);
@@ -114,16 +127,14 @@ const WorkForm: React.FC<WorkFormProps> = ({
       </FormField>
 
       <FormField label="Links:" htmlFor="work_entry_links">
-        <Input
-          type="text"
+        <LinkListInput
           id="work_entry_links"
-          name="work_entry_links"
           value={formData.work_entry_links}
-          onChange={handleChange}
+          onChange={handleLinksChange}
           disabled={isLoading}
-          placeholder="e.g., https://company.com, https://relevant-project.com"
+          placeholder="https://company.com"
         />
-        <small className="text-gray-500 text-sm mt-1 block">Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
+        <small className="text-gray-500 text-sm mt-1 block">Add relevant links (e.g., company website, project page).</small>
       </FormField>
 
       {error && <ErrorDisplay error={error} />}
@@ -131,8 +142,14 @@ const WorkForm: React.FC<WorkFormProps> = ({
       {/* Action buttons section */}
       <div className="flex items-center space-x-2 pt-4">
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {/* Manage loading text within the button */}
-          {isLoading ? 'Saving...' : (initialData ? 'Update Entry' : 'Create Entry')}
+          {isLoading ? (
+            <>
+              <Loading size="small" className="mr-2 inline-block" />
+              Saving...
+            </>
+          ) : (
+            initialData ? 'Update Entry' : 'Create Entry'
+          )}
         </Button>
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>

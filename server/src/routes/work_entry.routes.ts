@@ -10,6 +10,15 @@ const router = express.Router();
  */
 
 /**
+ * @route GET /api/work/summary/count
+ * @desc Get the total count of work entries
+ */
+router.get(
+  '/summary/count',
+  WorkEntryController.getCount // No validation needed, assuming auth handled elsewhere
+);
+
+/**
  * @route GET /api/work
  * @desc Get all work entries
  */

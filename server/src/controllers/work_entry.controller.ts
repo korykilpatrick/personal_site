@@ -92,6 +92,19 @@ export const WorkEntryController = {
       next(error);
     }
   },
+
+  /**
+   * Get the total count of work entries
+   */
+  getCount: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const count = await WorkEntryModel.getCount(); // Assume this method exists on the model
+      res.status(StatusCodes.OK).json({ count });
+    } catch (error) {
+      logger.error('Error fetching work entry count', { error });
+      next(error);
+    }
+  },
 };
 
 export default WorkEntryController;

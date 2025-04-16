@@ -10,6 +10,15 @@ const router = express.Router();
  */
 
 /**
+ * @route GET /api/projects/summary/count
+ * @desc Get the total count of projects
+ */
+router.get(
+  '/summary/count',
+  ProjectController.getCount // No validation needed, assuming auth handled elsewhere
+);
+
+/**
  * @route GET /api/projects
  * @desc Get all projects or filter by tag
  */

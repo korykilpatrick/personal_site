@@ -140,6 +140,15 @@ export const ProjectModel = {
     const deleted = await db('projects').where({ id }).delete();
     return deleted > 0;
   },
+
+  /**
+   * Get the total count of projects
+   */
+  getCount: async (): Promise<number> => {
+    const result = await db('projects').count('id as count').first();
+    // The count result might be a string depending on the DB driver, ensure it's a number
+    return parseInt(result?.count?.toString() || '0', 10);
+  },
 };
 
 export default ProjectModel;

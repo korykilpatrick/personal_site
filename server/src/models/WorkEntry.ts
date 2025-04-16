@@ -1,6 +1,7 @@
 import { BaseModel } from './BaseModel';
 // Import correct types from shared/root types location
 import { WorkEntry as SharedWorkEntry, WorkEntryLink } from '../../../types';
+import { db } from '../db/connection'; // Import db
 
 // Database model with work_entry_links as JSON string
 export interface WorkEntryDB extends SharedWorkEntry {
@@ -108,6 +109,18 @@ class WorkEntryModelClass extends BaseModel<WorkEntryDB> {
     const updatedWorkEntry = await super.update(id, dbWorkEntry);
     if (!updatedWorkEntry) return null;
     return this.toApiModel(updatedWorkEntry);
+  }
+
+  /**
+   * Get the total count of work entries
+   */
+  async getCount(): Promise<number> {
+    // Use the Knex instance directly via this.query() if BaseModel provides it,
+    // otherwise use the imported db instance.
+    const result = await this.query().count('id as count').first(); 
+    // OR: const result = await db(this.tableName).count('id as count').first();
+    
+    return parseInt(result?.count?.toString() || '0', 10);
   }
 }
 
