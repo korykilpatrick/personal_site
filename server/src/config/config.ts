@@ -19,6 +19,14 @@ interface IConfig {
     origin: string;
   };
   logLevel: string;
+  jwt: {
+    secret: string;
+    expiresIn: string;
+  };
+  admin: {
+    username: string;
+    passwordHash: string;
+  };
 }
 
 const config: IConfig = {
@@ -36,6 +44,15 @@ const config: IConfig = {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   },
   logLevel: process.env.LOG_LEVEL || 'info',
+  jwt: {
+    secret: process.env.JWT_SECRET || 'YOUR_DEFAULT_SECRET', // Change this!
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  },
+  admin: {
+    username: process.env.ADMIN_USERNAME || 'admin',
+    // IMPORTANT: Generate a real hash and store it in .env
+    passwordHash: process.env.ADMIN_PASSWORD_HASH || '$2b$10$YNxwTsS56FELZgjAp5Iv6uT01Og1kbC7z9ASoYdXKDcVUiqAkf5MO', 
+  },
 };
 
 export default config;
