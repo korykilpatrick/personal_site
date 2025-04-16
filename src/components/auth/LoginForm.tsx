@@ -1,7 +1,12 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Import useAuth
-import axios from 'axios'; // Keep for error type checking
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+
+// Shared form & UI components
+import { Input, FormField } from '../forms';
+import { Button } from '../common';
+import { ErrorDisplay } from '../ui';
 
 // REMOVE useLocalStorage hook - no longer needed here
 // const useLocalStorage = (key: string, initialValue: string | null) => { ... };
@@ -38,37 +43,41 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Admin Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            disabled={isLoading} // Disable form when loading
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading} // Disable form when loading
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'} { /* Show loading state */}
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-xl font-semibold text-center">Admin Login</h2>
+
+      {/* Username */}
+      <FormField label="Username" htmlFor="username">
+        <Input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </FormField>
+
+      {/* Password */}
+      <FormField label="Password" htmlFor="password">
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </FormField>
+
+      {/* Error message */}
+      {error && <ErrorDisplay error={error} />}
+
+      {/* Submit button */}
+      <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+        {isLoading ? 'Logging in...' : 'Login'}
+      </Button>
+    </form>
   );
 };
 

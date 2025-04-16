@@ -1,12 +1,15 @@
 import React from 'react';
 import LoginForm from '../components/auth/LoginForm';
-import Layout from '../components/layout/Layout'; // Optional: Wrap in main layout
+import Layout from '../components/layout/Layout';
+import { Card } from '../components/common';
 
 const LoginPage: React.FC = () => {
   return (
     <Layout> { /* Optional: Use Layout if you want Navbar/Footer */ }
-      <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc' }}>
-        <LoginForm />
+      <div className="flex justify-center pt-12">
+        <Card className="w-full max-w-sm p-6">
+          <LoginForm />
+        </Card>
       </div>
     </Layout>
   );
