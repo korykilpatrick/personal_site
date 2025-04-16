@@ -1,14 +1,14 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { Project, ProjectFormData } from '../../types/project'; // Import shared types
+import { Button, Select } from '../common'; // Import common components
+import { ErrorDisplay } from '../ui';
+import { Input, Textarea, FormField, MediaEntriesInput, MediaEntry } from '../forms'; // Import new form components and FormField
 
 // REMOVE local Project interface definition
 // interface Project { ... }
 
 // Interface for individual media entries
-interface MediaEntry {
-  type: 'image' | 'video' | ''; // Allow empty for new entries
-  url: string;
-}
+// const mediaTypeOptions = [...];
 
 interface ProjectFormProps {
   initialData?: Project | null; // Use imported Project type
@@ -116,21 +116,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     }
   };
 
-  // Basic form styling (inline for simplicity)
-  const labelStyle: React.CSSProperties = { display: 'block', marginBottom: '5px', fontWeight: 'bold' };
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '8px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '4px' };
-  const textAreaStyle: React.CSSProperties = { ...inputStyle, minHeight: '100px' };
-  const inlineInputStyle: React.CSSProperties = { padding: '8px', marginRight: '10px', border: '1px solid #ccc', borderRadius: '4px' };
-  const mediaEntryStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', marginBottom: '10px', padding: '10px', border: '1px solid #eee', borderRadius: '4px' };
-  const removeButtonStyle: React.CSSProperties = { marginLeft: 'auto', padding: '5px 10px', cursor: 'pointer' };
-
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>{initialData ? 'Edit Project' : 'Create New Project'}</h3>
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg shadow-sm bg-white">
+      <h3 className="text-lg font-semibold mb-4">{initialData ? 'Edit Project' : 'Create New Project'}</h3>
       
-      <div>
-        <label htmlFor="title" style={labelStyle}>Title:</label>
-        <input
+      <FormField label="Title:" htmlFor="title">
+        <Input
           type="text"
           id="title"
           name="title"
@@ -138,118 +129,78 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           onChange={handleChange}
           required
           disabled={isLoading}
-          style={inputStyle}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="description" style={labelStyle}>Description:</label>
-        <textarea
+      <FormField label="Description:" htmlFor="description">
+        <Textarea
           id="description"
           name="description"
           value={formData.description}
           onChange={handleChange}
           required
           disabled={isLoading}
-          style={textAreaStyle}
         />
-      </div>
+      </FormField>
 
       {/* --- Media URLs Section --- */}
-      <div>
-        <label style={labelStyle}>Media Entries:</label>
-        {mediaEntries.map((entry, index) => (
-          <div key={index} style={mediaEntryStyle}>
-            <select 
-              name={`media_type_${index}`}
-              value={entry.type}
-              onChange={(e) => handleMediaChange(index, 'type', e.target.value)}
-              required 
-              disabled={isLoading}
-              style={inlineInputStyle}
-            >
-              <option value="" disabled>Select type...</option>
-              <option value="image">Image</option>
-              <option value="video">Video</option>
-            </select>
-            <input
-              type="text"
-              name={`media_url_${index}`}
-              placeholder="Media URL (e.g., /images/proj.jpg or https://...)"
-              value={entry.url}
-              onChange={(e) => handleMediaChange(index, 'url', e.target.value)}
-              required
-              disabled={isLoading}
-              style={{ ...inlineInputStyle, flexGrow: 1 }} // Take remaining space
-            />
-            <button 
-              type="button" 
-              onClick={() => removeMediaEntry(index)} 
-              disabled={isLoading}
-              style={removeButtonStyle}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={addMediaEntry} disabled={isLoading} style={{ padding: '8px 12px' }}>
-          Add Media Entry
-        </button>
-      </div>
+      <FormField label="Media Entries:" htmlFor={undefined as any}>
+        <MediaEntriesInput
+          entries={mediaEntries}
+          onChange={handleMediaChange}
+          onAdd={addMediaEntry}
+          onRemove={removeMediaEntry}
+          disabled={isLoading}
+        />
+      </FormField>
       {/* --- End Media URLs Section --- */}
 
-      <div>
-        <label htmlFor="project_links" style={labelStyle}>Project Links:</label>
-        <input
+      <FormField label="Project Links:" htmlFor="project_links">
+        <Input
           type="text"
           id="project_links"
           name="project_links"
           value={formData.project_links}
           onChange={handleChange}
           disabled={isLoading}
-          style={inputStyle}
           placeholder="e.g., https://github.com/user/repo, https://live-demo.com"
         />
-        <small>Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
-      </div>
+        <small className="text-gray-500 text-sm mt-1 block">Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
+      </FormField>
 
-      <div>
-        <label htmlFor="writeup" style={labelStyle}>Write-up/Details:</label>
-        <textarea
+      <FormField label="Write-up/Details (Markdown):" htmlFor="writeup">
+        <Textarea
           id="writeup"
           name="writeup"
           value={formData.writeup}
           onChange={handleChange}
           disabled={isLoading}
-          style={textAreaStyle}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="project_tags" style={labelStyle}>Tags:</label>
-        <input
+      <FormField label="Tags:" htmlFor="project_tags">
+        <Input
           type="text"
           id="project_tags"
           name="project_tags"
           value={formData.project_tags}
           onChange={handleChange}
           disabled={isLoading}
-          style={inputStyle}
           placeholder="e.g., React, TypeScript, Node.js"
         />
-        <small>Enter tags separated by commas. Whitespace around commas will be ignored.</small>
-      </div>
+        <small className="text-gray-500 text-sm mt-1 block">Enter tags separated by commas. Whitespace around commas will be ignored.</small>
+      </FormField>
 
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {error && <ErrorDisplay error={error} />}
 
-      <div style={{ marginTop: '20px' }}>
-        <button type="submit" disabled={isLoading} style={{ padding: '10px 15px', marginRight: '10px' }}>
+      <div className="flex items-center space-x-2 pt-4">
+        <Button type="submit" variant="primary" disabled={isLoading}>
           {isLoading ? 'Saving...' : (initialData ? 'Update Project' : 'Create Project')}
-        </button>
+        </Button>
         {onCancel && (
-          <button type="button" onClick={onCancel} disabled={isLoading} style={{ padding: '10px 15px' }}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

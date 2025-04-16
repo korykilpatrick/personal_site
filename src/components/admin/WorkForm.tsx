@@ -1,5 +1,8 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { WorkEntry, WorkEntryFormData } from '../../types/work';
+import { Button } from '../common'; // Corrected import path
+import { ErrorDisplay } from '../ui'; // Corrected import path
+import { Input, Textarea, FormField } from '../forms'; // Import new form components and FormField
 
 interface WorkFormProps {
   initialData?: WorkEntry | null;
@@ -8,11 +11,11 @@ interface WorkFormProps {
   onCancel?: () => void;
 }
 
-const WorkForm: React.FC<WorkFormProps> = ({ 
-  initialData = null, 
-  onSubmit, 
-  isLoading, 
-  onCancel 
+const WorkForm: React.FC<WorkFormProps> = ({
+  initialData = null,
+  onSubmit,
+  isLoading,
+  onCancel
 }) => {
   const [formData, setFormData] = useState<WorkEntryFormData>({
     company: '',
@@ -32,6 +35,9 @@ const WorkForm: React.FC<WorkFormProps> = ({
         achievements: initialData.achievements || '',
         work_entry_links: initialData.work_entry_links || ''
       });
+    } else {
+        // Clear form when initialData is null (e.g., switching from edit to create)
+        setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: '' });
     }
   }, [initialData]);
 
@@ -45,7 +51,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
     setError(null);
     try {
       await onSubmit(formData);
-      if (!initialData) { // Clear form on create success
+      if (!initialData) { // Clear form on create success only
         setFormData({ company: '', role: '', duration: '', achievements: '', work_entry_links: '' });
       }
     } catch (submitError: any) {
@@ -54,60 +60,84 @@ const WorkForm: React.FC<WorkFormProps> = ({
     }
   };
 
-  // Reusing basic inline styles from ProjectForm for consistency
-  const labelStyle: React.CSSProperties = { display: 'block', marginBottom: '5px', fontWeight: 'bold' };
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '8px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '4px' };
-  const textAreaStyle: React.CSSProperties = { ...inputStyle, minHeight: '100px' };
-
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>{initialData ? 'Edit Work Entry' : 'Create New Work Entry'}</h3>
-      
-      <div>
-        <label htmlFor="company" style={labelStyle}>Company:</label>
-        <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} required disabled={isLoading} style={inputStyle} />
-      </div>
+    // Use a form wrapper with spacing
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg shadow-sm bg-white"> 
+      <h3 className="text-lg font-semibold mb-4">{initialData ? 'Edit Work Entry' : 'Create New Work Entry'}</h3>
 
-      <div>
-        <label htmlFor="role" style={labelStyle}>Role:</label>
-        <input type="text" id="role" name="role" value={formData.role} onChange={handleChange} required disabled={isLoading} style={inputStyle} />
-      </div>
+      <FormField label="Company:" htmlFor="company">
+        <Input
+          type="text"
+          id="company"
+          name="company"
+          value={formData.company}
+          onChange={handleChange}
+          required
+          disabled={isLoading}
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="duration" style={labelStyle}>Duration:</label>
-        <input type="text" id="duration" name="duration" value={formData.duration} onChange={handleChange} required disabled={isLoading} style={inputStyle} placeholder="e.g., Jan 2020 - Present"/>
-      </div>
+      <FormField label="Role:" htmlFor="role">
+        <Input
+          type="text"
+          id="role"
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          required
+          disabled={isLoading}
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="achievements" style={labelStyle}>Achievements (Markdown supported):</label>
-        <textarea id="achievements" name="achievements" value={formData.achievements} onChange={handleChange} required disabled={isLoading} style={textAreaStyle} />
-      </div>
+      <FormField label="Duration:" htmlFor="duration">
+        <Input
+          type="text"
+          id="duration"
+          name="duration"
+          value={formData.duration}
+          onChange={handleChange}
+          required
+          disabled={isLoading}
+          placeholder="e.g., Jan 2020 - Present"
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="work_entry_links" style={labelStyle}>Links:</label>
-        <input 
-          type="text" 
-          id="work_entry_links" 
-          name="work_entry_links" 
+      <FormField label="Achievements (Markdown supported):" htmlFor="achievements">
+        <Textarea
+          id="achievements"
+          name="achievements"
+          value={formData.achievements}
+          onChange={handleChange}
+          required
+          disabled={isLoading}
+        />
+      </FormField>
+
+      <FormField label="Links:" htmlFor="work_entry_links">
+        <Input
+          type="text"
+          id="work_entry_links"
+          name="work_entry_links"
           value={formData.work_entry_links}
-          onChange={handleChange} 
-          disabled={isLoading} 
-          style={inputStyle} 
+          onChange={handleChange}
+          disabled={isLoading}
           placeholder="e.g., https://company.com, https://relevant-project.com"
         />
-        <small>Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
-      </div>
+        <small className="text-gray-500 text-sm mt-1 block">Enter URLs separated by commas. Whitespace around commas will be ignored.</small>
+      </FormField>
 
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {error && <ErrorDisplay error={error} />}
 
-      <div style={{ marginTop: '20px' }}>
-        <button type="submit" disabled={isLoading} style={{ padding: '10px 15px', marginRight: '10px' }}>
+      {/* Action buttons section */}
+      <div className="flex items-center space-x-2 pt-4">
+        <Button type="submit" variant="primary" disabled={isLoading}>
+          {/* Manage loading text within the button */}
           {isLoading ? 'Saving...' : (initialData ? 'Update Entry' : 'Create Entry')}
-        </button>
+        </Button>
         {onCancel && (
-          <button type="button" onClick={onCancel} disabled={isLoading} style={{ padding: '10px 15px' }}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>
