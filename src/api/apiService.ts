@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Book, BookWithShelves, Bookshelf, Project, WorkEntry } from '../../types';
 
 // Define base API URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL!;
 
 // Create axios instance with default config
 const apiClient = axios.create({

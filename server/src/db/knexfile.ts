@@ -1,9 +1,13 @@
-import dotenv from 'dotenv';
+import dotenvSafe from 'dotenv-safe';
 import path from 'path';
 import { Knex } from 'knex';
 
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Load and validate env vars (throws if any required are missing)
+dotenvSafe.config({
+  path: path.resolve(__dirname, '../../.env'),
+  example: path.resolve(__dirname, '../../.env.example'),
+  allowEmptyValues: false,
+});
 
 // Database configuration for different environments
 interface IKnexConfig {
@@ -14,11 +18,11 @@ const config: IKnexConfig = {
   development: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      database: process.env.DB_NAME || 'personal_site',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
+      host: process.env.DB_HOST!,
+      port: parseInt(process.env.DB_PORT!, 10),
+      database: process.env.DB_NAME!,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     },
     pool: {
@@ -36,11 +40,11 @@ const config: IKnexConfig = {
   test: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      database: `${process.env.DB_NAME || 'personal_site'}_test`,
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
+      host: process.env.DB_HOST!,
+      port: parseInt(process.env.DB_PORT!, 10),
+      database: `${process.env.DB_NAME!}_test`,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     },
     pool: {
@@ -58,11 +62,11 @@ const config: IKnexConfig = {
   production: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: process.env.DB_HOST!,
+      port: parseInt(process.env.DB_PORT!, 10),
+      database: process.env.DB_NAME!,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : { rejectUnauthorized: false },
     },
     pool: {

@@ -1,27 +1,31 @@
 import { Client } from 'pg';
 import knex from 'knex';
-import dotenv from 'dotenv';
+import dotenvSafe from 'dotenv-safe';
 import path from 'path';
 import logger from '../utils/logger';
 import knexConfig from '../db/knexfile';
 
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Load env vars and validate
+dotenvSafe.config({
+  path: path.resolve(__dirname, '../../.env'),
+  example: path.resolve(__dirname, '../../.env.example'),
+  allowEmptyValues: false,
+});
 
 /**
  * Script to reset the database (drop and recreate)
  */
 async function resetDatabase() {
-  const environment = process.env.NODE_ENV || 'development';
-  const dbName = process.env.DB_NAME || 'personal_site';
+  const environment = process.env.NODE_ENV!;
+  const dbName = process.env.DB_NAME!;
   
   // Connect to default PostgreSQL database
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
+    host: process.env.DB_HOST!,
+    port: parseInt(process.env.DB_PORT!, 10),
     database: 'postgres', // Connect to default postgres database
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASSWORD!,
   });
 
   try {

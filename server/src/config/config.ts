@@ -1,8 +1,13 @@
-import dotenv from 'dotenv';
 import path from 'path';
+import dotenvSafe from 'dotenv-safe';
 
-// Load environment variables from .env file
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Load and validate environment variables using dotenv-safe. This will throw if any
+// variable declared in `.env.example` is missing or empty in `.env`.
+dotenvSafe.config({
+  path: path.resolve(__dirname, '../../.env'),
+  example: path.resolve(__dirname, '../../.env.example'),
+  allowEmptyValues: false,
+});
 
 interface IConfig {
   env: string;
@@ -30,28 +35,27 @@ interface IConfig {
 }
 
 const config: IConfig = {
-  env: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '3001', 10),
-  apiPrefix: process.env.API_PREFIX || '/api',
+  env: process.env.NODE_ENV!,
+  port: parseInt(process.env.PORT!, 10),
+  apiPrefix: process.env.API_PREFIX!,
   db: {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    database: process.env.DB_NAME || 'personal_site',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
+    host: process.env.DB_HOST!,
+    port: parseInt(process.env.DB_PORT!, 10),
+    database: process.env.DB_NAME!,
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASSWORD!,
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN!,
   },
-  logLevel: process.env.LOG_LEVEL || 'info',
+  logLevel: process.env.LOG_LEVEL!,
   jwt: {
-    secret: process.env.JWT_SECRET || 'YOUR_DEFAULT_SECRET', // Change this!
-    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    secret: process.env.JWT_SECRET!,
+    expiresIn: process.env.JWT_EXPIRES_IN!,
   },
   admin: {
-    username: process.env.ADMIN_USERNAME || 'admin',
-    // IMPORTANT: Generate a real hash and store it in .env
-    passwordHash: process.env.ADMIN_PASSWORD_HASH || '$2b$10$YNxwTsS56FELZgjAp5Iv6uT01Og1kbC7z9ASoYdXKDcVUiqAkf5MO', 
+    username: process.env.ADMIN_USERNAME!,
+    passwordHash: process.env.ADMIN_PASSWORD_HASH!,
   },
 };
 

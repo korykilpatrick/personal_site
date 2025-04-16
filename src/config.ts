@@ -7,7 +7,7 @@ interface AppConfig {
 // Ensure these variables are set up in your webpack.config.js or similar
 const config: AppConfig = {
   // Default to relative /api path, can be overridden by env var
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || '/api', 
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL!,
 };
 
 export default config; 

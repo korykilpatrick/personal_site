@@ -1,19 +1,23 @@
 import { Client } from 'pg';
 import knex from 'knex';
-import dotenv from 'dotenv';
+import dotenvSafe from 'dotenv-safe';
 import path from 'path';
 import logger from '../utils/logger';
 import knexConfig from '../db/knexfile';
 
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Load env variables with validation
+dotenvSafe.config({
+  path: path.resolve(__dirname, '../../.env'),
+  example: path.resolve(__dirname, '../../.env.example'),
+  allowEmptyValues: false,
+});
 
 /**
  * Script to create the database and tables if they don't exist
  */
 async function createDatabase() {
-  const environment = process.env.NODE_ENV || 'development';
-  const dbName = process.env.DB_NAME || 'personal_site';
+  const environment = process.env.NODE_ENV!;
+  const dbName = process.env.DB_NAME!;
   
   // Check if database already exists - not needed for cloud DB
   logger.info(`Using database '${dbName}' on host ${process.env.DB_HOST}`);
