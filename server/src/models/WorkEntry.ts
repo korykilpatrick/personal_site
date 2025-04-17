@@ -22,9 +22,18 @@ class WorkEntryModelClass extends BaseModel<WorkEntryDB> {
    */
   private toApiModel(dbRecord: WorkEntryDB): SharedWorkEntry {
     const { work_entry_links, ...rest } = dbRecord; // Updated column name
+    let parsedLinks: WorkEntryLink[] = []; // Define WorkLink if not already defined, or use 'any[]'
+
+    try {
+      parsedLinks = JSON.parse(work_entry_links || '[]'); // Updated column name
+    } catch (error) {
+      console.error(`Error parsing work_entry_links for work entry ID ${dbRecord.id}:`, work_entry_links, error);
+      // Default to an empty array if parsing fails
+    }
+
     return {
       ...rest,
-      links: JSON.parse(work_entry_links || '[]'), // Updated column name
+      links: parsedLinks,
     };
   }
 

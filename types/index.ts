@@ -87,6 +87,7 @@ export interface Project extends BaseRecord {
 export interface WorkEntryLink {
   title: string;
   url: string;
+  icon?: string;
 }
 
 /**
