@@ -6,7 +6,7 @@ The codebase is a well-structured monorepo with React/TypeScript frontend and No
 ## Task Checklist
 ### Quick Wins (<1 hour)
 - [x] `server/src/middleware/authMiddleware.ts:47` — Missing return statement in auth check — **Fix:** Add return statement to prevent execution after unauthorized
-- [ ] `server/src/controllers/authController.ts:58-64` — Dead commented code — **Fix:** Remove commented-out password hashing function
+- [x] `server/src/controllers/authController.ts:58-64` — Dead commented code — **Fix:** Remove commented-out password hashing function
 - [ ] `server/src/models/Project.ts:133` — SQL injection risk in whereRaw — **Fix:** Use parameterized query properly
 - [ ] `server/src/db/knexfile.ts:56` — Redundant SSL configuration — **Fix:** Simplify SSL options
 - [ ] `server/src/controllers/admin/workController.ts` (Line 9) — Remove unused `validateWorkEntryInput` function — **Fix:** Delete the unused validation function

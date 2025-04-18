@@ -57,13 +57,3 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     next(error); // Pass to global error handler
   }
 };
-
-// --- REMOVE Helper function to hash password (moved to script) ---
-// async function hashAdminPassword(plainPassword: string) {
-//   const saltRounds = 10; 
-//   const hash = await bcrypt.hash(plainPassword, saltRounds);
-//   console.log('Hashed Password:', hash);
-//   return hash;
-// }
-// hashAdminPassword('your_strong_password_here'); 
-// -------------------------------------------------------------------------- 
