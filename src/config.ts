@@ -1,7 +1,9 @@
-interface AppConfig {
-  apiBaseUrl: string;
-  // Add other frontend-specific configurations here
-}
+import type { AppConfig } from 'types';
+
+// interface AppConfig {  <-- REMOVED
+//   apiBaseUrl: string;
+//   // Add other frontend-specific configurations here
+// } <-- REMOVED
 
 // Use environment variables provided by the build tool (e.g., Webpack DefinePlugin, Vite)
 // Ensure these variables are set up in your webpack.config.js or similar

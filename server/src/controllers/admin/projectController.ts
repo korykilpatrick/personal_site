@@ -2,28 +2,10 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../middleware/authMiddleware'; // Import custom request type
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../utils/logger';
-import { db as knex } from '../../db/connection'; // Use named import and alias if desired
-
-const PROJECTS_TABLE = 'projects';
-
-// Helper function to update the updated_at timestamp
-const updateTimestamp = (queryBuilder: any) => {
-    queryBuilder.update({ updated_at: knex.fn.now() });
-};
-
-// Basic validation (can be expanded or moved to middleware)
-const validateProjectInput = (input: any) => {
-  if (!input || typeof input !== 'object') return 'Invalid input: project data missing';
-  if (!input.title || typeof input.title !== 'string' || input.title.trim() === '') {
-    return 'Invalid input: title is required';
-  }
-  if (!input.description || typeof input.description !== 'string' || input.description.trim() === '') {
-    return 'Invalid input: description is required';
-  }
-  // Add more checks for other fields (types, formats) if needed
-  // e.g., check if media_urls is valid JSON, links/tags are strings
-  return null; // No validation errors
-};
+// Import ProjectModel and shared types
+import { ProjectModel, Project, ProjectLink } from '../../models/Project'; // Adjust path if needed
+// Correct import path for shared type
+import { Project as SharedProject } from '../../../../types'; // Import shared type
 
 // --- CRUD Operations --- 
 
@@ -34,7 +16,8 @@ const validateProjectInput = (input: any) => {
 export const getProjects = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     logger.info('Admin fetching all projects', { user: req.user?.username });
-    const projects = await knex(PROJECTS_TABLE).select('*').orderBy('created_at', 'desc');
+    // Use model method
+    const projects = await ProjectModel.getAll(); 
     res.status(StatusCodes.OK).json(projects);
   } catch (error) {
     logger.error('Error fetching projects:', { error });
@@ -48,9 +31,16 @@ export const getProjects = async (req: AuthenticatedRequest, res: Response, next
  */
 export const getProjectById = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
+  const projectId = parseInt(id, 10);
+
+  if (isNaN(projectId)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
+  }
+
   try {
     logger.info('Admin fetching project by ID', { user: req.user?.username, id });
-    const project = await knex(PROJECTS_TABLE).where({ id }).first();
+    // Use model method
+    const project = await ProjectModel.getById(projectId);
     if (!project) {
       logger.warn('Project not found for getById', { id });
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
@@ -67,28 +57,26 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response, n
  * Creates a new project.
  */
 export const createProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const validationError = validateProjectInput(req.body);
-  if (validationError) {
-      logger.warn('Project creation validation failed', { error: validationError, body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: validationError });
+  // Expect req.body to match Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>
+  const projectData: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'> = req.body;
+
+  // Basic validation (improve with Zod/Joi)
+  if (!projectData.title || !projectData.description) {
+      logger.warn('Project creation validation failed: Missing title or description', { body: req.body });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required project fields (title, description)' });
   }
-
-  const { title, description, media_urls, project_links, writeup, project_tags } = req.body;
-
-  // Ensure jsonb fields are stringified if needed, though Knex might handle objects
-  const projectData = {
-    title,
-    description,
-    media_urls: media_urls ? JSON.stringify(media_urls) : null, // Assuming input is object
-    project_links,
-    writeup,
-    project_tags,
-    // created_at and updated_at have defaults
-  };
+  // Add validation for links and tags arrays if needed
+  if (!Array.isArray(projectData.links)) projectData.links = [];
+  if (!Array.isArray(projectData.tags)) projectData.tags = [];
+  if (!Array.isArray(projectData.media_urls)) projectData.media_urls = [];
 
   try {
-    logger.info('Admin creating project', { user: req.user?.username, title });
-    const [newProject] = await knex(PROJECTS_TABLE).insert(projectData).returning('*');
+    logger.info('Admin creating project', { user: req.user?.username, title: projectData.title });
+    
+    // Use the model's create method
+    // The model expects Project type from model file, ensure SharedProject matches or cast
+    const newProject = await ProjectModel.create(projectData as Omit<Project, 'id' | 'created_at' | 'updated_at'>); 
+    
     res.status(StatusCodes.CREATED).json(newProject);
   } catch (error) {
     logger.error('Error creating project:', { error });
@@ -102,36 +90,45 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
  */
 export const updateProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  const validationError = validateProjectInput(req.body);
-  if (validationError) {
-      logger.warn('Project update validation failed', { id, error: validationError, body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: validationError });
+  const projectId = parseInt(id, 10);
+
+  if (isNaN(projectId)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
   }
 
-  const { title, description, media_urls, project_links, writeup, project_tags } = req.body;
-  const projectData = {
-    title,
-    description,
-    media_urls: media_urls ? JSON.stringify(media_urls) : null, // Assuming input is object
-    project_links,
-    writeup,
-    project_tags,
-    updated_at: knex.fn.now(), // Manually update timestamp
-  };
+  // Expect req.body to be Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>>
+  const projectData: Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>> = req.body;
+
+  // Basic validation
+  if (Object.keys(projectData).length === 0) {
+    logger.warn('Project update attempted with empty body', { id });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No update data provided' });
+  }
+  // Ensure arrays if present (model handles stringification)
+  if (projectData.links !== undefined && !Array.isArray(projectData.links)) {
+      logger.warn('Project update validation failed: Invalid links format', { id, body: req.body });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid links format, expected array' });
+  }
+  if (projectData.tags !== undefined && !Array.isArray(projectData.tags)) {
+      logger.warn('Project update validation failed: Invalid tags format', { id, body: req.body });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid tags format, expected array' });
+  }
+   if (projectData.media_urls !== undefined && !Array.isArray(projectData.media_urls)) {
+      logger.warn('Project update validation failed: Invalid media_urls format', { id, body: req.body });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid media_urls format, expected array' });
+  }
 
   try {
     logger.info('Admin updating project', { user: req.user?.username, id });
-    const updatedCount = await knex(PROJECTS_TABLE)
-      .where({ id })
-      .update(projectData);
+    
+    // Use the model's update method
+    const updatedProject = await ProjectModel.update(projectId, projectData as Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>);
 
-    if (updatedCount === 0) {
+    if (!updatedProject) {
       logger.warn('Project not found for update', { id });
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
     }
 
-    // Fetch the updated project to return it
-    const updatedProject = await knex(PROJECTS_TABLE).where({ id }).first();
     res.status(StatusCodes.OK).json(updatedProject);
   } catch (error) {
     logger.error('Error updating project:', { id, error });
@@ -145,17 +142,24 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response, ne
  */
 export const deleteProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
+  const projectId = parseInt(id, 10);
+
+  if (isNaN(projectId)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
+  }
 
   try {
     logger.info('Admin deleting project', { user: req.user?.username, id });
-    const deletedCount = await knex(PROJECTS_TABLE).where({ id }).del();
+    // Use model method
+    const deleted = await ProjectModel.delete(projectId);
 
-    if (deletedCount === 0) {
-      logger.warn('Project not found for deletion', { id });
-      return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
+    // Adjust check based on model's delete return type (boolean)
+    if (!deleted) { 
+      logger.warn('Project not found for deletion or delete failed', { id });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found or could not be deleted' });
     }
 
-    res.status(StatusCodes.NO_CONTENT).send(); // Standard practice for DELETE
+    res.status(StatusCodes.NO_CONTENT).send(); 
   } catch (error) {
     logger.error('Error deleting project:', { id, error });
     next(error);

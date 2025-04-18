@@ -1,17 +1,18 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
 import api from '../services/api'; // Use the configured Axios instance
 import config from '../config'; // Use frontend config
+import type { User } from '../../types'; // Import User from root types
 
-interface User {
-  // Define basic user info obtained from token (or fetched after login)
-  username: string;
-  // Add role or other relevant fields if needed
-  // role?: string;
-}
+// interface User { <-- REMOVED
+//   // Define basic user info obtained from token (or fetched after login)
+//   username: string;
+//   // Add role or other relevant fields if needed
+//   // role?: string;
+// } <-- REMOVED
 
 interface AuthContextType {
   token: string | null;
-  user: User | null;
+  user: User | null; // Use imported type
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (usernameInput: string, passwordInput: string) => Promise<void>;
@@ -42,7 +43,7 @@ const parseJwt = (token: string): User | null => {
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null); // Use imported type
   const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading until initial check is done
 
   // Initial load: Check local storage for token

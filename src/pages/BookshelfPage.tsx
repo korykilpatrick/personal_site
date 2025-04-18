@@ -12,17 +12,12 @@ import {
 import { BookCard } from '../components/books';
 import useMultiSelect from '../hooks/useMultiSelect';
 import useDynamicBookSize from '../hooks/useDynamicBookSize';
-import { Book, Bookshelf } from '../../types';
+import { Book, Bookshelf, SortOption } from '../../types';
 import PersonalNote from '../components/bookshelf/PersonalNote';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
 
 // Sort options for the books
-type SortOption = {
-  label: string;
-  value: string;
-};
-
 const sortOptions: SortOption[] = [
   { label: 'Recently Read', value: 'date_read' },
   { label: 'Title', value: 'title' },

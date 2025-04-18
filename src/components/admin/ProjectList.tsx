@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Project } from '../../types/project';
+import { Project } from '../../../types';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
 
@@ -79,9 +79,13 @@ const ProjectList: React.FC = () => {
             <span className="text-sm font-medium text-gray-500 md:text-base md:font-normal md:text-inherit">{project.id}</span>
             {/* Removed truncate from title */}
             <span className="font-medium">{project.title}</span> 
-            {/* Removed Description Span */}
-            <span className="text-xs text-gray-500 md:text-sm">{new Date(project.created_at).toLocaleDateString()}</span>
-            <span className="text-xs text-gray-500 md:text-sm">{new Date(project.updated_at).toLocaleDateString()}</span>
+            {/* Add check for optional dates before formatting */}
+            <span className="text-xs text-gray-500 md:text-sm">
+              {project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'}
+            </span>
+            <span className="text-xs text-gray-500 md:text-sm">
+              {project.updated_at ? new Date(project.updated_at).toLocaleDateString() : '-'}
+            </span>
             <div className="flex space-x-2 justify-end md:justify-start"> {/* Action buttons */} 
               <Button 
                 variant="outline" 

@@ -3,9 +3,8 @@ import { Routes, Route, Link, useNavigate, Outlet, useParams, NavLink } from 're
 import { useAuth } from '../context/AuthContext'; // Import useAuth
 import api from '../services/api'; // Import configured API service
 import ProjectForm from '../components/admin/ProjectForm'; // Import the form
-import { Project, ProjectFormData } from '../types/project'; // Import shared type
+import { Project, WorkEntry } from '../../types';
 import WorkForm from '../components/admin/WorkForm'; // Import WorkForm
-import { WorkEntry, WorkEntryFormData } from '../types/work'; // Import Work types
 import ProjectList from '../components/admin/ProjectList';
 import { Button } from '../components/common'; // Import Button
 import WorkList from '../components/admin/WorkList';
@@ -45,7 +44,7 @@ const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => 
     }
   }, [mode, projectId]);
 
-  const handleSubmit = async (projectData: ProjectFormData) => {
+  const handleSubmit = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -131,7 +130,7 @@ const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     }
   }, [mode, workId]);
 
-  const handleSubmit = async (workData: WorkEntryFormData) => {
+  const handleSubmit = async (workData: Omit<WorkEntry, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
     setError(null);
     try {

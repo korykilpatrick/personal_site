@@ -1,19 +1,21 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Project, ProjectFormData } from '../../types/project'; // Import shared types
-import { Button, Select } from '../common'; // Import common components
+// Import main Project and ProjectLink types
+import { Project, ProjectLink } from '../../../types'; 
+import { Button } from '../common'; // Select might not be needed directly here
 import { ErrorDisplay, Loading } from '../ui';
-import { Input, Textarea, FormField, MediaEntriesInput, MediaEntry, TagInput, LinkListInput } from '../forms'; // Import new form components and FormField
-import { parseCommaSeparatedString } from '../../utils/helpers'; // Import from utils
+// Import StructuredLinkInput, remove LinkListInput
+import { Input, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms'; // Remove MediaEntry from here
+import { MediaEntry } from '../../../types'; // <-- Import MediaEntry from root types
+import StructuredLinkInput from '../forms/StructuredLinkInput';
+// Remove unused helper
+// import { parseCommaSeparatedString } from '../../utils/helpers'; 
 
-// REMOVE local Project interface definition
-// interface Project { ... }
-
-// Interface for individual media entries
-// const mediaTypeOptions = [...];
+// Interface for individual media entries (seems defined in MediaEntriesInput? check if needed here)
 
 interface ProjectFormProps {
-  initialData?: Project | null; // Use imported Project type
-  onSubmit: (projectData: ProjectFormData) => Promise<void>; // Use imported ProjectFormData type
+  initialData?: Project | null; 
+  // Update onSubmit to expect Project type from main types
+  onSubmit: (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => Promise<void>; 
   isLoading: boolean; 
   onCancel?: () => void; 
 }
@@ -24,14 +26,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   isLoading, 
   onCancel 
 }) => {
-  const [formData, setFormData] = useState<Omit<ProjectFormData, 'media_urls' | 'project_tags' | 'project_links'> & { project_tags: string[]; project_links: string[] }>({
+  // State for simple fields + links/tags arrays
+  const [formData, setFormData] = useState<Omit<Project, 'id' | 'created_at' | 'updated_at' | 'media_urls'> & { 
+    // Explicitly keep non-array fields separate if needed by validation/logic 
+    // Or just rely on the Omit<Project,...> type 
+   }>({ 
     title: '',
     description: '',
-    project_links: [], // Initialize as array
+    links: [], // ProjectLink[]
     writeup: '',
-    project_tags: []
+    tags: [], // string[]
   });
-  // State specifically for media URLs
+  // Separate state for media entries (array of objects)
   const [mediaEntries, setMediaEntries] = useState<MediaEntry[]>([]); 
   const [error, setError] = useState<string | null>(null);
 
@@ -40,50 +46,63 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
-        project_links: parseCommaSeparatedString(initialData.project_links), // Use imported helper
+        links: Array.isArray(initialData.links) ? initialData.links : [], 
         writeup: initialData.writeup || '',
-        project_tags: parseCommaSeparatedString(initialData.project_tags) // Use imported helper
+        tags: Array.isArray(initialData.tags) ? initialData.tags : [],
       });
-      // Parse and populate media entries
+      // Handle media_urls separately (assuming it's string[] in Project type)
+      // If backend sends structured MediaEntry[], parse differently
+      const initialMedia = Array.isArray(initialData.media_urls) ? initialData.media_urls : [];
+      // For now, assume we need to construct MediaEntry[] from string[] if that's what initialData has
+      // This part might need adjustment based on actual initialData.media_urls structure
+      // If it's already MediaEntry[], just assign: setMediaEntries(initialMedia)
+      // If it's string[], we need logic to map string URLs to MediaEntry objects
+      // Example: Assuming simple URLs, map them with a default type (needs refinement)
       try {
-        const parsedMedia = initialData.media_urls ? JSON.parse(initialData.media_urls) : [];
-        // Basic validation of parsed structure
-        if (Array.isArray(parsedMedia) && parsedMedia.every(item => typeof item === 'object' && item !== null && 'type' in item && 'url' in item)) {
-          setMediaEntries(parsedMedia as MediaEntry[]);
-        } else {
-          console.warn('Invalid media_urls format in initialData, defaulting to empty.');
-          setMediaEntries([]);
-        }
+          // Attempt to parse if it's a JSON string (from older data perhaps?)
+          const parsedOrArray = typeof initialData.media_urls === 'string' ? JSON.parse(initialData.media_urls) : initialMedia;
+          if(Array.isArray(parsedOrArray)) {
+              // Check if it's already MediaEntry[] or string[]
+              if (parsedOrArray.length > 0 && typeof parsedOrArray[0] === 'object') {
+                 setMediaEntries(parsedOrArray as MediaEntry[]); // Assume it's MediaEntry[]
+              } else {
+                 // Assume it's string[] and map
+                 setMediaEntries((parsedOrArray as string[]).map(url => ({ type: 'image', url }))); // Default type
+              }
+          } else {
+             setMediaEntries([]);
+          }
       } catch (e) {
-        console.error("Error parsing initial media_urls:", e);
-        setMediaEntries([]); // Default to empty on error
+          console.error("Error processing initial media_urls:", e);
+          setMediaEntries([]);
       }
+
     } else {
-      // Reset everything for create mode
-      setFormData({ title: '', description: '', project_links: [], writeup: '', project_tags: [] });
+      // Reset form and media entries
+      setFormData({ title: '', description: '', links: [], writeup: '', tags: [] });
       setMediaEntries([]);
     }
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    // Ensure complex fields are not handled here
-    if (name !== 'project_tags' && name !== 'project_links') {
+    // Handle only non-array fields
+    if (name !== 'tags' && name !== 'links' && name !== 'media_urls') { 
         setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
   // Specific handler for tags
-  const handleTagsChange = (tags: string[]) => {
-    setFormData(prev => ({ ...prev, project_tags: tags }));
+  const handleTagsChange = (updatedTags: string[]) => {
+    setFormData(prev => ({ ...prev, tags: updatedTags }));
   };
 
   // Specific handler for links
-  const handleLinksChange = (links: string[]) => {
-    setFormData(prev => ({ ...prev, project_links: links }));
+  const handleLinksChange = (updatedLinks: ProjectLink[]) => { 
+    setFormData(prev => ({ ...prev, links: updatedLinks }));
   };
 
-  // --- Media Entry Handlers ---
+  // --- Media Entry Handlers (using separate state) ---
   const handleMediaChange = (index: number, field: keyof MediaEntry, value: string) => {
     const updatedEntries = [...mediaEntries];
     updatedEntries[index] = { ...updatedEntries[index], [field]: value };
@@ -103,26 +122,26 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     e.preventDefault();
     setError(null);
 
-    // Validate media entries before submit (e.g., ensure type is selected and URL is present)
+    // Validate media entries 
     const invalidMedia = mediaEntries.find(entry => !entry.type || !entry.url.trim());
     if (invalidMedia) {
         setError('Please ensure all media entries have a type selected and a non-empty URL.');
         return;
     }
 
-    // Convert arrays back to strings for submission
-    const projectDataForSubmit: ProjectFormData = {
-      ...formData,
-      project_tags: formData.project_tags.join(', '),
-      project_links: formData.project_links.join(', '), // Join links
-      media_urls: JSON.stringify(mediaEntries)
+    // Construct data for submission according to Project type
+    const projectDataForSubmit: Omit<Project, 'id' | 'created_at' | 'updated_at'> = {
+      ...formData, // Includes title, description, links[], tags[], writeup
+      // Map MediaEntry[] back to string[] for submission (as expected by Project type)
+      media_urls: mediaEntries.map(entry => entry.url), 
     };
 
     try {
       await onSubmit(projectDataForSubmit); 
       if (!initialData) {
-        setFormData({ title: '', description: '', project_links: [], writeup: '', project_tags: [] });
-        setMediaEntries([]); // Clear media entries too
+        // Clear form state and media entries
+        setFormData({ title: '', description: '', links: [], writeup: '', tags: [] });
+        setMediaEntries([]); 
       }
     } catch (submitError: any) {
       console.error("Form submission error:", submitError);
@@ -169,14 +188,13 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       </FormField>
       {/* --- End Media URLs Section --- */}
 
-      {/* Use LinkListInput for project_links */}
-      <FormField label="Project Links:" htmlFor="project_links"> 
-        <LinkListInput
-          id="project_links"
-          value={formData.project_links}
-          onChange={handleLinksChange} // Use specific handler
+      {/* Use StructuredLinkInput for project_links */}
+      <FormField label="Project Links:" htmlFor="links"> 
+        <StructuredLinkInput
+          id="links"
+          value={formData.links}
+          onChange={handleLinksChange}
           disabled={isLoading}
-          placeholder="https://github.com/user/repo"
         />
         <small className="text-gray-500 text-sm mt-1 block">Add relevant project links (e.g., GitHub, live demo).</small>
       </FormField>
@@ -191,12 +209,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         />
       </FormField>
 
-      {/* Use TagInput for project_tags */}
-      <FormField label="Tags:" htmlFor="project_tags"> 
+      {/* Use TagInput for project tags */}
+      <FormField label="Tags:" htmlFor="tags"> 
         <TagInput
-          id="project_tags"
-          value={formData.project_tags} 
-          onChange={handleTagsChange} // Use specific handler
+          id="tags"
+          value={formData.tags || []}
+          onChange={handleTagsChange}
           disabled={isLoading}
           placeholder="Add tags (e.g., React, Node.js)..."
         />

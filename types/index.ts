@@ -1,6 +1,22 @@
 // Shared types for both frontend and backend
 
 /**
+ * Frontend Application Configuration
+ */
+export interface AppConfig {
+  apiBaseUrl: string;
+  // Add other frontend-specific configurations here
+}
+
+/**
+ * Represents the authenticated user data.
+ */
+export interface User {
+  username: string; // User's unique identifier
+  // role?: string; // Optional: User role for authorization
+}
+
+/**
  * Base model interface that all models will extend
  */
 export interface BaseRecord {
@@ -82,6 +98,14 @@ export interface Project extends BaseRecord {
 }
 
 /**
+ * Represents a single media entry (image or video) associated with a project.
+ */
+export interface MediaEntry {
+  type: 'image' | 'video' | ''; // Type of media
+  url: string; // URL of the media asset
+}
+
+/**
  * Work Entry link interface
  */
 export interface WorkEntryLink {
@@ -113,3 +137,13 @@ export interface PaginatedResponse<T> {
     total_pages: number;
   };
 }
+
+/**
+ * Represents a generic option used in sorting dropdowns or controls.
+ */
+export type SortOption = {
+  label: string; // User-facing label for the sort option
+  value: string; // Internal value used for sorting logic (e.g., API query parameter)
+};
+
+// Add other general shared types below

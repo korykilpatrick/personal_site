@@ -4,7 +4,7 @@ export { default as Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 export { default as FormField } from './FormField';
 export { default as MediaEntriesInput } from './MediaEntriesInput';
-export type { MediaEntry, MediaEntriesInputProps } from './MediaEntriesInput';
+export type { MediaEntriesInputProps } from './MediaEntriesInput';
 export { default as TagInput } from './TagInput';
 export type { TagInputProps } from './TagInput';
 export { default as LinkListInput } from './LinkListInput';
