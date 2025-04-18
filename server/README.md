@@ -88,48 +88,73 @@ The server will run at http://localhost:3001 by default.
 
 ## API Endpoints
 
-### Books
+All endpoints are prefixed with `/api`.
 
-- `GET /api/books` - Get all books
-- `GET /api/books/:id` - Get a book by ID
-- `POST /api/books` - Create a new book
-- `PUT /api/books/:id` - Update a book
-- `DELETE /api/books/:id` - Delete a book
+### Health Check
 
-### Bookshelves
+- `GET /health` - Check server status
 
-- `GET /api/bookshelves` - Get all bookshelves
-- `GET /api/bookshelves/:id` - Get a bookshelf by ID
-- `GET /api/bookshelves/:id/books` - Get books in a bookshelf
-- `POST /api/bookshelves` - Create a new bookshelf
-- `PUT /api/bookshelves/:id` - Update a bookshelf
-- `DELETE /api/bookshelves/:id` - Delete a bookshelf
-- `POST /api/bookshelves/:id/books` - Add a book to a bookshelf
-- `DELETE /api/bookshelves/:id/books/:bookId` - Remove a book from a bookshelf
+### Authentication
 
-### Projects
+- `POST /auth/login` - Log in an administrator
 
-- `GET /api/projects` - Get all projects
-- `GET /api/projects?tag=react` - Filter projects by tag
-- `GET /api/projects/:id` - Get a project by ID
-- `POST /api/projects` - Create a new project
-- `PUT /api/projects/:id` - Update a project
-- `DELETE /api/projects/:id` - Delete a project
+### Books (Public)
 
-### Gigs (Professional Experience)
+- `GET /books` - Get all books
+- `GET /books/:id` - Get a book by ID
+// Note: POST, PUT, DELETE for books might be admin-only in practice, clarify if needed.
+// Keeping them here for now as they are in book.routes.ts without explicit admin protection.
+- `POST /books` - Create a new book
+- `PUT /books/:id` - Update a book
+- `DELETE /books/:id` - Delete a book
 
-- `GET /api/gigs` - Get all gigs
-- `GET /api/gigs/:id` - Get a gig by ID
-- `POST /api/gigs` - Create a new gig
-- `PUT /api/gigs/:id` - Update a gig
-- `DELETE /api/gigs/:id` - Delete a gig
+### Bookshelves (Public)
 
-### Blog Posts
+- `GET /bookshelves` - Get all bookshelves
+- `GET /bookshelves/:id` - Get a bookshelf by ID
+- `GET /bookshelves/:id/books` - Get books in a bookshelf
+// Note: POST, PUT, DELETE for bookshelves might be admin-only in practice, clarify if needed.
+- `POST /bookshelves` - Create a new bookshelf
+- `PUT /bookshelves/:id` - Update a bookshelf
+- `DELETE /bookshelves/:id` - Delete a bookshelf
+- `POST /bookshelves/:id/books` - Add a book to a bookshelf
+- `DELETE /bookshelves/:id/books/:bookId` - Remove a book from a bookshelf
 
-- `GET /api/posts` - Get all posts
-- `GET /api/posts?tag=react` - Filter posts by tag
-- `GET /api/posts?q=search` - Search posts
-- `GET /api/posts/:id` - Get a post by ID
-- `POST /api/posts` - Create a new post
-- `PUT /api/posts/:id` - Update a post
-- `DELETE /api/posts/:id` - Delete a post
+### Projects (Public)
+
+- `GET /projects` - Get all projects
+- `GET /projects?tag=react` - Filter projects by tag (example)
+- `GET /projects/summary/count` - Get the total count of projects
+- `GET /projects/:id` - Get a project by ID
+// Note: POST, PUT, DELETE for projects might be admin-only in practice, clarify if needed.
+- `POST /projects` - Create a new project
+- `PUT /projects/:id` - Update a project
+- `DELETE /projects/:id` - Delete a project
+
+### Work Entries (Public)
+
+- `GET /work` - Get all work entries
+- `GET /work/summary/count` - Get the total count of work entries
+- `GET /work/:id` - Get a work entry by ID
+// Note: POST, PUT, DELETE for work entries might be admin-only in practice, clarify if needed.
+- `POST /work` - Create a new work entry
+- `PUT /work/:id` - Update a work entry
+- `DELETE /work/:id` - Delete a work entry
+
+### Admin (Requires Authentication)
+
+These endpoints require a valid JWT token obtained via `/api/auth/login`.
+
+**Admin Projects:**
+- `GET /admin/projects` - Get all projects (admin view)
+- `POST /admin/projects` - Create a new project
+- `GET /admin/projects/:id` - Get a specific project by ID (admin view)
+- `PUT /admin/projects/:id` - Update a specific project
+- `DELETE /admin/projects/:id` - Delete a specific project
+
+**Admin Work Entries:**
+- `GET /admin/work` - Get all work entries (admin view)
+- `POST /admin/work` - Create a new work entry
+- `GET /admin/work/:id` - Get a specific work entry by ID (admin view)
+- `PUT /admin/work/:id` - Update a specific work entry
+- `DELETE /admin/work/:id` - Delete a specific work entry
