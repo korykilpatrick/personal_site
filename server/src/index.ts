@@ -50,7 +50,7 @@ app.listen(app.get('port'), () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  logger.error('Unhandled Rejection', { error: err });
+  logger.error('Unhandled Rejection', err);
 });
 
 export default app;
