@@ -36,6 +36,7 @@ export const protect = (req: AuthenticatedRequest, res: Response, next: NextFunc
 
   if (!token) {
     res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, no token' });
+    return; // Prevent further execution
   }
 };
 
