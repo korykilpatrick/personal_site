@@ -5,19 +5,6 @@ import logger from '../../utils/logger';
 import { WorkEntryModel } from '../../models/WorkEntry'; // Import the model
 import { WorkEntry as SharedWorkEntry } from '../../../../types'; // Import shared type
 
-// Basic validation for Work Entry
-const validateWorkEntryInput = (input: any) => {
-  if (!input || typeof input !== 'object') return 'Invalid input: work entry data missing';
-  const requiredFields = ['company', 'role', 'duration', 'achievements'];
-  for (const field of requiredFields) {
-    if (!input[field] || typeof input[field] !== 'string' || input[field].trim() === '') {
-      return `Invalid input: ${field} is required and must be a non-empty string`;
-    }
-  }
-  // Add optional field checks if needed (e.g., work_entry_links)
-  return null; // No validation errors
-};
-
 // --- CRUD Operations ---
 
 /**

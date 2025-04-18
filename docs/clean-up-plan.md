@@ -9,7 +9,7 @@ The codebase is a well-structured monorepo with React/TypeScript frontend and No
 - [x] `server/src/controllers/authController.ts:58-64` — Dead commented code — **Fix:** Remove commented-out password hashing function
 - [x] `server/src/models/Project.ts:133` — SQL injection risk in whereRaw — **Fix:** Use parameterized query properly
 - [x] `server/src/db/knexfile.ts:56` — Redundant SSL configuration — **Fix:** Simplify SSL options
-- [ ] `server/src/controllers/admin/workController.ts` (Line 9) — Remove unused `validateWorkEntryInput` function — **Fix:** Delete the unused validation function
+- [x] `server/src/controllers/admin/workController.ts` (Line 9) — Remove unused `validateWorkEntryInput` function — **Fix:** Delete the unused validation function
 - [ ] `server/README.md` (API Endpoints section) — Update outdated API endpoint documentation — **Fix:** Correct endpoint paths (e.g., `/work` instead of `/gigs`, remove `/posts`)
 
 ### Medium Fixes (1–4 hrs)
