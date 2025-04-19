@@ -18,10 +18,15 @@ class BookModelClass extends BaseModel<Book> {
     
     if (!book) return null;
     
-    const shelves = await db('bookshelves')
-      .join('books_shelves', 'bookshelves.id', '=', 'books_shelves.shelf_id')
-      .where('books_shelves.book_id', id)
-      .select('bookshelves.id', 'bookshelves.name') as BookshelfSummary[];
+    const shelves = await this.findRelated<BookshelfSummary>(
+      'bookshelves',
+      'books_shelves',
+      'book_id',
+      'shelf_id',
+      id,
+      ['id', 'name'],
+      'name'
+    );
     
     return { ...book, shelves };
   }
@@ -30,7 +35,7 @@ class BookModelClass extends BaseModel<Book> {
    * Get books by shelf ID
    */
   async getByShelfId(shelfId: number): Promise<Book[]> {
-    return db('books')
+    return this.query()
       .join('books_shelves', 'books.id', '=', 'books_shelves.book_id')
       .where('books_shelves.shelf_id', shelfId)
       .select('books.*')

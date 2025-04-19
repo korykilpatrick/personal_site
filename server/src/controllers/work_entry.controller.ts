@@ -98,7 +98,8 @@ export const WorkEntryController = {
    */
   getCount: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const count = await WorkEntryModel.getCount(); // Assume this method exists on the model
+      // Use the inherited count() method from BaseModel but keep controller method name stable
+      const count = await WorkEntryModel.count(); 
       res.status(StatusCodes.OK).json({ count });
     } catch (error) {
       logger.error('Error fetching work entry count', { error });

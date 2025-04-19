@@ -12,15 +12,15 @@ export const ProjectController = {
    */
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Check if we should filter by tag
       const { tag } = req.query;
       
+      let projects;
       if (tag && typeof tag === 'string') {
-        const projects = await ProjectModel.getByTag(tag);
-        return res.status(StatusCodes.OK).json(projects);
+        projects = await ProjectModel.getByTag(tag);
+      } else {
+        projects = await ProjectModel.getAllApi();
       }
       
-      const projects = await ProjectModel.getAll();
       res.status(StatusCodes.OK).json(projects);
     } catch (error) {
       logger.error('Error fetching projects', { error, query: req.query });
@@ -35,7 +35,7 @@ export const ProjectController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const project = await ProjectModel.getById(id);
+      const project = await ProjectModel.getByIdApi(id);
       
       if (!project) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
@@ -53,7 +53,7 @@ export const ProjectController = {
    */
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const newProject = await ProjectModel.create(req.body);
+      const newProject = await ProjectModel.createFromApi(req.body);
       res.status(StatusCodes.CREATED).json(newProject);
     } catch (error) {
       logger.error('Error creating project', { error, payload: req.body });
@@ -68,7 +68,7 @@ export const ProjectController = {
     try {
       const id = parseInt(req.params.id, 10);
       
-      const updatedProject = await ProjectModel.update(id, req.body);
+      const updatedProject = await ProjectModel.updateFromApi(id, req.body);
       
       if (!updatedProject) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
@@ -106,7 +106,7 @@ export const ProjectController = {
    */
   getCount: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const count = await ProjectModel.getCount(); // Assume this method exists on the model
+      const count = await ProjectModel.count();
       res.status(StatusCodes.OK).json({ count });
     } catch (error) {
       logger.error('Error fetching project count', { error });

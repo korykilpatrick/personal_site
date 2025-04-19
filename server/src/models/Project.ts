@@ -1,154 +1,113 @@
-import { db } from '../db/connection';
-
-export interface ProjectLink {
-  title: string;
-  url: string;
-  icon?: string;
-}
-
-export interface Project {
-  id: number;
-  title: string;
-  description: string;
-  media_urls: string[];
-  links: ProjectLink[];
-  writeup?: string;
-  tags?: string[];
-  created_at: Date;
-  updated_at: Date;
-}
+import { BaseModel } from './BaseModel';
+import { Project as SharedProject, ProjectLink } from '../../../types'; 
 
 /**
- * Project model with database operations
+ * Project model using BaseModel for CRUD operations.
+ * Handles JSONB columns directly via Knex.
  */
-export const ProjectModel = {
-  /**
-   * Get all projects
-   */
-  getAll: async (): Promise<Project[]> => {
-    const projects = await db('projects').select('*').orderBy('created_at', 'desc');
-    
-    // Parse JSON fields
-    return projects.map((project) => ({
-      ...project,
-      // media_urls is already in JSONB format, no need to parse
-      media_urls: project.media_urls || [],
-      links: JSON.parse(project.project_links || '[]'),
-      tags: JSON.parse(project.project_tags || '[]'),
-    }));
-  },
+class ProjectModelClass extends BaseModel<SharedProject> { // Use SharedProject directly
+  constructor() {
+    // Default sort by creation date, descending
+    super('projects', 'created_at', 'desc'); 
+  }
+
+  // Remove toApiModel and toDbModel methods as Knex handles JSONB
+
+  // --- Public API Methods ---
+  // Simplification: The *Api methods are no longer strictly necessary
+  // as BaseModel methods now return the correct SharedProject type directly.
+  // We can keep them for semantic clarity or remove them and update controllers.
+  // Let's keep them for now to minimize controller changes initially.
 
   /**
-   * Get a project by ID
+   * Get all projects, mapping DB columns to SharedProject fields.
    */
-  getById: async (id: number): Promise<Project | null> => {
-    const project = await db('projects').where({ id }).first();
-    
-    if (!project) return null;
-    
-    // Parse JSON fields
-    return {
-      ...project,
-      // media_urls is already in JSONB format, no need to parse
-      media_urls: project.media_urls || [],
-      links: JSON.parse(project.project_links || '[]'),
-      tags: JSON.parse(project.project_tags || '[]'),
-    };
-  },
+  async getAllApi(): Promise<SharedProject[]> {
+    // Explicitly select columns and alias jsonb fields
+    // Knex automatically parses JSONB when selected.
+    return this.query()
+      .select(
+        'id', 'title', 'description', 'media_urls', 'writeup', 
+        'created_at', 'updated_at',
+        'project_links as links', // Alias DB column to expected field name
+        'project_tags as tags'      // Alias DB column to expected field name
+      )
+      .orderBy(this.sortField, this.sortOrder);
+  }
 
   /**
-   * Get projects by tag
+   * Get a project by ID, mapping DB columns to SharedProject fields.
    */
-  getByTag: async (tag: string): Promise<Project[]> => {
-    // Search for projects containing the tag in their tags text field
-    const projects = await db('projects')
-      .whereRaw("project_tags LIKE ?", [`%${tag}%`])
-      .orderBy('created_at', 'desc');
-    
-    // Parse JSON fields
-    return projects.map((project) => ({
-      ...project,
-      // media_urls is already in JSONB format, no need to parse
-      media_urls: project.media_urls || [],
-      links: JSON.parse(project.project_links || '[]'),
-      tags: JSON.parse(project.project_tags || '[]'),
-    }));
-  },
-
-  /**
-   * Create a new project
-   */
-  create: async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Promise<Project> => {
-    // Stringify JSON fields
-    const { links, tags, ...rest } = project;
-    const projectData = {
-      ...rest,
-      // media_urls should be passed directly as it's a JSONB field
-      media_urls: project.media_urls || [],
-      project_links: JSON.stringify(links || []),
-      project_tags: JSON.stringify(tags || []),
-    };
-    
-    
-    const [newProject] = await db('projects').insert(projectData).returning('*');
-    
-    // Parse JSON fields in the returned project
-    return {
-      ...newProject,
-      media_urls: newProject.media_urls || [],
-      links: JSON.parse(newProject.project_links || '[]'),
-      tags: JSON.parse(newProject.project_tags || '[]'),
-    };
-  },
-
-  /**
-   * Update a project
-   */
-  update: async (id: number, project: Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>): Promise<Project | null> => {
-    // Extract links and tags if they exist
-    const { links, tags, ...rest } = project;
-    
-    // Prepare update data
-    const updateData: any = { ...rest, updated_at: new Date() };
-    
-    // Stringify JSON fields if they exist
-    // Pass media_urls directly as it's a JSONB field
-    if (project.media_urls) updateData.media_urls = project.media_urls;
-    if (links) updateData.project_links = JSON.stringify(links);
-    if (tags) updateData.project_tags = JSON.stringify(tags);
-    
-    const [updatedProject] = await db('projects')
+  async getByIdApi(id: number): Promise<SharedProject | null> {
+    const project = await this.query()
+      .select(
+        'id', 'title', 'description', 'media_urls', 'writeup', 
+        'created_at', 'updated_at',
+        'project_links as links',
+        'project_tags as tags'
+      )
       .where({ id })
-      .update(updateData)
-      .returning('*');
-    
-    if (!updatedProject) return null;
-    
-    // Parse JSON fields
-    return {
-      ...updatedProject,
-      media_urls: updatedProject.media_urls || [],
-      links: JSON.parse(updatedProject.project_links || '[]'),
-      tags: JSON.parse(updatedProject.project_tags || '[]'),
-    };
-  },
+      .first();
+    return project || null;
+  }
 
   /**
-   * Delete a project
+   * Create a new project.
+   * (Alias for inherited create, takes and returns SharedProject)
    */
-  delete: async (id: number): Promise<boolean> => {
-    const deleted = await db('projects').where({ id }).delete();
-    return deleted > 0;
-  },
+  async createFromApi(projectData: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>): Promise<SharedProject> {
+    // Base create method works correctly as Knex maps SharedProject fields
+    // to columns (including handling jsonb stringification) on insert.
+    return super.create(projectData); 
+  }
 
   /**
-   * Get the total count of projects
+   * Update a project.
+   * (Alias for inherited update, takes and returns SharedProject)
    */
-  getCount: async (): Promise<number> => {
-    const result = await db('projects').count('id as count').first();
-    // The count result might be a string depending on the DB driver, ensure it's a number
-    return parseInt(result?.count?.toString() || '0', 10);
-  },
-};
+  async updateFromApi(id: number, projectData: Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>>): Promise<SharedProject | null> {
+     // Base update method works correctly for the same reasons as create.
+     if (Object.keys(projectData).length === 0) {
+        // Fetch using the API-specific method to ensure correct mapping
+        return this.getByIdApi(id);
+    }
+    // Need to fetch the updated record with correct mapping
+    const updatedRecord = await super.update(id, projectData);
+    if (!updatedRecord) return null;
+    // Fetch the full record using getByIdApi to ensure correct field names
+    return this.getByIdApi(id); 
+  }
+
+  /**
+   * Get projects by tag (custom logic)
+   */
+  async getByTag(tag: string): Promise<SharedProject[]> {
+    // Query needs to select and alias columns correctly as well.
+    const projects = await this.query()
+      .select(
+        'id', 'title', 'description', 'media_urls', 'writeup', 
+        'created_at', 'updated_at',
+        'project_links as links',
+        'project_tags as tags'
+      )
+      .whereRaw('project_tags @> ?::jsonb', [JSON.stringify([tag])])
+      .orderBy(this.sortField, this.sortOrder);
+    return projects; 
+  }
+
+  // Inherited methods now operate on SharedProject directly:
+  // - getAll(): Promise<SharedProject[]>
+  // - getById(id: number): Promise<SharedProject | null>
+  // - create(data: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>): Promise<SharedProject>
+  // - update(id: number, data: Partial<SharedProject>): Promise<SharedProject | null>
+  // - delete(id: number): Promise<boolean>
+  // - count(): Promise<number>
+  // - getWhere(whereClause: Partial<SharedProject>): Promise<SharedProject[]>
+  // - getOneWhere(whereClause: Partial<SharedProject>): Promise<SharedProject | null>
+  // - query(): Knex.QueryBuilder<SharedProject>
+}
+
+// Export a singleton instance
+export const ProjectModel = new ProjectModelClass();
 
 export default ProjectModel;

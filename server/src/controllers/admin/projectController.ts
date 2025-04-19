@@ -2,10 +2,10 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../middleware/authMiddleware'; // Import custom request type
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../utils/logger';
-// Import ProjectModel and shared types
-import { ProjectModel, Project, ProjectLink } from '../../models/Project'; // Adjust path if needed
-// Correct import path for shared type
-import { Project as SharedProject } from '../../../../types'; // Import shared type
+// Import ProjectModel instance
+import ProjectModel from '../../models/Project'; // Import only the model instance
+// Correct import path for shared types
+import { Project as SharedProject, ProjectLink } from '../../../../types'; // Import types from shared location
 
 // --- CRUD Operations --- 
 
@@ -16,8 +16,8 @@ import { Project as SharedProject } from '../../../../types'; // Import shared t
 export const getProjects = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     logger.info('Admin fetching all projects', { user: req.user?.username });
-    // Use model method
-    const projects = await ProjectModel.getAll(); 
+    // Use the API-ready model method
+    const projects = await ProjectModel.getAllApi(); 
     res.status(StatusCodes.OK).json(projects);
   } catch (error) {
     logger.error('Error fetching projects:', { error });
@@ -39,8 +39,8 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response, n
 
   try {
     logger.info('Admin fetching project by ID', { user: req.user?.username, id });
-    // Use model method
-    const project = await ProjectModel.getById(projectId);
+    // Use the API-ready model method
+    const project = await ProjectModel.getByIdApi(projectId);
     if (!project) {
       logger.warn('Project not found for getById', { id });
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' });
@@ -73,9 +73,8 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
   try {
     logger.info('Admin creating project', { user: req.user?.username, title: projectData.title });
     
-    // Use the model's create method
-    // The model expects Project type from model file, ensure SharedProject matches or cast
-    const newProject = await ProjectModel.create(projectData as Omit<Project, 'id' | 'created_at' | 'updated_at'>); 
+    // Use the model's createFromApi method which expects the SharedProject type
+    const newProject = await ProjectModel.createFromApi(projectData); 
     
     res.status(StatusCodes.CREATED).json(newProject);
   } catch (error) {
@@ -121,8 +120,8 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response, ne
   try {
     logger.info('Admin updating project', { user: req.user?.username, id });
     
-    // Use the model's update method
-    const updatedProject = await ProjectModel.update(projectId, projectData as Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>);
+    // Use the model's updateFromApi method which expects the SharedProject type
+    const updatedProject = await ProjectModel.updateFromApi(projectId, projectData);
 
     if (!updatedProject) {
       logger.warn('Project not found for update', { id });
