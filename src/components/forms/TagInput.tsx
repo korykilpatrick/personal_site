@@ -2,6 +2,7 @@ import React, { useState, KeyboardEvent, ChangeEvent } from 'react';
 import { Input } from './'; // Corrected import path (assuming index export)
 import { Tag } from '../ui'; // Use Tag component for display
 import { Button } from '../common'; // For potential remove button
+import { isRequired } from '../../utils/validation'; // Import the validation utility
 
 interface TagInputProps {
   id?: string;
@@ -30,7 +31,7 @@ const TagInput: React.FC<TagInputProps> = ({
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault(); // Prevent form submission on Enter
       const newTag = inputValue.trim();
-      if (newTag && !value.includes(newTag)) {
+      if (isRequired(newTag) && !value.includes(newTag)) {
         onChange([...value, newTag]);
       }
       setInputValue(''); // Clear input

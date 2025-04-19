@@ -1,6 +1,7 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Input } from './';
 import { Button } from '../common';
+import { isRequired, isUrl } from '../../utils/validation';
 
 interface LinkListInputProps {
   id?: string;
@@ -19,51 +20,89 @@ const LinkListInput: React.FC<LinkListInputProps> = ({
   disabled = false,
   className = '',
 }) => {
+  const [errors, setErrors] = useState<{ [index: number]: string }>({});
 
-  const handleLinkChange = (index: number, newValue: string) => {
+  const validateLink = (url: string): string | undefined => {
+    const trimmedUrl = url.trim();
+    if (!isRequired(trimmedUrl)) {
+      return 'URL is required.';
+    }
+    if (!isUrl(trimmedUrl)) {
+      return 'Must be a valid URL (e.g., https://...).';
+    }
+    return undefined;
+  };
+
+  const handleLinkChange = (index: number, rawValue: string) => {
+    const trimmedValue = rawValue.trim();
     const updatedLinks = [...value];
-    updatedLinks[index] = newValue;
+    updatedLinks[index] = trimmedValue;
+    
+    const error = validateLink(trimmedValue);
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [index]: error || '',
+    }));
+
     onChange(updatedLinks);
   };
 
   const handleAddLink = () => {
-    onChange([...value, '']); // Add a new empty string for the new input
+    const newIndex = value.length;
+    onChange([...value, '']);
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [newIndex]: '',
+    }));
   };
 
   const handleRemoveLink = (indexToRemove: number) => {
     onChange(value.filter((_, index) => index !== indexToRemove));
+    setErrors(prevErrors => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[indexToRemove];
+      return newErrors;
+    });
   };
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {/* Label is expected to be provided by the parent FormField */} 
-      {value.map((link, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <Input
-            id={index === 0 ? id : undefined} // Assign ID only to the first input for label association
-            type="url" // Use type="url" for basic validation
-            name={`link_${index}`}
-            placeholder={placeholder}
-            value={link}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => handleLinkChange(index, e.target.value)}
-            disabled={disabled}
-            className="flex-grow !mb-0" // Adjust styling for inline use
-          />
-          {!disabled && (
-            <Button
-              type="button"
-              variant="text"
-              onClick={() => handleRemoveLink(index)}
-              disabled={disabled}
-              size="sm"
-              className="text-red-600 hover:bg-red-50 flex-shrink-0"
-              aria-label={`Remove link ${index + 1}`}
-            >
-              Remove
-            </Button>
-          )}
-        </div>
-      ))}
+      {value.map((link, index) => {
+        const linkError = errors[index];
+        return (
+          <div key={index}>
+            <div className="flex items-center space-x-2">
+              <Input
+                id={index === 0 ? id : undefined}
+                type="url"
+                name={`link_${index}`}
+                placeholder={placeholder}
+                value={link}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleLinkChange(index, e.target.value)}
+                disabled={disabled}
+                className={`flex-grow !mb-0 ${linkError ? 'border-red-500' : ''}`}
+                aria-describedby={linkError ? `link-${index}-error` : undefined}
+              />
+              {!disabled && (
+                <Button
+                  type="button"
+                  variant="text"
+                  onClick={() => handleRemoveLink(index)}
+                  disabled={disabled}
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50 flex-shrink-0"
+                  aria-label={`Remove link ${index + 1}`}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+            {linkError && (
+              <p id={`link-${index}-error`} className="text-red-600 text-xs mt-1">{linkError}</p>
+            )}
+          </div>
+        );
+      })}
       {!disabled && (
         <Button
           type="button"
