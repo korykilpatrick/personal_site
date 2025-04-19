@@ -1,7 +1,7 @@
 import React from 'react';
 import { MultiSelectDropdown, FilterPill, SortDropdown } from '../ui';
-import { Bookshelf } from '../../../types'; // Adjust path as needed
-import type { SortOption } from '../../../types'; // Import SortOption
+import { Bookshelf } from 'types/index'; // Correct path
+import { SortOption } from 'types/index'; // Correct path
 
 interface BookshelfControlsProps {
   sortOptions: SortOption[];

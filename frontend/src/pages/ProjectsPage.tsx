@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import apiService from '../api/apiService';
 import { Loading, ErrorDisplay, FilterButton, Tag, EmptyState } from '../components/ui';
 import useApi from '../hooks/useApi';
-import { Project } from '../../types';
-import ProjectCard from '../components/projects/ProjectCard';
+import { Project } from 'types/index';
+import ProjectCard from '@/components/projects/ProjectCard';
 
 const ProjectsPage: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { WorkEntry, WorkEntryLink } from '../../../types';
+import { WorkEntry, WorkEntryLink } from 'types/index';
 import { Button } from '../common'; // Corrected import path
 import { ErrorDisplay, Loading } from '../ui'; // Corrected import path
 import { Input, Textarea, FormField } from '../forms'; // Import new form components and FormField

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input, FormField } from './'; // Import Input from the same directory
 import { Button, Select } from '../common';
-import type { MediaEntry } from '../../../types'; // Import from root types
+import { MediaEntry } from 'types/index'; // Correct path
 
 // Define options for the media type select
 // Moved here from ProjectForm as it's specific to this input

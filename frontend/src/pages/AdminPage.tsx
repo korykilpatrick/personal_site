@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, Outlet, useParams, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // Import useAuth
 import api from '../services/api'; // Import configured API service
-import ProjectForm from '../components/admin/ProjectForm'; // Import the form
-import { Project, WorkEntry } from '../../types';
+import ProjectForm from '@/components/admin/ProjectForm'; // Import the form
+import { Project, WorkEntry } from 'types/index';
 import WorkForm from '../components/admin/WorkForm'; // Import WorkForm
 import ProjectList from '../components/admin/ProjectList';
 import { Button } from '../components/common'; // Import Button

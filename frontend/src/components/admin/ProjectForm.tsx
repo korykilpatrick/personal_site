@@ -1,11 +1,11 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 // Import main Project and ProjectLink types
-import { Project, ProjectLink } from '../../../types'; 
+import { Project, ProjectLink } from 'types/index'; 
 import { Button } from '../common'; // Select might not be needed directly here
 import { ErrorDisplay, Loading } from '../ui';
 // Import StructuredLinkInput, remove LinkListInput
 import { Input, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms'; // Remove MediaEntry from here
-import { MediaEntry } from '../../../types'; // <-- Import MediaEntry from root types
+import { MediaEntry } from 'types/index'; // <-- Import MediaEntry from root types
 import StructuredLinkInput from '../forms/StructuredLinkInput';
 // Remove unused helper
 // import { parseCommaSeparatedString } from '../../utils/helpers'; 
@@ -180,7 +180,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <FormField label="Media Entries:" htmlFor={undefined as any}>
         <MediaEntriesInput
           entries={mediaEntries}
-          onChange={handleMediaChange}
+          onChange={(index: number, field: keyof MediaEntry, value: string) => handleMediaChange(index, field, value)}
           onAdd={addMediaEntry}
           onRemove={removeMediaEntry}
           disabled={isLoading}

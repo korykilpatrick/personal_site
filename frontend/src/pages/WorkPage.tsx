@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 // Import shared types
-import { WorkEntry, WorkEntryLink } from '../../types';
+import { WorkEntry, WorkEntryLink } from 'types/index';
 // Import standard UI components
 import { Loading, ErrorDisplay, EmptyState } from '../components/ui';
 // Import the new WorkCard component
-import WorkCard from '../components/work/WorkCard';
+import WorkCard from '@/components/work/WorkCard';
 
 const WorkPage: React.FC = () => {
   // Fetch work experience - Pass empty array [] as the second argument for autoFetchParams

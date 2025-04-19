@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DotenvWebpackPlugin = require('dotenv-webpack');
 
 module.exports = {
-  entry: './src/index.tsx',
+  entry: './frontend/src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -12,7 +12,8 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, 'frontend/src'),
+      '@types': path.resolve(__dirname, 'types'),
     },
   },
   module: {

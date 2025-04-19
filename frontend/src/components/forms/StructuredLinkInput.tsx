@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WorkEntryLink } from '../../../types'; // Adjust path as necessary
+import { ProjectLink, WorkEntryLink } from 'types/index'; // Correct path
 import Input from './Input'; 
 import Select from '../common/Select'; 
 import { Button } from '../common';

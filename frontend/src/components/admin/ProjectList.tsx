@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Project } from '../../../types';
+import { Project } from 'types/index';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
 

@@ -18,10 +18,10 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["frontend/src/*"],
       "@types/*": ["types/*"]
     }
   },
-  "include": ["src", "types"],
+  "include": ["frontend/src", "types"],
   "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx"]
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import apiService from '../api/apiService';
 import {
   Loading,
@@ -12,7 +12,7 @@ import {
 import { BookCard } from '../components/books';
 import useMultiSelect from '../hooks/useMultiSelect';
 import useDynamicBookSize from '../hooks/useDynamicBookSize';
-import { Book, Bookshelf, SortOption } from '../../types';
+import { Book, Bookshelf, SortOption } from 'types/index';
 import PersonalNote from '../components/bookshelf/PersonalNote';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';

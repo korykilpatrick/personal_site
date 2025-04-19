@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import MarkdownToJsx from 'markdown-to-jsx';
-import { Project } from '../../../types'; // Assuming path relative to this file
-import Card from '../common/Card';
-import Tag from '../ui/Tag';
+import { Project, ProjectLink } from 'types/index'; // Correct import path
+import Card from '@/components/common/Card';
+import Tag from '@/components/ui/Tag';
 // We can potentially add Icon component usage later if needed
 
 interface ProjectCardProps {
@@ -33,7 +33,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
           {/* Tags */}
           {project.tags && project.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {project.tags.map((tag) => (
+              {project.tags.map((tag: string) => (
                 <Tag key={tag} label={tag} onClick={() => onTagClick(tag)} />
               ))}
             </div>
@@ -48,7 +48,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
           {/* Links */}
           {project.links && project.links.length > 0 && (
              <div className="flex flex-wrap gap-2 mb-0">
-               {project.links.map((link, index) => (
+               {project.links.map((link: ProjectLink, index: number) => (
                  <a
                    key={index}
                    href={link.url}

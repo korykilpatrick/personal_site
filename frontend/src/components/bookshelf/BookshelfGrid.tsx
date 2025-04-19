@@ -1,5 +1,5 @@
 import React from 'react';
-import { Book } from '../../../types'; // Adjust path as needed
+import { Book } from 'types/index'; // Correct path
 import { BookCard } from '../books';
 import { EmptyState } from '../ui';
 

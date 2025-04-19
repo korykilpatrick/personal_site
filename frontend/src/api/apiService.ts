@@ -1,4 +1,5 @@
-import { Book, BookWithShelves, Bookshelf, Project, WorkEntry } from '../../types';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import type { Bookshelf, Book, BookWithShelves, Project, WorkEntry } from 'types/index';
 import api from '../services/api';
 
 // API service methods

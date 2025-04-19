@@ -18,9 +18,9 @@
     "build:all": "npm run build && npm run server:build",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
-    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md}'",
+    "lint": "eslint 'frontend/src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint 'frontend/src/**/*.{js,jsx,ts,tsx}' --fix",
+    "format": "prettier --write 'frontend/src/**/*.{js,jsx,ts,tsx,css,md}'",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

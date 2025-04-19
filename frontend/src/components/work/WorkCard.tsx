@@ -1,8 +1,8 @@
 import React from 'react';
 import MarkdownToJsx from 'markdown-to-jsx';
-import { WorkEntry } from '../../../types'; // Adjust path as necessary
-import Card from '../common/Card';
-import Icon from '../common/Icon'; // Import the Icon component
+import { WorkEntry, WorkEntryLink } from 'types/index'; // Correct import path
+import Card from '@/components/common/Card';
+import Icon from '@/components/common/Icon'; // Import the Icon component
 
 interface WorkCardProps {
   work: WorkEntry;
@@ -36,7 +36,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work }) => {
         {/* Links Section */}
         {work.links && work.links.length > 0 && (
           <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-100 mt-1">
-            {work.links.map((link, index) => (
+            {work.links.map((link: WorkEntryLink, index: number) => (
               <a
                 key={index}
                 href={link.url}
