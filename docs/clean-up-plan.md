@@ -13,7 +13,7 @@ The codebase is a well-structured monorepo with React/TypeScript frontend and No
 - [x] `server/README.md` (API Endpoints section) — Update outdated API endpoint documentation — **Fix:** Correct endpoint paths (e.g., `/work` instead of `/gigs`, remove `/posts`)
 
 ### Medium Fixes (1–4 hrs)
-- [ ] `src/api/apiService.ts` & `src/services/api.ts` — API service fragmentation — **Fix:** Consolidate API services into a unified pattern
+- [x] `src/api/apiService.ts` & `src/services/api.ts` — API service fragmentation — **Fix:** Consolidate into a single Axios instance in `src/services/api.ts` with unified configuration and interceptors (auth, error handling). (Subsequent step: Consider migrating fetches to React Query/SWR using this instance).
 - [ ] `server/src/models/*` — Inconsistent model patterns between files — **Fix:** Standardize on BaseModel class pattern throughout
 - [ ] `src/components/forms/*` — Duplicate form validation logic — **Fix:** Extract common validation to shared hook
 - [ ] `server/src/middleware/authMiddleware.ts` — No brute force login protection — **Fix:** Implement rate-limiting or slow-down strategies

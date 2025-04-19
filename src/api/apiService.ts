@@ -1,41 +1,21 @@
-import axios from 'axios';
 import { Book, BookWithShelves, Bookshelf, Project, WorkEntry } from '../../types';
-
-// Define base API URL
-const API_BASE_URL = process.env.REACT_APP_API_URL!;
-
-// Create axios instance with default config
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add response interceptor for error handling
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', error.response?.data || error.message);
-    return Promise.reject(error);
-  },
-);
+import api from '../services/api';
 
 // API service methods
 export const apiService = {
   // Book related endpoints
   getBooks: async (): Promise<Book[]> => {
-    const response = await apiClient.get<Book[]>('/books');
+    const response = await api.get<Book[]>('/books');
     return response.data;
   },
 
   getBookById: async (id: number): Promise<BookWithShelves> => {
-    const response = await apiClient.get<BookWithShelves>(`/books/${id}`);
+    const response = await api.get<BookWithShelves>(`/books/${id}`);
     return response.data;
   },
 
   getBookshelves: async (): Promise<Bookshelf[]> => {
-    const response = await apiClient.get<Bookshelf[]>('/bookshelves');
+    const response = await api.get<Bookshelf[]>('/bookshelves');
     return response.data;
   },
 
@@ -43,7 +23,7 @@ export const apiService = {
     if (shelfId === undefined) {
       return apiService.getBooks();
     }
-    const response = await apiClient.get<Book[]>(`/bookshelves/${shelfId}/books`);
+    const response = await api.get<Book[]>(`/bookshelves/${shelfId}/books`);
     return response.data;
   },
 
@@ -53,7 +33,7 @@ export const apiService = {
     }
 
     // Using Promise.all to fetch books from multiple shelves in parallel
-    const promises = shelfIds.map((id) => apiClient.get<Book[]>(`/bookshelves/${id}/books`));
+    const promises = shelfIds.map((id) => api.get<Book[]>(`/bookshelves/${id}/books`));
 
     const responses = await Promise.all(promises);
 
@@ -67,7 +47,7 @@ export const apiService = {
   },
 
   getSortedBooks: async (sortBy: string = 'date_read'): Promise<Book[]> => {
-    const response = await apiClient.get<Book[]>('/books', {
+    const response = await api.get<Book[]>('/books', {
       params: { sort: sortBy },
     });
     return response.data;
@@ -75,25 +55,25 @@ export const apiService = {
 
   // Project related endpoints
   getProjects: async (tag?: string): Promise<Project[]> => {
-    const response = await apiClient.get<Project[]>('/projects', {
+    const response = await api.get<Project[]>('/projects', {
       params: tag ? { tag } : undefined,
     });
     return response.data;
   },
 
   getProjectById: async (id: number): Promise<Project> => {
-    const response = await apiClient.get<Project>(`/projects/${id}`);
+    const response = await api.get<Project>(`/projects/${id}`);
     return response.data;
   },
 
   // Work Entry related endpoints
   getWorkEntries: async (): Promise<WorkEntry[]> => {
-    const response = await apiClient.get<WorkEntry[]>('/work');
+    const response = await api.get<WorkEntry[]>('/work');
     return response.data;
   },
 
   getWorkEntryById: async (id: number): Promise<WorkEntry> => {
-    const response = await apiClient.get<WorkEntry>(`/work/${id}`);
+    const response = await api.get<WorkEntry>(`/work/${id}`);
     return response.data;
   },
 };
