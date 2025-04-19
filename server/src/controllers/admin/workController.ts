@@ -30,10 +30,6 @@ export const getWorkEntryById = async (req: AuthenticatedRequest, res: Response,
   const { id } = req.params;
   const workEntryId = parseInt(id, 10);
 
-  if (isNaN(workEntryId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid work entry ID' });
-  }
-
   try {
     logger.info('Admin fetching work entry by ID', { user: req.user?.username, id });
     const workEntry = await WorkEntryModel.getByIdApi(workEntryId);
@@ -53,18 +49,7 @@ export const getWorkEntryById = async (req: AuthenticatedRequest, res: Response,
  * Creates a new work entry.
  */
 export const createWorkEntry = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  // Validation can remain similar, but might be adapted based on SharedWorkEntry structure
-  // const validationError = validateWorkEntryInput(req.body); 
-  // Let's assume req.body is now expected to match Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>
-  // We might need better validation based on the SharedWorkEntry type
-
   const workEntryData: Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'> = req.body; 
-
-  // Basic check (improve this with a proper validation library like Zod or Joi)
-  if (!workEntryData.company || !workEntryData.role || !workEntryData.duration || !workEntryData.achievements) {
-    logger.warn('Work entry creation validation failed', { body: req.body });
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required work entry fields' });
-  }
 
   try {
     logger.info('Admin creating work entry', { user: req.user?.username, company: workEntryData.company, role: workEntryData.role });
@@ -87,18 +72,7 @@ export const updateWorkEntry = async (req: AuthenticatedRequest, res: Response, 
   const { id } = req.params;
   const workEntryId = parseInt(id, 10);
 
-  if (isNaN(workEntryId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid work entry ID' });
-  }
-
-  // Assume req.body is Partial<Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>>
   const workEntryData: Partial<Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>> = req.body;
-
-  // Add basic validation if needed - check if body is empty or contains invalid fields
-  if (Object.keys(workEntryData).length === 0) {
-    logger.warn('Work entry update attempted with empty body', { id });
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No update data provided' });
-  }
 
   try {
     logger.info('Admin updating work entry', { user: req.user?.username, id });
@@ -125,10 +99,6 @@ export const updateWorkEntry = async (req: AuthenticatedRequest, res: Response, 
 export const deleteWorkEntry = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const workEntryId = parseInt(id, 10);
-
-  if (isNaN(workEntryId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid work entry ID' });
-  }
 
   try {
     logger.info('Admin deleting work entry', { user: req.user?.username, id });

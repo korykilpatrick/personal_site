@@ -31,11 +31,12 @@ export const getProjects = async (req: AuthenticatedRequest, res: Response, next
  */
 export const getProjectById = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
+  // Validation is now handled by express-validator in adminRoutes.ts
   const projectId = parseInt(id, 10);
 
-  if (isNaN(projectId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
-  }
+  // if (isNaN(projectId)) {
+  //   return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
+  // }
 
   try {
     logger.info('Admin fetching project by ID', { user: req.user?.username, id });
@@ -57,18 +58,18 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response, n
  * Creates a new project.
  */
 export const createProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  // Expect req.body to match Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>
+  // Validation is now handled by express-validator in adminRoutes.ts
   const projectData: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'> = req.body;
 
   // Basic validation (improve with Zod/Joi)
-  if (!projectData.title || !projectData.description) {
-      logger.warn('Project creation validation failed: Missing title or description', { body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required project fields (title, description)' });
-  }
+  // if (!projectData.title || !projectData.description) {
+  //     logger.warn('Project creation validation failed: Missing title or description', { body: req.body });
+  //     return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required project fields (title, description)' });
+  // }
   // Add validation for links and tags arrays if needed
-  if (!Array.isArray(projectData.links)) projectData.links = [];
-  if (!Array.isArray(projectData.tags)) projectData.tags = [];
-  if (!Array.isArray(projectData.media_urls)) projectData.media_urls = [];
+  // if (!Array.isArray(projectData.links)) projectData.links = [];
+  // if (!Array.isArray(projectData.tags)) projectData.tags = [];
+  // if (!Array.isArray(projectData.media_urls)) projectData.media_urls = [];
 
   try {
     logger.info('Admin creating project', { user: req.user?.username, title: projectData.title });
@@ -89,33 +90,33 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
  */
 export const updateProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
+  // Validation is now handled by express-validator in adminRoutes.ts
   const projectId = parseInt(id, 10);
 
-  if (isNaN(projectId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
-  }
+  // if (isNaN(projectId)) {
+  //   return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
+  // }
 
-  // Expect req.body to be Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>>
   const projectData: Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>> = req.body;
 
   // Basic validation
-  if (Object.keys(projectData).length === 0) {
-    logger.warn('Project update attempted with empty body', { id });
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No update data provided' });
-  }
+  // if (Object.keys(projectData).length === 0) {
+  //   logger.warn('Project update attempted with empty body', { id });
+  //   return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No update data provided' });
+  // }
   // Ensure arrays if present (model handles stringification)
-  if (projectData.links !== undefined && !Array.isArray(projectData.links)) {
-      logger.warn('Project update validation failed: Invalid links format', { id, body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid links format, expected array' });
-  }
-  if (projectData.tags !== undefined && !Array.isArray(projectData.tags)) {
-      logger.warn('Project update validation failed: Invalid tags format', { id, body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid tags format, expected array' });
-  }
-   if (projectData.media_urls !== undefined && !Array.isArray(projectData.media_urls)) {
-      logger.warn('Project update validation failed: Invalid media_urls format', { id, body: req.body });
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid media_urls format, expected array' });
-  }
+  // if (projectData.links !== undefined && !Array.isArray(projectData.links)) {
+  //     logger.warn('Project update validation failed: Invalid links format', { id, body: req.body });
+  //     return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid links format, expected array' });
+  // }
+  // if (projectData.tags !== undefined && !Array.isArray(projectData.tags)) {
+  //     logger.warn('Project update validation failed: Invalid tags format', { id, body: req.body });
+  //     return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid tags format, expected array' });
+  // }
+  //  if (projectData.media_urls !== undefined && !Array.isArray(projectData.media_urls)) {
+  //     logger.warn('Project update validation failed: Invalid media_urls format', { id, body: req.body });
+  //     return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid media_urls format, expected array' });
+  // }
 
   try {
     logger.info('Admin updating project', { user: req.user?.username, id });
@@ -141,11 +142,12 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response, ne
  */
 export const deleteProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { id } = req.params;
+  // Validation is now handled by express-validator in adminRoutes.ts
   const projectId = parseInt(id, 10);
 
-  if (isNaN(projectId)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
-  }
+  // if (isNaN(projectId)) {
+  //   return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid project ID' });
+  // }
 
   try {
     logger.info('Admin deleting project', { user: req.user?.username, id });
