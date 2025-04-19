@@ -28,10 +28,6 @@ interface IConfig {
     secret: string;
     expiresIn: string;
   };
-  admin: {
-    username: string;
-    passwordHash: string;
-  };
 }
 
 const config: IConfig = {
@@ -52,10 +48,6 @@ const config: IConfig = {
   jwt: {
     secret: process.env.JWT_SECRET!,
     expiresIn: process.env.JWT_EXPIRES_IN!,
-  },
-  admin: {
-    username: process.env.ADMIN_USERNAME!,
-    passwordHash: process.env.ADMIN_PASSWORD_HASH!,
   },
 };
 
