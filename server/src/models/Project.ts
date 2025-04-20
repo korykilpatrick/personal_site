@@ -1,30 +1,45 @@
 import { BaseModel } from './BaseModel';
 import { Project as SharedProject, ProjectLink } from '../../../types'; 
 
+// Helper type for DB representation
+type ProjectDbRecord = Omit<SharedProject, 'links' | 'tags'> & {
+  project_links?: ProjectLink[]; // Use actual DB column name
+  project_tags?: string[];      // Use actual DB column name
+};
+
+// Helper function to map SharedProject to DB record structure
+const mapToDbRecord = (projectData: Partial<SharedProject>): Partial<ProjectDbRecord> => {
+  const dbRecord: Partial<ProjectDbRecord> = { ...projectData }; // Copy other fields
+  
+  if ('links' in projectData) {
+    dbRecord.project_links = projectData.links; // Map links to project_links
+    delete (dbRecord as Partial<SharedProject>).links; // Remove original key
+  }
+  if ('tags' in projectData) {
+    dbRecord.project_tags = projectData.tags; // Map tags to project_tags
+    delete (dbRecord as Partial<SharedProject>).tags; // Remove original key
+  }
+  return dbRecord;
+};
+
 /**
  * Project model using BaseModel for CRUD operations.
  * Handles JSONB columns directly via Knex.
  */
-class ProjectModelClass extends BaseModel<SharedProject> { // Use SharedProject directly
+class ProjectModelClass extends BaseModel<SharedProject> { // Still uses SharedProject for external interface
   constructor() {
     // Default sort by creation date, descending
     super('projects', 'created_at', 'desc'); 
   }
 
-  // Remove toApiModel and toDbModel methods as Knex handles JSONB
-
   // --- Public API Methods ---
-  // Simplification: The *Api methods are no longer strictly necessary
-  // as BaseModel methods now return the correct SharedProject type directly.
-  // We can keep them for semantic clarity or remove them and update controllers.
-  // Let's keep them for now to minimize controller changes initially.
+  // These methods handle the mapping between API structure (SharedProject) 
+  // and the DB structure (using column aliases).
 
   /**
    * Get all projects, mapping DB columns to SharedProject fields.
    */
   async getAllApi(): Promise<SharedProject[]> {
-    // Explicitly select columns and alias jsonb fields
-    // Knex automatically parses JSONB when selected.
     return this.query()
       .select(
         'id', 'title', 'description', 'media_urls', 'writeup', 
@@ -52,37 +67,62 @@ class ProjectModelClass extends BaseModel<SharedProject> { // Use SharedProject 
   }
 
   /**
-   * Create a new project.
-   * (Alias for inherited create, takes and returns SharedProject)
+   * Create a new project, handling field mapping and JSON stringification.
    */
   async createFromApi(projectData: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>): Promise<SharedProject> {
-    // Base create method works correctly as Knex maps SharedProject fields
-    // to columns (including handling jsonb stringification) on insert.
-    return super.create(projectData); 
+    const dbDataInput = mapToDbRecord(projectData);
+
+    // Explicitly stringify JSONB fields before passing to BaseModel.create
+    const dbDataForInsert = { ...dbDataInput };
+    if ('project_links' in dbDataForInsert && dbDataForInsert.project_links) {
+      dbDataForInsert.project_links = JSON.stringify(dbDataForInsert.project_links) as any; 
+    }
+    if ('project_tags' in dbDataForInsert && dbDataForInsert.project_tags) {
+      dbDataForInsert.project_tags = JSON.stringify(dbDataForInsert.project_tags) as any; 
+    }
+    
+    // Call base create with the mapped and explicitly stringified data
+    const createdDbRecord = await super.create(dbDataForInsert as any);
+    
+    // Fetch the newly created record using getByIdApi to ensure correct mapping back
+    const newProject = await this.getByIdApi(createdDbRecord.id);
+    if (!newProject) {
+        throw new Error('Failed to fetch project immediately after creation.');
+    }
+    return newProject; 
   }
 
   /**
-   * Update a project.
-   * (Alias for inherited update, takes and returns SharedProject)
+   * Update a project, handling field mapping and JSON stringification.
    */
   async updateFromApi(id: number, projectData: Partial<Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>>): Promise<SharedProject | null> {
-     // Base update method works correctly for the same reasons as create.
      if (Object.keys(projectData).length === 0) {
-        // Fetch using the API-specific method to ensure correct mapping
         return this.getByIdApi(id);
     }
-    // Need to fetch the updated record with correct mapping
-    const updatedRecord = await super.update(id, projectData);
+
+    const dbDataInput = mapToDbRecord(projectData);
+
+    // Explicitly stringify JSONB fields before passing to BaseModel.update
+    const dbDataForUpdate = { ...dbDataInput };
+     if ('project_links' in dbDataForUpdate && dbDataForUpdate.project_links) {
+      dbDataForUpdate.project_links = JSON.stringify(dbDataForUpdate.project_links) as any;
+    }
+    if ('project_tags' in dbDataForUpdate && dbDataForUpdate.project_tags) {
+      dbDataForUpdate.project_tags = JSON.stringify(dbDataForUpdate.project_tags) as any;
+    }
+
+    // Call base update with the mapped and explicitly stringified data
+    const updatedRecord = await super.update(id, dbDataForUpdate as any);
+    
     if (!updatedRecord) return null;
-    // Fetch the full record using getByIdApi to ensure correct field names
+    // Fetch the full record using getByIdApi to ensure correct field names are returned
     return this.getByIdApi(id); 
   }
 
   /**
-   * Get projects by tag (custom logic)
+   * Get projects by tag (custom logic, already handles mapping on select)
    */
   async getByTag(tag: string): Promise<SharedProject[]> {
-    // Query needs to select and alias columns correctly as well.
     const projects = await this.query()
       .select(
         'id', 'title', 'description', 'media_urls', 'writeup', 
@@ -95,16 +135,9 @@ class ProjectModelClass extends BaseModel<SharedProject> { // Use SharedProject 
     return projects; 
   }
 
-  // Inherited methods now operate on SharedProject directly:
-  // - getAll(): Promise<SharedProject[]>
-  // - getById(id: number): Promise<SharedProject | null>
-  // - create(data: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>): Promise<SharedProject>
-  // - update(id: number, data: Partial<SharedProject>): Promise<SharedProject | null>
-  // - delete(id: number): Promise<boolean>
-  // - count(): Promise<number>
-  // - getWhere(whereClause: Partial<SharedProject>): Promise<SharedProject[]>
-  // - getOneWhere(whereClause: Partial<SharedProject>): Promise<SharedProject | null>
-  // - query(): Knex.QueryBuilder<SharedProject>
+  // Note: Base model methods (getAll, getById, create, update, delete) 
+  // if called directly, would NOT handle the links/tags mapping correctly.
+  // Always use the *Api methods defined here for Project interactions.
 }
 
 // Export a singleton instance

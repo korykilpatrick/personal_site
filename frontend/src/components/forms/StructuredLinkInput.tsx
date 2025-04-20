@@ -1,32 +1,36 @@
-import React, { useState } from 'react';
-import { ProjectLink, WorkEntryLink } from 'types/index'; // Correct path
+import React, { useState, useEffect } from 'react';
+import { ProjectLink } from 'types/index'; // Only ProjectLink is needed now
 import Input from './Input'; 
-import Select from '../common/Select'; 
 import { Button } from '../common';
-import { FaTrashAlt, FaPlus } from 'react-icons/fa'; // Example icons
-import { isRequired, isUrl } from '../../utils/validation'; // Import validation utils
+import { FaTrashAlt, FaPlus, FaLink, FaGithub, FaLinkedin, FaYoutube, FaExternalLinkAlt } from 'react-icons/fa'; // Add relevant icons
+import { isRequired, isUrl } from '../../utils/validation'; 
 
-// Define available icons
-const iconOptions = [
-  { value: '', label: 'None' },
-  { value: 'github', label: 'GitHub' },
-  { value: 'website', label: 'Website' },
-  { value: 'linkedin', label: 'LinkedIn' },
-  { value: 'demo', label: 'Demo' },
-  { value: 'docs', label: 'Documentation' },
-  { value: 'other', label: 'Other Link' },
-];
+// Helper function to determine icon based on URL
+const getIconForUrl = (url: string): React.ReactNode => {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    if (hostname.includes('github.com')) return <FaGithub aria-label="GitHub Icon" />;
+    if (hostname.includes('linkedin.com')) return <FaLinkedin aria-label="LinkedIn Icon" />;
+    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) return <FaYoutube aria-label="YouTube Icon" />;
+    if (hostname.includes('localhost')) return <FaExternalLinkAlt aria-label="Local Link Icon" />;
+    // Add more specific checks if needed
+    return <FaLink aria-label="Generic Link Icon" />; // Default link icon
+  } catch (e) {
+    return <FaLink aria-label="Generic Link Icon" />; // Default on URL parse error
+  }
+};
+
+// Removed iconOptions array as it's no longer needed
 
 interface StructuredLinkInputProps {
   id: string;
-  value: WorkEntryLink[];
-  onChange: (newValue: WorkEntryLink[]) => void;
+  value: ProjectLink[]; 
+  onChange: (newValue: ProjectLink[]) => void; 
   disabled?: boolean;
 }
 
-// Define a type for error messages for each link item
 type LinkErrors = {
-  title?: string;
+  title?: string; 
   url?: string;
 };
 
@@ -36,10 +40,9 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
   onChange,
   disabled = false
 }) => {
-  // State to hold validation errors for each link entry
   const [errors, setErrors] = useState<{ [index: number]: LinkErrors }>({});
 
-  const validateLink = (link: WorkEntryLink): LinkErrors => {
+  const validateLink = (link: ProjectLink): LinkErrors => { 
     const linkErrors: LinkErrors = {};
     if (!isRequired(link.title)) {
       linkErrors.title = 'Title is required.';
@@ -52,10 +55,46 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
     return linkErrors;
   };
 
-  const handleLinkChange = (index: number, field: keyof WorkEntryLink, rawValue: string) => {
-    const trimmedValue = rawValue.trim(); // Trim whitespace
+  // Function to determine and update the icon based on URL
+  const updateIconBasedOnUrl = (url: string, currentLink: ProjectLink): Partial<ProjectLink> => {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      let iconName = 'other'; // Default icon name
+      if (hostname.includes('github.com')) iconName = 'github';
+      else if (hostname.includes('linkedin.com')) iconName = 'linkedin';
+      else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) iconName = 'youtube';
+      else if (hostname.includes('localhost')) iconName = 'website'; // Or a custom local icon name
+      // Add more rules here
+
+      // Only update if the icon needs changing
+      if (currentLink.icon !== iconName) {
+        return { icon: iconName };
+      }
+    } catch (e) {
+      // If URL is invalid or parsing fails, maybe clear icon or set default?
+      if (currentLink.icon !== 'other') {
+          return { icon: 'other' }; // Set to default if URL becomes invalid
+      }
+    }
+    return {}; // No changes needed
+  };
+
+  const handleLinkChange = (index: number, field: 'title' | 'url', rawValue: string) => {
+    const trimmedValue = rawValue.trim();
     const newLinks = [...value];
-    const updatedLink = { ...newLinks[index], [field]: trimmedValue };
+    let updatedLink = { ...newLinks[index] };
+
+    updatedLink[field] = trimmedValue;
+
+    // If URL changed, determine the icon
+    let iconUpdate: Partial<ProjectLink> = {};
+    if (field === 'url') {
+      iconUpdate = updateIconBasedOnUrl(trimmedValue, updatedLink);
+    }
+
+    // Merge field update and potential icon update
+    updatedLink = { ...updatedLink, ...iconUpdate };
+
     newLinks[index] = updatedLink;
     
     // Validate the updated link
@@ -65,26 +104,23 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
       [index]: linkErrors,
     }));
 
-    onChange(newLinks); // Pass trimmed value up
+    onChange(newLinks); 
   };
 
   const addLink = () => {
-    // Add new link and initialize errors for it
     const newIndex = value.length;
-    onChange([...value, { title: '', url: '', icon: '' }]);
+    onChange([...value, { title: '', url: '' }]); // Icon will be determined on URL input
     setErrors(prevErrors => ({
       ...prevErrors,
-      [newIndex]: {}, // Initialize empty errors for the new link
+      [newIndex]: {}, 
     }));
   };
 
   const removeLink = (indexToRemove: number) => {
     onChange(value.filter((_, i) => i !== indexToRemove));
-    // Clean up errors for the removed index
     setErrors(prevErrors => {
       const newErrors = { ...prevErrors };
       delete newErrors[indexToRemove];
-      // Adjust indices for subsequent errors if necessary (though map keys handle this ok)
       return newErrors; 
     });
   };
@@ -92,19 +128,24 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
   return (
     <div id={id} className="space-y-3">
       {value.map((link, index) => {
-        const linkErrors = errors[index] || {}; // Get errors for this specific link
+        const linkErrors = errors[index] || {}; 
+        const displayIcon = getIconForUrl(link.url); // Get icon component based on URL
         return (
           <div key={index} className="flex items-start space-x-2 p-3 border rounded bg-gray-50">
-            <div className="flex-grow space-y-1"> {/* Reduced space */}
-              <div> {/* Wrap Input and error */}
+             {/* Display determined icon */}
+             <div className="flex-shrink-0 pt-1 text-gray-500 text-lg">
+                {displayIcon}
+             </div>
+             
+            <div className="flex-grow space-y-1"> 
+              <div> 
                 <Input
                   type="text"
-                  placeholder="Link Title (e.g., Company Website)"
+                  placeholder="Link Title (e.g., GitHub Repo)" 
                   value={link.title}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleLinkChange(index, 'title', e.target.value)}
                   disabled={disabled}
-                  // Removed HTML required, relying on JS validation
-                  className={`w-full ${linkErrors.title ? 'border-red-500' : ''}`} // Highlight if error
+                  className={`w-full ${linkErrors.title ? 'border-red-500' : ''}`} 
                   aria-describedby={linkErrors.title ? `link-${index}-title-error` : undefined}
                 />
                 {linkErrors.title && (
@@ -112,15 +153,14 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
                 )}
               </div>
 
-              <div> {/* Wrap Input and error */}
+              <div> 
                 <Input
-                  type="url" // Keep type=url for semantic meaning/mobile keyboards
+                  type="url" 
                   placeholder="Link URL (https://...)"
                   value={link.url}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleLinkChange(index, 'url', e.target.value)}
                   disabled={disabled}
-                  // Removed HTML required
-                  className={`w-full ${linkErrors.url ? 'border-red-500' : ''}`} // Highlight if error
+                  className={`w-full ${linkErrors.url ? 'border-red-500' : ''}`} 
                   aria-describedby={linkErrors.url ? `link-${index}-url-error` : undefined}
                 />
                 {linkErrors.url && (
@@ -128,13 +168,7 @@ const StructuredLinkInput: React.FC<StructuredLinkInputProps> = ({
                 )}
               </div>
               
-              <Select
-                value={link.icon || ''}
-                onChange={(value: string) => handleLinkChange(index, 'icon', value)}
-                disabled={disabled}
-                options={iconOptions}
-                className="w-full"
-              />
+              {/* Removed Select dropdown for icon */}
             </div>
             <Button 
               type="button"

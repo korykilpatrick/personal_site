@@ -145,7 +145,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       }
     } catch (submitError: any) {
       console.error("Form submission error:", submitError);
-      setError(submitError.response?.data?.message || submitError.message || 'Failed to save project');
+      // Check if the error response has the structured validation errors
+      const validationErrors = submitError.response?.data?.errors;
+      if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+        // Format the validation errors for display
+        const errorMessages = validationErrors.map((err: any) => 
+          `${err.param ? `${err.param}: ` : ''}${err.msg}`
+        ).join('\n'); // Join with newline for better readability in ErrorDisplay
+        setError(`Validation failed:\n${errorMessages}`);
+      } else {
+        // Fallback to general error message
+        setError(submitError.response?.data?.message || submitError.message || 'Failed to save project');
+      }
     }
   };
 

@@ -6,6 +6,7 @@ import * as workController from '../controllers/admin/workController';
 import * as projectController from '../controllers/admin/projectController';
 // Potentially import other admin controllers if they exist
 // import * as bookController from '../controllers/admin/bookController'; 
+import logger from '../utils/logger'; // Import logger
 
 const router = express.Router();
 
@@ -13,6 +14,13 @@ const router = express.Router();
 const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    // Log the specific validation errors
+    logger.warn('Validation failed for request:', { 
+      path: req.path, 
+      method: req.method, 
+      errors: errors.array(),
+      body: req.body // Log the request body for context
+    }); 
     return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
   }
   next();
@@ -98,7 +106,7 @@ router.post(
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('description').trim().notEmpty().withMessage('Description is required'),
     body('links').optional().isArray().withMessage('Links must be an array'),
-    body('links.*.label').if(body('links').exists()).trim().notEmpty().withMessage('Link label is required'),
+    body('links.*.title').if(body('links').exists()).trim().notEmpty().withMessage('Link title is required'),
     body('links.*.url').if(body('links').exists()).trim().isURL().withMessage('Link URL must be valid'),
     body('tags').optional().isArray().withMessage('Tags must be an array'),
     body('tags.*').if(body('tags').exists()).trim().notEmpty().withMessage('Each tag must be a non-empty string'),
@@ -118,7 +126,7 @@ router.put(
     body('title').optional().trim().notEmpty().withMessage('Title cannot be empty if provided'),
     body('description').optional().trim().notEmpty().withMessage('Description cannot be empty if provided'),
     body('links').optional().isArray().withMessage('Links must be an array if provided'),
-    body('links.*.label').if(body('links').exists()).optional().trim().notEmpty().withMessage('Link label is required'),
+    body('links.*.title').if(body('links').exists()).optional().trim().notEmpty().withMessage('Link title is required'),
     body('links.*.url').if(body('links').exists()).optional().trim().isURL().withMessage('Link URL must be valid'),
     body('tags').optional().isArray().withMessage('Tags must be an array if provided'),
     body('tags.*').if(body('tags').exists()).optional().trim().notEmpty().withMessage('Each tag must be a non-empty string'),
