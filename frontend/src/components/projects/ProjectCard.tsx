@@ -3,6 +3,7 @@ import MarkdownToJsx from 'markdown-to-jsx';
 import { Project, ProjectLink } from 'types/index'; // Correct import path
 import Card from '@/components/common/Card';
 import Tag from '@/components/ui/Tag';
+import { useModal } from '@/context/ModalContext'; // Import the context hook
 // We can potentially add Icon component usage later if needed
 
 interface ProjectCardProps {
@@ -14,9 +15,19 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { openModal } = useModal(); // Get the openModal function from context
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  // Function to handle image click
+  const handleImageClick = () => {
+    if (project.media_urls && project.media_urls.length > 0 && !imageError) {
+      const imageUrl = project.media_urls[0];
+      const altText = `Screenshot of ${project.title}`;
+      openModal(imageUrl, altText); // Call openModal from context
+    }
   };
 
   // Defensive check for project data
@@ -78,13 +89,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
         {/* Right side: Image */}
         {!imageError && project.media_urls && project.media_urls.length > 0 && (
           <div className="md:w-1/3 lg:w-1/4 flex-shrink-0 md:self-center project-image-container">
-            <div className="relative overflow-hidden rounded-md shadow-sm h-32 md:h-40 bg-gray-100"> {/* Added bg placeholder */}
+            <div className="relative overflow-hidden rounded-md shadow-sm h-32 md:h-40 bg-gray-100">
               <img
                 src={project.media_urls[0]}
                 alt={`Screenshot of ${project.title}`}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center cursor-pointer"
                 onError={() => setImageError(true)}
                 loading="lazy"
+                onClick={handleImageClick}
               />
             </div>
           </div>
