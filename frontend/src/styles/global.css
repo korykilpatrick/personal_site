@@ -51,10 +51,6 @@
     @apply max-w-none leading-snug;
   }
   
-  .prose p {
-    @apply mb-2.5 text-sm md:text-base;
-  }
-  
   .prose img {
     @apply rounded-md my-4;
   }

@@ -54,7 +54,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
           {/* Title & Description */}
           <h2 className="text-lg font-bold mb-2 truncate">{project.title}</h2>
           {project.description && (
-             <p className="text-textSecondary mb-3 text-sm line-clamp-3">{project.description}</p>
+             <div className="text-textSecondary mb-3 text-sm prose prose-primary max-w-none prose-p:my-0 prose-headings:my-0">
+               <MarkdownToJsx>{project.description || ''}</MarkdownToJsx>
+             </div>
           )}
 
           {/* Links */}
