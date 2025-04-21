@@ -110,6 +110,10 @@ class ProjectModelClass extends BaseModel<SharedProject> { // Still uses SharedP
     if ('project_tags' in dbDataForUpdate && dbDataForUpdate.project_tags) {
       dbDataForUpdate.project_tags = JSON.stringify(dbDataForUpdate.project_tags) as any;
     }
+    // Add stringification for media_urls
+    if ('media_urls' in dbDataForUpdate && dbDataForUpdate.media_urls) {
+      dbDataForUpdate.media_urls = JSON.stringify(dbDataForUpdate.media_urls) as any;
+    }
 
     // Call base update with the mapped and explicitly stringified data
     const updatedRecord = await super.update(id, dbDataForUpdate as any);
