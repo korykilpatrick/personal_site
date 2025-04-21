@@ -1,5 +1,7 @@
 // Shared types for both frontend and backend
 
+import { LinkIconName } from '@/components/common/LinkIcon';
+
 /**
  * Frontend Application Configuration
  */
@@ -82,7 +84,7 @@ export interface BookshelfWithBooks extends Bookshelf {
 export interface ProjectLink {
   title: string;
   url: string;
-  icon?: string;
+  icon?: LinkIconName;
 }
 
 /**
@@ -111,7 +113,7 @@ export interface MediaEntry {
 export interface WorkEntryLink {
   title: string;
   url: string;
-  icon?: string;
+  icon?: LinkIconName;
 }
 
 /**
