@@ -2,6 +2,66 @@ import { BaseModel } from './BaseModel';
 import { WorkEntry as SharedWorkEntry, WorkEntryLink } from '../../../types';
 
 /**
+ * Represents the structure of the work_entries table in the database,
+ * acknowledging that links will be stringified before DB operations.
+ */
+interface WorkEntryDbRecord extends Omit<SharedWorkEntry, 'links'> {
+  work_entry_links?: string | null; // Changed type to string | null
+}
+
+/**
+ * Helper function to map SharedWorkEntry to DB record structure
+ */
+const mapToDbRecord = (workData: Partial<SharedWorkEntry>): Partial<WorkEntryDbRecord> => {
+  const dbRecord: Partial<WorkEntryDbRecord> = { ...workData }; // Copy non-link fields
+  
+  // Map links to work_entry_links only if links is present in workData
+  if ('links' in workData) {
+    // Explicitly stringify the links array for the JSONB column
+    dbRecord.work_entry_links = workData.links ? JSON.stringify(workData.links) : null;
+    delete (dbRecord as Partial<SharedWorkEntry>).links; 
+  }
+  
+  return dbRecord;
+};
+
+/**
+ * Helper function to map DB record structure back to SharedWorkEntry
+ * (used after create/update operations that return the DB record)
+ */
+const mapToSharedWorkEntry = (dbRecord: any | null): SharedWorkEntry | null => {
+  // Accept 'any' here because the record returned by super.create/update might
+  // not perfectly match WorkEntryDbRecord if base model returns generic T.
+  if (!dbRecord) return null;
+  
+  // Perform a safer copy
+  const { work_entry_links, ...rest } = dbRecord;
+  const sharedEntry: SharedWorkEntry = { ...rest } as SharedWorkEntry;
+
+  // Try to parse work_entry_links if it exists and is a string
+  let parsedLinks: WorkEntryLink[] = [];
+  if (typeof work_entry_links === 'string') {
+    try {
+      const parsed = JSON.parse(work_entry_links);
+      if (Array.isArray(parsed)) {
+        // Basic validation: Check if items look like WorkEntryLink (optional)
+        parsedLinks = parsed; // Assume structure is correct for now
+      }
+    } catch (e) {
+      console.error('Failed to parse work_entry_links from DB', e);
+      // Keep parsedLinks as empty array
+    }
+  } else if (Array.isArray(work_entry_links)) {
+    // If Knex/pg already parsed it into an array (common on read)
+    parsedLinks = work_entry_links;
+  }
+  
+  sharedEntry.links = parsedLinks;
+
+  return sharedEntry;
+};
+
+/**
  * WorkEntry model using BaseModel for CRUD operations.
  * Handles JSONB columns directly via Knex.
  */
@@ -56,23 +116,44 @@ class WorkEntryModelClass extends BaseModel<SharedWorkEntry> { // Use SharedWork
 
   /**
    * Create a new work entry.
-   * (Alias for inherited create)
+   * Handles mapping `links` to `work_entry_links`.
    */
   async createFromApi(workEntry: Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>): Promise<SharedWorkEntry> {
-    return super.create(workEntry); // Takes and returns SharedWorkEntry
+    const dbRecordData = mapToDbRecord(workEntry);
+    
+    // Ensure all required fields for creation are present (adjust if base model handles defaults)
+    // Here, we assume workEntry provides all necessary fields for a new record.
+    // The cast to Partial<SharedWorkEntry> for super.create might still be needed
+    // depending on BaseModel's generic constraints, but the input *data* 
+    // (dbRecordData) should represent a complete record for creation.
+    
+    // Use the inherited create method with the mapped data
+    // Cast dbRecordData to the expected input type for super.create
+    const createdDbRecord = await super.create(dbRecordData as Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>); 
+
+    // Map the returned DB record back to the shared type
+    // Use a non-null assertion as create should always return a record or throw
+    return mapToSharedWorkEntry(createdDbRecord)!; // Pass the raw returned record
   }
 
   /**
    * Update a work entry.
-   * (Alias for inherited update)
+   * Handles mapping `links` to `work_entry_links`.
    */
-  async updateFromApi(id: number, workEntry: Partial<Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>>): Promise<SharedWorkEntry | null> {
-    if (Object.keys(workEntry).length === 0) {
-        return this.getByIdApi(id);
+  async updateFromApi(id: number, workEntryUpdate: Partial<Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>>): Promise<SharedWorkEntry | null> {
+    if (Object.keys(workEntryUpdate).length === 0) {
+      return this.getByIdApi(id); // Return existing if update is empty
     }
-    const updatedRecord = await super.update(id, workEntry);
-    if (!updatedRecord) return null;
-    return this.getByIdApi(id);
+
+    const dbRecordUpdate = mapToDbRecord(workEntryUpdate);
+    
+    // Use the inherited update method. Cast the update payload appropriately.
+    const updatedDbRecord = await super.update(id, dbRecordUpdate as Partial<SharedWorkEntry>); 
+    
+    if (!updatedDbRecord) return null;
+    
+    // Map the returned DB record back to the shared type
+    return mapToSharedWorkEntry(updatedDbRecord); // Pass the raw returned record
   }
   
   // Inherited methods now operate on SharedWorkEntry directly

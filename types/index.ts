@@ -124,7 +124,7 @@ export interface WorkEntry extends BaseRecord {
   role: string;
   duration: string;
   achievements: string;
-  links?: WorkEntryLink[]; // Use new link type
+  links?: WorkEntryLink[];
 }
 
 /**

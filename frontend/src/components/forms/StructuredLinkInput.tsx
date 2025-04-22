@@ -31,12 +31,15 @@ const StructuredLinkInput = <T extends AnyLink>({
 
   const validateLink = (link: T): LinkErrors => {
     const linkErrors: LinkErrors = {};
-    if (!isRequired(link.title)) {
+    // Validate the *trimmed* title
+    if (!isRequired(link.title?.trim())) {
       linkErrors.title = 'Title is required.';
     }
-    if (!isRequired(link.url)) {
+    // Validate the *trimmed* URL
+    const trimmedUrl = link.url?.trim();
+    if (!isRequired(trimmedUrl)) {
       linkErrors.url = 'URL is required.';
-    } else if (!isUrl(link.url)) {
+    } else if (!isUrl(trimmedUrl)) {
       linkErrors.url = 'Must be a valid URL (e.g., https://...).';
     }
     return linkErrors;
@@ -68,16 +71,17 @@ const StructuredLinkInput = <T extends AnyLink>({
   };
 
   const handleLinkChange = (index: number, field: 'title' | 'url', rawValue: string) => {
-    const trimmedValue = rawValue.trim();
+    // No trimming here - update with raw value
     const newLinks = [...value];
     let updatedLink = { ...newLinks[index] };
 
-    updatedLink[field] = trimmedValue;
+    updatedLink[field] = rawValue; // Use rawValue directly
 
     // If URL changed, determine the icon name
     let iconUpdate: Partial<T> = {};
     if (field === 'url') {
-      iconUpdate = updateIconBasedOnUrl(trimmedValue, updatedLink);
+      // Still use trimmed value for icon determination, but don't change state
+      iconUpdate = updateIconBasedOnUrl(rawValue.trim(), updatedLink);
     }
 
     // Merge field update and potential icon update
@@ -85,14 +89,34 @@ const StructuredLinkInput = <T extends AnyLink>({
 
     newLinks[index] = updatedLink;
 
-    // Validate the updated link
-    const linkErrors = validateLink(updatedLink);
+    // Remove validation from here
+    // const linkErrors = validateLink(updatedLink);
+    // setErrors(prevErrors => ({
+    //   ...prevErrors,
+    //   [index]: linkErrors,
+    // }));
+
+    onChange(newLinks);
+  };
+
+  // New handler for blur event to trigger validation
+  const handleBlur = (index: number) => {
+    const linkToValidate = value[index];
+    const linkErrors = validateLink(linkToValidate);
     setErrors(prevErrors => ({
       ...prevErrors,
       [index]: linkErrors,
     }));
 
-    onChange(newLinks);
+    // Optional: If you want to trim the value on blur as well, 
+    // you can update the state here after validation.
+    // const trimmedTitle = linkToValidate.title?.trim();
+    // const trimmedUrl = linkToValidate.url?.trim();
+    // if (trimmedTitle !== linkToValidate.title || trimmedUrl !== linkToValidate.url) {
+    //   const newLinks = [...value];
+    //   newLinks[index] = { ...linkToValidate, title: trimmedTitle || '', url: trimmedUrl || '' };
+    //   onChange(newLinks);
+    // }
   };
 
   const addLink = () => {
@@ -137,6 +161,7 @@ const StructuredLinkInput = <T extends AnyLink>({
                   disabled={disabled}
                   className={`w-full ${linkErrors.title ? 'border-red-500' : ''}`}
                   aria-describedby={linkErrors.title ? `link-${index}-title-error` : undefined}
+                  onBlur={() => handleBlur(index)}
                 />
                 {linkErrors.title && (
                   <p id={`link-${index}-title-error`} className="text-red-600 text-xs mt-1">{linkErrors.title}</p>
@@ -152,6 +177,7 @@ const StructuredLinkInput = <T extends AnyLink>({
                   disabled={disabled}
                   className={`w-full ${linkErrors.url ? 'border-red-500' : ''}`}
                   aria-describedby={linkErrors.url ? `link-${index}-url-error` : undefined}
+                  onBlur={() => handleBlur(index)}
                 />
                 {linkErrors.url && (
                   <p id={`link-${index}-url-error`} className="text-red-600 text-xs mt-1">{linkErrors.url}</p>

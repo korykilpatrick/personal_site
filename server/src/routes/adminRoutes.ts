@@ -50,8 +50,7 @@ router.post(
     body('company').trim().notEmpty().withMessage('Company is required'),
     body('role').trim().notEmpty().withMessage('Role is required'),
     body('duration').trim().notEmpty().withMessage('Duration is required'),
-    body('achievements').isArray({ min: 1 }).withMessage('Achievements must be a non-empty array'),
-    body('achievements.*').trim().notEmpty().withMessage('Each achievement must be a non-empty string'), // Validate items within the array
+    body('achievements').isString().trim().notEmpty().withMessage('Achievements text is required and cannot be empty'),
     // Add other field validations as necessary based on SharedWorkEntry type
   ],
   handleValidationErrors, // Handle validation errors
@@ -66,8 +65,7 @@ router.put(
     body('company').optional().trim().notEmpty().withMessage('Company cannot be empty if provided'),
     body('role').optional().trim().notEmpty().withMessage('Role cannot be empty if provided'),
     body('duration').optional().trim().notEmpty().withMessage('Duration cannot be empty if provided'),
-    body('achievements').optional().isArray().withMessage('Achievements must be an array if provided'),
-    body('achievements.*').if(body('achievements').exists()).trim().notEmpty().withMessage('Each achievement must be a non-empty string'),
+    body('achievements').optional().isString().trim().notEmpty().withMessage('Achievements cannot be empty if provided'),
     // Ensure at least one field is present for update (can be complex with express-validator, might keep a light check in controller or service)
     // Consider adding a check like:
     // body().custom((value, { req }) => {

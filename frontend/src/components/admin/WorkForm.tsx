@@ -22,36 +22,37 @@ const WorkForm: React.FC<WorkFormProps> = ({
     company: '',
     role: '',
     duration: '',
-    achievements: '',
-    links: [] // Initialize with the correct type WorkEntryLink[]
+    achievements: '', // Reverted to initialize as empty string
+    links: []
   });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
+      // Set form data directly, achievements is now a string
       setFormData({
         company: initialData.company || '',
         role: initialData.role || '',
         duration: initialData.duration || '',
-        achievements: initialData.achievements || '',
-        // Ensure initial links are valid WorkEntryLink[] or default to empty array
+        achievements: initialData.achievements || '', // Assign string directly
         links: Array.isArray(initialData.links) ? initialData.links : [] 
       });
     } else {
-        // Clear form when initialData is null (e.g., switching from edit to create)
+        // Clear form
         setFormData({ company: '', role: '', duration: '', achievements: '', links: [] });
     }
   }, [initialData]);
 
+  // Unified change handler for simple inputs and textarea
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    // Only handle simple fields here
+    // Handle all fields except links directly
     if (name !== 'links') { 
         setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // Handler for the new structured links component
+  // Handler for structured links
   const handleLinksChange = (updatedLinks: WorkEntryLink[]) => {
     setFormData(prev => ({ ...prev, links: updatedLinks }));
   };
@@ -60,8 +61,9 @@ const WorkForm: React.FC<WorkFormProps> = ({
     e.preventDefault();
     setError(null);
     try {
-      // No need to join links, formData already has the correct structure
-      await onSubmit(formData);
+      // Submit formData directly, no need to process achievements separately
+      await onSubmit(formData); 
+      
       if (!initialData) { // Clear form on create success only
         setFormData({ company: '', role: '', duration: '', achievements: '', links: [] });
       }
@@ -82,7 +84,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
           id="company"
           name="company"
           value={formData.company}
-          onChange={handleChange}
+          onChange={handleChange} // Use unified handler
           required
           disabled={isLoading}
         />
@@ -94,7 +96,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
           id="role"
           name="role"
           value={formData.role}
-          onChange={handleChange}
+          onChange={handleChange} // Use unified handler
           required
           disabled={isLoading}
         />
@@ -106,7 +108,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
           id="duration"
           name="duration"
           value={formData.duration}
-          onChange={handleChange}
+          onChange={handleChange} // Use unified handler
           required
           disabled={isLoading}
           placeholder="e.g., Jan 2020 - Present"
@@ -117,10 +119,11 @@ const WorkForm: React.FC<WorkFormProps> = ({
         <Textarea
           id="achievements"
           name="achievements"
-          value={formData.achievements}
-          onChange={handleChange}
+          value={formData.achievements} // Bind directly to formData.achievements (string)
+          onChange={handleChange} // Use unified handler
           required
           disabled={isLoading}
+          rows={6}
         />
       </FormField>
 
