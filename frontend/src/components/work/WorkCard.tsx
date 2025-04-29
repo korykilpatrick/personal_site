@@ -22,7 +22,11 @@ const WorkCard: React.FC<WorkCardProps> = ({ work }) => {
           <div className="flex-grow">
             {/* Combined Role and Company */}
             <p className="text-md font-semibold text-textPrimary mb-0">
-              {work.role} <span className="text-sm text-textSecondary font-normal">at {work.company}</span>
+              {work.role}
+              {/* Conditionally render the company part */}
+              {work.company && (
+                <span className="text-sm text-textSecondary font-normal"> at {work.company}</span>
+              )}
             </p>
           </div>
           <span className="text-xs text-textTertiary flex-shrink-0 pt-1">{work.duration}</span>

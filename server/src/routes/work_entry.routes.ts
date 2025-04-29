@@ -42,7 +42,7 @@ router.get(
 router.post(
   '/',
   [
-    body('company').notEmpty().withMessage('Company is required'),
+    body('company').optional().isString().trim(),
     body('role').notEmpty().withMessage('Role is required'),
     body('duration').notEmpty().withMessage('Duration is required'),
     body('achievements').notEmpty().withMessage('Achievements are required'),
@@ -60,7 +60,7 @@ router.put(
   '/:id',
   [
     param('id').isInt().withMessage('ID must be an integer'),
-    body('company').optional().notEmpty().withMessage('Company cannot be empty'),
+    body('company').optional().isString().trim(),
     body('role').optional().notEmpty().withMessage('Role cannot be empty'),
     body('duration').optional().notEmpty().withMessage('Duration cannot be empty'),
     body('achievements').optional().notEmpty().withMessage('Achievements cannot be empty'),

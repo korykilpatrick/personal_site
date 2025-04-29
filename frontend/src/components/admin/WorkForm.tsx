@@ -85,7 +85,6 @@ const WorkForm: React.FC<WorkFormProps> = ({
           name="company"
           value={formData.company}
           onChange={handleChange} // Use unified handler
-          required
           disabled={isLoading}
         />
       </FormField>

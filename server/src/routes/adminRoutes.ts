@@ -47,7 +47,7 @@ router.post(
   '/work', 
   protect, 
   [ // Add body validation
-    body('company').trim().notEmpty().withMessage('Company is required'),
+    body('company').optional().isString().trim(), // Made optional
     body('role').trim().notEmpty().withMessage('Role is required'),
     body('duration').trim().notEmpty().withMessage('Duration is required'),
     body('achievements').isString().trim().notEmpty().withMessage('Achievements text is required and cannot be empty'),
@@ -60,22 +60,15 @@ router.post(
 router.put(
   '/work/:id', 
   protect, 
-  validateIdParam, // Add ID validation
-  [ // Add body validation (optional for updates)
-    body('company').optional().trim().notEmpty().withMessage('Company cannot be empty if provided'),
-    body('role').optional().trim().notEmpty().withMessage('Role cannot be empty if provided'),
-    body('duration').optional().trim().notEmpty().withMessage('Duration cannot be empty if provided'),
-    body('achievements').optional().isString().trim().notEmpty().withMessage('Achievements cannot be empty if provided'),
-    // Ensure at least one field is present for update (can be complex with express-validator, might keep a light check in controller or service)
-    // Consider adding a check like:
-    // body().custom((value, { req }) => {
-    //   if (Object.keys(req.body).length === 0) {
-    //     throw new Error('Update body cannot be empty');
-    //   }
-    //   return true;
-    // })
+  [
+    param('id').isInt({ min: 1 }).withMessage('Invalid ID format'),
+    body('company').optional().isString().trim(), // Made optional
+    body('role').optional().trim().notEmpty().withMessage('Role cannot be empty'),
+    body('duration').optional().trim().notEmpty().withMessage('Duration cannot be empty'),
+    body('achievements').optional().isString().trim().notEmpty().withMessage('Achievements cannot be empty'),
+    // Add other field validations as necessary
   ],
-  handleValidationErrors, // Handle validation errors
+  handleValidationErrors,
   workController.updateWorkEntry
 );
 
