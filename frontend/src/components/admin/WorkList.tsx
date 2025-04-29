@@ -60,7 +60,7 @@ const WorkList: React.FC = () => {
         {/* Header Row - Removed Role, updated grid columns */} 
         <div className="hidden md:grid grid-cols-[auto_1fr_1fr_auto] gap-4 px-4 py-2 font-medium text-gray-600 border-b">
           <span>ID</span>
-          <span>Company</span>
+          <span>Role</span>
           <span>Duration</span>
           <span>Actions</span>
         </div>
@@ -71,7 +71,7 @@ const WorkList: React.FC = () => {
             className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_auto] gap-3 md:gap-4 px-4 py-3 border rounded-md hover:bg-gray-50 items-center"
           >
             <span className="text-sm font-medium text-gray-500 md:text-base md:font-normal md:text-inherit">{entry.id}</span>
-            <span className="font-medium truncate">{entry.company}</span>
+            <span className="font-medium truncate">{entry.role}</span>
             <span className="text-xs text-gray-500 md:text-sm">{entry.duration}</span>
             <div className="flex space-x-2 justify-end md:justify-start"> {/* Action buttons */} 
               <Button 
