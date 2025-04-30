@@ -1,48 +1,41 @@
 import React, { useState } from 'react';
-import MarkdownToJsx from 'markdown-to-jsx';
-import { Project, ProjectLink } from 'types/index'; // Correct import path
 import Card from '@/components/common/Card';
 import Tag from '@/components/ui/Tag';
-import { useModal } from '@/context/ModalContext'; // Import the context hook
-import LinkIcon from '@/components/common/LinkIcon'; // Import the new LinkIcon component
-// We can potentially add Icon component usage later if needed
+import { useModal } from '@/context/ModalContext';
+import LinkIcon from '@/components/common/LinkIcon';
+import { Project, ProjectLink } from 'types/index';
+import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 
 interface ProjectCardProps {
   project: Project;
-  /** Callback function when a tag is clicked. */
   onTagClick: (tag: string) => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { openModal } = useModal(); // Get the openModal function from context
+  const { openModal } = useModal();
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
-  // Function to handle image click
   const handleImageClick = () => {
     if (project.media_urls && project.media_urls.length > 0 && !imageError) {
       const imageUrl = project.media_urls[0];
       const altText = `Screenshot of ${project.title}`;
-      openModal(imageUrl, altText); // Call openModal from context
+      openModal(imageUrl, altText);
     }
   };
 
-  // Defensive check for project data
   if (!project) {
-    return null; // Or render some placeholder/error state
+    return null;
   }
 
   return (
     <Card variant="hover" padding="none" className="project-card">
-      {/* Main content area */}
       <div className="p-4 md:p-5 flex flex-col md:flex-row gap-4 md:items-start">
-        {/* Left side: Tags, Title, Desc, Links */}
-        <div className="md:flex-1 min-w-0"> {/* Added min-w-0 for flex truncation */}
-          {/* Tags */}
+        <div className="md:flex-1 min-w-0">
           {project.tags && project.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {project.tags.map((tag: string) => (
@@ -51,41 +44,38 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
             </div>
           )}
 
-          {/* Title & Description */}
           <h2 className="text-lg font-bold mb-2 truncate">{project.title}</h2>
+
           {project.description && (
-             <div className="text-textSecondary mb-3 text-sm prose prose-primary max-w-none prose-p:my-0 prose-headings:my-0">
-               <MarkdownToJsx>{project.description || ''}</MarkdownToJsx>
-             </div>
+            <div className="text-textSecondary mb-3 text-sm prose prose-primary max-w-none prose-p:my-0 prose-headings:my-0">
+              <MarkdownRenderer>{project.description}</MarkdownRenderer>
+            </div>
           )}
 
-          {/* Links */}
           {project.links && project.links.length > 0 && (
-             <div className="flex flex-wrap gap-2 mb-0">
-               {project.links.map((link: ProjectLink, index: number) => (
-                 <a
-                   key={index}
-                   href={link.url}
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className="inline-flex items-center px-2.5 py-1 border border-primary text-primary rounded text-xs hover:bg-primary/10 transition"
-                   aria-label={`Link to ${link.title || link.url}`}
-                 >
-                   {/* Use the LinkIcon component */}
-                   <LinkIcon 
-                     iconName={link.icon} 
-                     url={link.url} // Pass URL as fallback if iconName is missing
-                     className="w-4 h-4 mr-1.5" 
-                     ariaLabel="" // Let LinkIcon handle default aria-label based on type
-                   />
-                   {link.title || 'Link'}
-                 </a>
-               ))}
-             </div>
+            <div className="flex flex-wrap gap-2 mb-0">
+              {project.links.map((link: ProjectLink, index: number) => (
+                <a
+                  key={index}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2.5 py-1 border border-primary text-primary rounded text-xs hover:bg-primary/10 transition"
+                  aria-label={`Link to ${link.title || link.url}`}
+                >
+                  <LinkIcon
+                    iconName={link.icon}
+                    url={link.url}
+                    className="w-4 h-4 mr-1.5"
+                    ariaLabel=""
+                  />
+                  {link.title || 'Link'}
+                </a>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Right side: Image */}
         {!imageError && project.media_urls && project.media_urls.length > 0 && (
           <div className="md:w-1/3 lg:w-1/4 flex-shrink-0 md:self-center project-image-container">
             <div className="relative overflow-hidden rounded-md shadow-sm h-32 md:h-40 bg-gray-100">
@@ -102,14 +92,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
         )}
       </div>
 
-      {/* Expandable Writeup Section */}
       {project.writeup && (
         <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-gray-100">
           <button
             onClick={toggleExpand}
             className="flex items-center text-primary hover:underline text-sm font-medium mt-3 mb-3"
             aria-expanded={isExpanded}
-            aria-controls={`project-details-${project.id}`} // Added aria-controls
+            aria-controls={`project-details-${project.id}`}
           >
             {isExpanded ? 'Hide Details' : 'Show Details'}
             <svg
@@ -126,11 +115,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTagClick }) => {
 
           {isExpanded && (
             <div
-              id={`project-details-${project.id}`} // Added id for aria-controls
+              id={`project-details-${project.id}`}
               className="prose prose-primary max-w-none text-sm"
             >
-              {/* Ensure MarkdownToJsx handles potential null/undefined writeup gracefully */}
-              <MarkdownToJsx>{project.writeup || ''}</MarkdownToJsx>
+              <MarkdownRenderer>{project.writeup}</MarkdownRenderer>
             </div>
           )}
         </div>
