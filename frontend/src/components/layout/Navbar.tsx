@@ -25,10 +25,18 @@ const Navbar: React.FC = () => {
       <nav>
         {/* Desktop Navigation */}
         <div className="hidden md:grid grid-cols-3 items-center">
-          {/* Name on left */}
+          {/* Logo and Name on left */}
           <div className="justify-self-start">
-            <Link to="/" className="font-serif text-lg text-primary hover:no-underline whitespace-nowrap">
-              Kory Kilpatrick
+            {/* Link to homepage wrapping logo and name */}
+            <Link to="/" className="flex items-center space-x-2 hover:no-underline" aria-label="Homepage">
+              <img 
+                src="/images/logo.png" 
+                alt="" // Alt text moved to aria-label on link
+                className="h-8 w-auto" 
+              />
+              <span className="font-serif text-lg text-primary whitespace-nowrap">
+                Kory Kilpatrick
+              </span>
             </Link>
           </div>
           
@@ -103,8 +111,16 @@ const Navbar: React.FC = () => {
         {/* Mobile Navigation */}
         <div className="md:hidden flex flex-col items-center">
           <div className="w-full flex justify-between items-center">
-            <Link to="/" className="font-serif text-lg text-primary hover:no-underline whitespace-nowrap">
-              Kory Kilpatrick
+            {/* Logo and Name on left (mobile) */}
+            <Link to="/" className="flex items-center space-x-2 hover:no-underline" aria-label="Homepage">
+              <img 
+                src="/images/logo.png" 
+                alt="" // Alt text moved to aria-label on link
+                className="h-7 w-auto" 
+              />
+              <span className="font-serif text-lg text-primary whitespace-nowrap">
+                 Kory Kilpatrick
+              </span>
             </Link>
             
             {/* Mobile menu button */}
