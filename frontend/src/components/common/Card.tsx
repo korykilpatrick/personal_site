@@ -18,8 +18,8 @@ const Card: React.FC<CardProps> = ({
   const baseClasses = 'rounded-lg overflow-hidden';
 
   const variantClasses = {
-    default: 'bg-white shadow-sm',
-    hover: 'bg-white shadow-sm transition hover:shadow-md',
+    default: 'bg-white shadow-md',
+    hover: 'bg-white shadow-md transition hover:shadow-lg',
     outline: 'bg-white border border-gray-200',
   };
 
