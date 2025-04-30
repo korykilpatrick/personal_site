@@ -8,9 +8,6 @@ import useMultiSelect from '../hooks/useMultiSelect';
 import apiService from '../api/apiService';
 import { useBooks } from '../context/BooksContext';
 
-/**
- * Sort options for the books
- */
 const sortOptions: SortOption[] = [
   { label: 'Recently Read', value: 'date_read' },
   { label: 'Title', value: 'title' },
@@ -26,17 +23,15 @@ const BookshelfPage: React.FC = () => {
   const [shelvesLoading, setShelvesLoading] = useState(true);
   const [shelvesError, setShelvesError] = useState<Error | null>(null);
 
-  // Use a multiSelect for selecting shelf filters
   const {
     selectedItems: selectedShelves,
     toggleSelection: toggleShelfSelection,
     clearSelection,
   } = useMultiSelect<number>([]);
 
-  // Sorting
   const [sortBy, setSortBy] = useState<string>('date_read');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch shelves once, but do it here or optionally prefetch in the same manner
   useEffect(() => {
     const fetchShelves = async () => {
       setShelvesLoading(true);
@@ -57,12 +52,19 @@ const BookshelfPage: React.FC = () => {
   const filteredAndSortedBooks = useMemo(() => {
     let result = [...(allBooks || [])];
 
-    // Filter by shelves if any are selected
+    // Filter by shelves
     if (selectedShelves.length > 0) {
-      result = result.filter((b: BookWithShelves) => {
-        if (!b.shelves) return false;
-        return b.shelves.some((shelf) => selectedShelves.includes(shelf.id));
-      });
+      result = result.filter((b: BookWithShelves) =>
+        b.shelves && b.shelves.some((shelf) => selectedShelves.includes(shelf.id))
+      );
+    }
+
+    // Filter by search query (case-insensitive)
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter((b: BookWithShelves) =>
+        b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query)
+      );
     }
 
     // Sort local
@@ -83,19 +85,15 @@ const BookshelfPage: React.FC = () => {
     });
 
     return result;
-  }, [allBooks, selectedShelves, sortBy]);
+  }, [allBooks, selectedShelves, sortBy, searchQuery]);
 
-  // Priority: if context loading fails, that means no books. If shelves fail, that's separate.
   if (booksLoading) {
-    // Show combined loading if shelves might still be fetching
     return <Loading className="h-64" />;
   }
   if (booksError) {
     return <ErrorDisplay error={booksError} />;
   }
   if (shelvesLoading && !booksError) {
-    // If we do have books but are still waiting on shelves,
-    // we can show partial UI. But let's just show loading for shelves:
     return <Loading className="h-64" />;
   }
   if (shelvesError) {
@@ -114,6 +112,8 @@ const BookshelfPage: React.FC = () => {
         onToggleShelf={toggleShelfSelection}
         onClearShelves={clearSelection}
         bookCount={filteredAndSortedBooks.length}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
       <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 85, height: 128 }} />
     </>

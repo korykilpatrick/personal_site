@@ -1,7 +1,7 @@
 import React from 'react';
 import { MultiSelectDropdown, FilterPill, SortDropdown } from '../ui';
-import { Bookshelf } from 'types/index'; // Correct path
-import { SortOption } from 'types/index'; // Correct path
+import { Bookshelf, SortOption } from 'types/index';
+import SearchInput from '@/components/common/SearchInput';
 
 interface BookshelfControlsProps {
   sortOptions: SortOption[];
@@ -12,6 +12,8 @@ interface BookshelfControlsProps {
   onToggleShelf: (id: number) => void;
   onClearShelves: () => void;
   bookCount: number;
+  searchQuery: string;
+  onSearchChange: (val: string) => void;
 }
 
 const BookshelfControls: React.FC<BookshelfControlsProps> = ({
@@ -23,10 +25,11 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   onToggleShelf,
   onClearShelves,
   bookCount,
+  searchQuery,
+  onSearchChange,
 }) => {
   return (
     <div className="mb-3">
-      {/* Filtering and Sorting Controls - compact horizontal layout */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center">
           <span className="text-xs font-medium text-stone-700 mr-1.5">Sort By</span>
@@ -48,13 +51,20 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             className="w-36"
           />
         </div>
-        
+
+        <div className="flex items-center">
+          <SearchInput
+            value={searchQuery}
+            onChange={onSearchChange}
+            placeholder="Search books..."
+            debounceMs={300}
+            className="w-40"
+          />
+        </div>
+
         <div className="text-xs text-stone-500 ml-auto">Showing {bookCount} books</div>
       </div>
 
-      {/* Container to reserve space for selected bookshelves pills */}
-      {/* Added min-h-8 (2rem) to ensure space is reserved even when empty */}
-      {/* Added mt-3 for spacing above */}
       <div className="min-h-8 mt-3"> 
         {selectedShelfIds.length > 0 && (
           <div className="flex flex-wrap gap-1.5"> 
@@ -67,7 +77,6 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
                   onRemove={() => onToggleShelf(shelf.id)}
                 />
               ))}
-
             {selectedShelfIds.length > 1 && (
               <button
                 onClick={onClearShelves}
