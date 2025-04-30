@@ -15,7 +15,7 @@ const Card: React.FC<CardProps> = ({
   className = '',
   onClick,
 }) => {
-  const baseClasses = 'rounded-lg overflow-hidden';
+  const baseClasses = 'rounded-lg overflow-hidden border border-stone-200';
 
   const variantClasses = {
     default: 'bg-white shadow-md',
