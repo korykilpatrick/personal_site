@@ -25,7 +25,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   bookCount,
 }) => {
   return (
-    <div className="mb-5 space-y-2">
+    <div className="mb-3">
       {/* Filtering and Sorting Controls - compact horizontal layout */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center">
@@ -52,29 +52,33 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
         <div className="text-xs text-stone-500 ml-auto">Showing {bookCount} books</div>
       </div>
 
-      {/* Selected bookshelves pills */}
-      {selectedShelfIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {allBookshelves
-            .filter((shelf) => selectedShelfIds.includes(shelf.id))
-            .map((shelf) => (
-              <FilterPill
-                key={shelf.id}
-                label={shelf.name}
-                onRemove={() => onToggleShelf(shelf.id)}
-              />
-            ))}
+      {/* Container to reserve space for selected bookshelves pills */}
+      {/* Added min-h-8 (2rem) to ensure space is reserved even when empty */}
+      {/* Added mt-3 for spacing above */}
+      <div className="min-h-8 mt-3"> 
+        {selectedShelfIds.length > 0 && (
+          <div className="flex flex-wrap gap-1.5"> 
+            {allBookshelves
+              .filter((shelf) => selectedShelfIds.includes(shelf.id))
+              .map((shelf) => (
+                <FilterPill
+                  key={shelf.id}
+                  label={shelf.name}
+                  onRemove={() => onToggleShelf(shelf.id)}
+                />
+              ))}
 
-          {selectedShelfIds.length > 1 && (
-            <button
-              onClick={onClearShelves}
-              className="text-xs underline text-stone-500 hover:text-stone-700 self-center ml-1"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-      )}
+            {selectedShelfIds.length > 1 && (
+              <button
+                onClick={onClearShelves}
+                className="text-xs underline text-stone-500 hover:text-stone-700 self-center ml-1"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
