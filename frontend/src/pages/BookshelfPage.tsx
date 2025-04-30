@@ -78,7 +78,7 @@ const BookshelfPage: React.FC = () => {
           return (b.rating || 0) - (a.rating || 0);
         case 'date_read':
         default:
-          return new Date(b.date_read || 0).getTime() - new Date(a.date_read || 0).getTime();
+          return new Date(b.date_added || 0).getTime() - new Date(a.date_added || 0).getTime();
       }
     });
 
