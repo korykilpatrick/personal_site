@@ -4,7 +4,7 @@ import { Project, ProjectLink } from 'types/index';
 import { Button } from '../common'; // Select might not be needed directly here
 import { ErrorDisplay, Loading } from '../ui';
 // Import StructuredLinkInput, remove LinkListInput
-import { Input, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms'; // Remove MediaEntry from here
+import { FormInput, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms'; // Remove MediaEntry from here
 import { MediaEntry } from 'types/index'; // <-- Import MediaEntry from root types
 import StructuredLinkInput from '../forms/StructuredLinkInput';
 // Remove unused helper
@@ -165,7 +165,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <h3 className="text-lg font-semibold mb-4">{initialData ? 'Edit Project' : 'Create New Project'}</h3>
       
       <FormField label="Title:" htmlFor="title">
-        <Input
+        <FormInput
           type="text"
           id="title"
           name="title"

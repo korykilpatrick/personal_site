@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent, ChangeEvent } from 'react';
-import { Input } from './'; // Corrected import path (assuming index export)
+import { FormInput } from './'; // Corrected import path (assuming index export)
 import { Tag } from '../ui'; // Use Tag component for display
 import { Button } from '../common'; // For potential remove button
 import { isRequired } from '../../utils/validation'; // Import the validation utility
@@ -71,7 +71,7 @@ const TagInput: React.FC<TagInputProps> = ({
           )}
         </React.Fragment>
       ))}
-      <Input
+      <FormInput
         id={id || 'tag-input-field'}
         type="text"
         value={inputValue}

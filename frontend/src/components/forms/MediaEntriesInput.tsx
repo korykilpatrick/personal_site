@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, FormField } from './'; // Import Input from the same directory
+import { FormInput, FormField } from './'; // Import Input from the same directory
 import { Button, Select } from '../common';
 import { MediaEntry } from 'types/index'; // Correct path
 
@@ -41,7 +41,7 @@ const MediaEntriesInput: React.FC<MediaEntriesInputProps> = ({
             disabled={disabled}
             className="w-1/4"
           />
-          <Input
+          <FormInput
             type="text"
             name={`media_url_${index}`}
             placeholder="Media URL (e.g., /img.jpg or https://...)"

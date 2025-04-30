@@ -5,7 +5,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   // e.g., error?: string;
 }
 
-const Input: React.FC<InputProps> = ({ className = '', ...props }) => {
+const FormInput: React.FC<InputProps> = ({ className = '', ...props }) => {
   // Base input styling using Tailwind classes (matches styles used in forms)
   const baseInputStyles =
     "w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100";
@@ -18,4 +18,4 @@ const Input: React.FC<InputProps> = ({ className = '', ...props }) => {
   );
 };
 
-export default Input; 
+export default FormInput; 

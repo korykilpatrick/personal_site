@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
-import { Input } from './';
+import { FormInput } from './';
 import { Button } from '../common';
 import { isRequired, isUrl } from '../../utils/validation';
 
@@ -72,7 +72,7 @@ const LinkListInput: React.FC<LinkListInputProps> = ({
         return (
           <div key={index}>
             <div className="flex items-center space-x-2">
-              <Input
+              <FormInput
                 id={index === 0 ? id : undefined}
                 type="url"
                 name={`link_${index}`}

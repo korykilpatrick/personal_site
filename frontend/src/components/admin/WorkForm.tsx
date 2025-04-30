@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { WorkEntry, WorkEntryLink } from 'types/index';
 import { Button } from '../common'; // Corrected import path
 import { ErrorDisplay, Loading } from '../ui'; // Corrected import path
-import { Input, Textarea, FormField } from '../forms'; // Import new form components and FormField
+import { FormInput, Textarea, FormField } from '../forms'; // Import new form components and FormField
 import StructuredLinkInput from '../forms/StructuredLinkInput';
 
 interface WorkFormProps {
@@ -79,7 +79,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
       <h3 className="text-lg font-semibold mb-4">{initialData ? 'Edit Work Entry' : 'Create New Work Entry'}</h3>
 
       <FormField label="Company:" htmlFor="company">
-        <Input
+        <FormInput
           type="text"
           id="company"
           name="company"
@@ -90,7 +90,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
       </FormField>
 
       <FormField label="Role:" htmlFor="role">
-        <Input
+        <FormInput
           type="text"
           id="role"
           name="role"
@@ -102,7 +102,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
       </FormField>
 
       <FormField label="Duration:" htmlFor="duration">
-        <Input
+        <FormInput
           type="text"
           id="duration"
           name="duration"

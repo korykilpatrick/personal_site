@@ -1,5 +1,5 @@
-export { default as Input } from './Input';
-export type { InputProps } from './Input';
+export { default as FormInput } from './FormInput';
+export type { InputProps } from './FormInput';
 export { default as Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 export { default as FormField } from './FormField';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ProjectLink, WorkEntryLink } from 'types/index';
-import Input from './Input';
+import { FormInput } from './';
 import { Button } from '../common';
 import { FaTrashAlt, FaPlus } from 'react-icons/fa';
 import { isRequired, isUrl } from '../../utils/validation';
@@ -153,7 +153,7 @@ const StructuredLinkInput = <T extends AnyLink>({
 
             <div className="flex-grow space-y-1">
               <div>
-                <Input
+                <FormInput
                   type="text"
                   placeholder="Link Title (e.g., GitHub Repo)"
                   value={link.title}
@@ -169,7 +169,7 @@ const StructuredLinkInput = <T extends AnyLink>({
               </div>
 
               <div>
-                <Input
+                <FormInput
                   type="url"
                   placeholder="Link URL (https://...)"
                   value={link.url}

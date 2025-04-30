@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 
 // Shared form & UI components
-import { Input, FormField } from '../forms';
+import { FormInput, FormField } from '../forms';
 import { Button } from '../common';
 import { ErrorDisplay } from '../ui';
 
@@ -48,7 +48,7 @@ const LoginForm: React.FC = () => {
 
       {/* Username */}
       <FormField label="Username" htmlFor="username">
-        <Input
+        <FormInput
           id="username"
           type="text"
           value={username}
@@ -60,7 +60,7 @@ const LoginForm: React.FC = () => {
 
       {/* Password */}
       <FormField label="Password" htmlFor="password">
-        <Input
+        <FormInput
           id="password"
           type="password"
           value={password}
