@@ -1,78 +1,52 @@
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import type { Bookshelf, Book, BookWithShelves, Project, WorkEntry } from 'types/index';
+import axios from 'axios';
+import type { BookWithShelves, Bookshelf, Book, Project, WorkEntry } from 'types/index';
 import api from '../services/api';
 
-// API service methods
+// Centralized API service
 export const apiService = {
-  // Book related endpoints
-  getBooks: async (): Promise<Book[]> => {
-    const response = await api.get<Book[]>('/books');
+  /**
+   * Fetch books. If includeShelves is true, returns BookWithShelves (each book has shelves).
+   */
+  getBooks: async (includeShelves?: boolean): Promise<(Book | BookWithShelves)[]> => {
+    const response = await api.get<(Book | BookWithShelves)[]>('/books', {
+      params: { includeShelves: includeShelves ? 'true' : 'false' },
+    });
     return response.data;
   },
 
+  /**
+   * Fetch a single book by ID, including its shelves.
+   */
   getBookById: async (id: number): Promise<BookWithShelves> => {
     const response = await api.get<BookWithShelves>(`/books/${id}`);
     return response.data;
   },
 
+  /**
+   * Fetch all bookshelves.
+   */
   getBookshelves: async (): Promise<Bookshelf[]> => {
     const response = await api.get<Bookshelf[]>('/bookshelves');
     return response.data;
   },
 
-  getBooksByShelf: async (shelfId: number | undefined): Promise<Book[]> => {
-    if (shelfId === undefined) {
-      return apiService.getBooks();
-    }
-    const response = await api.get<Book[]>(`/bookshelves/${shelfId}/books`);
-    return response.data;
-  },
-
-  getBooksByShelves: async (shelfIds: number[]): Promise<Book[]> => {
-    if (shelfIds.length === 0) {
-      return apiService.getBooks();
-    }
-
-    // Using Promise.all to fetch books from multiple shelves in parallel
-    const promises = shelfIds.map((id) => api.get<Book[]>(`/bookshelves/${id}/books`));
-
-    const responses = await Promise.all(promises);
-
-    // Combine books from all shelves and remove duplicates
-    const allBooks = responses.flatMap((response) => response.data);
-    const uniqueBooks = allBooks.filter(
-      (book, index, self) => index === self.findIndex((b) => b.id === book.id),
-    );
-
-    return uniqueBooks;
-  },
-
-  getSortedBooks: async (sortBy: string = 'date_read'): Promise<Book[]> => {
-    const response = await api.get<Book[]>('/books', {
-      params: { sort: sortBy },
-    });
-    return response.data;
-  },
-
-  // Project related endpoints
+  // Project endpoints
   getProjects: async (tag?: string): Promise<Project[]> => {
     const response = await api.get<Project[]>('/projects', {
       params: tag ? { tag } : undefined,
     });
     return response.data;
   },
-
   getProjectById: async (id: number): Promise<Project> => {
     const response = await api.get<Project>(`/projects/${id}`);
     return response.data;
   },
 
-  // Work Entry related endpoints
+  // Work entry endpoints
   getWorkEntries: async (): Promise<WorkEntry[]> => {
     const response = await api.get<WorkEntry[]>('/work');
     return response.data;
   },
-
   getWorkEntryById: async (id: number): Promise<WorkEntry> => {
     const response = await api.get<WorkEntry>(`/work/${id}`);
     return response.data;

@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
+import { BooksProvider } from './context/BooksContext';
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 
@@ -24,32 +25,35 @@ const GlobalImageModal: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ModalProvider>
-      <div className="flex flex-col min-h-screen bg-background">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Layout><HomePage /></Layout>} />
-            <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-            <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
-            <Route path="/work" element={<Layout><WorkPage /></Layout>} />
-            <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedRoute />}>
-              <Route
-                path="/admin/*"
-                element={
-                  <Suspense fallback={<div>Loading Admin...</div>}>
-                    <AdminPage />
-                  </Suspense>
-                }
-              />
-            </Route>
-            <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-          </Routes>
-        </main>
-        <Footer />
-        <GlobalImageModal />
-      </div>
+      {/* Provide books context to entire app, so no waiting in BookshelfPage */}
+      <BooksProvider>
+        <div className="flex flex-col min-h-screen bg-background">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Layout><HomePage /></Layout>} />
+              <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+              <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
+              <Route path="/work" element={<Layout><WorkPage /></Layout>} />
+              <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route
+                  path="/admin/*"
+                  element={
+                    <Suspense fallback={<div>Loading Admin...</div>}>
+                      <AdminPage />
+                    </Suspense>
+                  }
+                />
+              </Route>
+              <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
+            </Routes>
+          </main>
+          <Footer />
+          <GlobalImageModal />
+        </div>
+      </BooksProvider>
     </ModalProvider>
   );
 };

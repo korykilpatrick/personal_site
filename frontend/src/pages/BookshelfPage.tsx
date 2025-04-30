@@ -1,23 +1,16 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import apiService from '../api/apiService';
-import {
-  Loading,
-  ErrorDisplay,
-  FilterButton,
-  EmptyState,
-  MultiSelectDropdown,
-  FilterPill,
-  SortDropdown,
-} from '../components/ui';
-import { BookCard } from '../components/books';
-import useMultiSelect from '../hooks/useMultiSelect';
-import useDynamicBookSize from '../hooks/useDynamicBookSize';
-import { Book, Bookshelf, SortOption } from 'types/index';
+import React, { useMemo, useEffect, useState } from 'react';
+import { Loading, ErrorDisplay } from '../components/ui';
+import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
 import PersonalNote from '../components/bookshelf/PersonalNote';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
+import useMultiSelect from '../hooks/useMultiSelect';
+import apiService from '../api/apiService';
+import { useBooks } from '../context/BooksContext';
 
-// Sort options for the books
+/**
+ * Sort options for the books
+ */
 const sortOptions: SortOption[] = [
   { label: 'Recently Read', value: 'date_read' },
   { label: 'Title', value: 'title' },
@@ -27,71 +20,53 @@ const sortOptions: SortOption[] = [
 ];
 
 const BookshelfPage: React.FC = () => {
-  // State for the bookshelf data
-  const [bookshelves, setBookshelves] = useState<Bookshelf[]>([]);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { books: allBooks, loading: booksLoading, error: booksError } = useBooks();
 
-  // UI state
+  const [bookshelves, setBookshelves] = useState<Bookshelf[]>([]);
+  const [shelvesLoading, setShelvesLoading] = useState(true);
+  const [shelvesError, setShelvesError] = useState<Error | null>(null);
+
+  // Use a multiSelect for selecting shelf filters
   const {
     selectedItems: selectedShelves,
     toggleSelection: toggleShelfSelection,
     clearSelection,
   } = useMultiSelect<number>([]);
+
+  // Sorting
   const [sortBy, setSortBy] = useState<string>('date_read');
 
-  // Calculate dynamic book size using the simplified custom hook
-  const bookSize = useDynamicBookSize({
-    minWidth: 85, // More compact minimum width for dense display
-  });
-
-  // Fetch bookshelves on mount
+  // Fetch shelves once, but do it here or optionally prefetch in the same manner
   useEffect(() => {
-    const fetchBookshelves = async () => {
+    const fetchShelves = async () => {
+      setShelvesLoading(true);
+      setShelvesError(null);
       try {
-        const bookshelvesData = await apiService.getBookshelves();
-        setBookshelves(bookshelvesData);
+        const fetchedShelves = await apiService.getBookshelves();
+        setBookshelves(fetchedShelves);
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        const e = err instanceof Error ? err : new Error(String(err));
+        setShelvesError(e);
+      } finally {
+        setShelvesLoading(false);
       }
     };
-
-    fetchBookshelves();
+    fetchShelves();
   }, []);
 
-  // Fetch books when selected shelves or sort option changes
-  useEffect(() => {
-    const fetchBooks = async () => {
-      setLoading(true);
-      try {
-        let booksData: Book[];
+  const filteredAndSortedBooks = useMemo(() => {
+    let result = [...(allBooks || [])];
 
-        if (selectedShelves.length > 0) {
-          // Fetch books from selected shelves
-          booksData = await apiService.getBooksByShelves(selectedShelves);
-        } else {
-          // Fetch all books (the API will handle sorting server-side if possible)
-          booksData = await apiService.getSortedBooks(sortBy);
-        }
+    // Filter by shelves if any are selected
+    if (selectedShelves.length > 0) {
+      result = result.filter((b: BookWithShelves) => {
+        if (!b.shelves) return false;
+        return b.shelves.some((shelf) => selectedShelves.includes(shelf.id));
+      });
+    }
 
-        setBooks(booksData);
-        setError(null);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, [selectedShelves, sortBy]);
-
-  // Sort books client-side (in case the server doesn't support sorting or for multi-shelf selections)
-  const sortedBooks = useMemo(() => {
-    return [...books].sort((a, b) => {
+    // Sort local
+    result.sort((a, b) => {
       switch (sortBy) {
         case 'title':
           return a.title.localeCompare(b.title);
@@ -106,24 +81,30 @@ const BookshelfPage: React.FC = () => {
           return new Date(b.date_read || 0).getTime() - new Date(a.date_read || 0).getTime();
       }
     });
-  }, [books, sortBy]);
 
-  // Note: We're now using the toggleShelfSelection from useMultiSelect
+    return result;
+  }, [allBooks, selectedShelves, sortBy]);
 
-  if (loading) {
+  // Priority: if context loading fails, that means no books. If shelves fail, that's separate.
+  if (booksLoading) {
+    // Show combined loading if shelves might still be fetching
     return <Loading className="h-64" />;
   }
-
-  if (error) {
-    return <ErrorDisplay error={error} />;
+  if (booksError) {
+    return <ErrorDisplay error={booksError} />;
+  }
+  if (shelvesLoading && !booksError) {
+    // If we do have books but are still waiting on shelves,
+    // we can show partial UI. But let's just show loading for shelves:
+    return <Loading className="h-64" />;
+  }
+  if (shelvesError) {
+    return <ErrorDisplay error={shelvesError} />;
   }
 
   return (
     <>
-      {/* Personal Note Section */}
       <PersonalNote />
-
-      {/* Controls Section */}
       <BookshelfControls
         sortOptions={sortOptions}
         selectedSortBy={sortBy}
@@ -132,11 +113,9 @@ const BookshelfPage: React.FC = () => {
         selectedShelfIds={selectedShelves}
         onToggleShelf={toggleShelfSelection}
         onClearShelves={clearSelection}
-        bookCount={sortedBooks.length}
+        bookCount={filteredAndSortedBooks.length}
       />
-
-      {/* Books Grid */}
-      <BookshelfGrid books={sortedBooks} bookSize={bookSize} />
+      <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 85, height: 128 }} />
     </>
   );
 };

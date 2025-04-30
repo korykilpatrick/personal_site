@@ -7,12 +7,18 @@ import BookService from '../services/BookService';
  */
 export const BookController = {
   /**
-   * Get all books
+   * Get all books. If req.query.includeShelves === 'true', returns BookWithShelves.
    */
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const books = await BookService.getAll();
-      res.status(StatusCodes.OK).json(books);
+      const includeShelves = req.query.includeShelves === 'true';
+      if (includeShelves) {
+        const booksWithShelves = await BookService.getAllWithShelves();
+        return res.status(StatusCodes.OK).json(booksWithShelves);
+      } else {
+        const books = await BookService.getAll();
+        return res.status(StatusCodes.OK).json(books);
+      }
     } catch (error) {
       next(error);
     }
@@ -24,14 +30,11 @@ export const BookController = {
   getById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = parseInt(req.params.id, 10);
-      
-      const book = await BookService.getWithShelves(id);
-      
-      if (!book) {
+      const bookWithShelves = await BookService.getWithShelves(id);
+      if (!bookWithShelves) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
       }
-      
-      res.status(StatusCodes.OK).json(book);
+      res.status(StatusCodes.OK).json(bookWithShelves);
     } catch (error) {
       next(error);
     }
@@ -55,13 +58,10 @@ export const BookController = {
   update: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = parseInt(req.params.id, 10);
-      
       const updatedBook = await BookService.update(id, req.body);
-      
       if (!updatedBook) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
       }
-      
       res.status(StatusCodes.OK).json(updatedBook);
     } catch (error) {
       next(error);
@@ -74,13 +74,10 @@ export const BookController = {
   delete: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = parseInt(req.params.id, 10);
-      
       const deleted = await BookService.delete(id);
-      
       if (!deleted) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Book not found' });
       }
-      
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
