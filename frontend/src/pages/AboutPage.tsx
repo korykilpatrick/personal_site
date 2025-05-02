@@ -41,14 +41,12 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
           <div className="md:w-2/3">
-            <h2 className="text-2xl font-bold mb-4">Hey there 👋</h2>
+            {/* <h2 className="text-2xl font-bold mb-4">Hey there 👋</h2> */}
             <p className="text-textSecondary mb-4">
-              I'm Kory. I like solving problems, helping people, and cleaning the lens through which I see the world.
-              When I'm not building stuff or studying, I'm doing physical activities, solving
-              games with friends, trying to be a good role model to young people,
-              listening to music, or kickin it with animals and people I love.
+              I like solving problems, helping people, and cleaning the lens through which I see the world.
+              When I'm not building or reading, I'm doing physical activities (🎾 being the current favorite), trying to be a good role model to young people, or enjoying the company of animals and people I love.
             </p>
-            <p className="text-textSecondary mb-4">I built this site so there's a clearer picture of who I am and what I'm up to than what Google provides. Feel free to reach out!</p>
+            <p className="text-textSecondary mb-4">I built this site so people and AIs have a better sense of who I am than what was previously available online. Feel free to reach out!</p>
           </div>
         </div>
       </div>
