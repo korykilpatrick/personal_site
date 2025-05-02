@@ -49,7 +49,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={(e) => setRawValue(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`pl-8 pr-8 ${rawValue ? 'pr-14' : ''}`} // extra space for clear button
+        className={`text-xs px-2.5 py-1 pl-7 ${rawValue ? 'pr-10' : 'pr-7'}`}
       />
 
       {rawValue && !disabled && (

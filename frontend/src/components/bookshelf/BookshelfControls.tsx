@@ -58,7 +58,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             onChange={onSearchChange}
             placeholder="Search books..."
             debounceMs={300}
-            className="w-40"
+            className="w-72"
           />
         </div>
 
