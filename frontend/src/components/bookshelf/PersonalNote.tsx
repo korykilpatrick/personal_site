@@ -5,9 +5,7 @@ const PersonalNote: React.FC = () => {
   return (
     <Card variant="default" className="mb-5">
       <p className="text-base text-stone-700 italic leading-tight">
-        I've always found solace in books. This collection represents my journey through different
-        worlds, ideas, and perspectives. Each book has left its mark on me in some way. I hope you
-        find something here that piques your interest too!
+       Books have been my guides, mentors, and friends. No matter what I'm going through, someone else has faced it before and found just the right words. They've opened doors, connected me deeply with souls both living and dead, and been an endless source of wisdom, comfort, and joy. Each one adds a thread to a tapestry that maps my journey, which I've tracked since 2017 on <a href="https://www.goodreads.com/review/list/76731654?shelf=%23ALL%23" target="_blank" rel="noopener noreferrer">Goodreads</a>.
       </p>
     </Card>
   );
