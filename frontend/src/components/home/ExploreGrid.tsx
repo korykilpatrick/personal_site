@@ -6,8 +6,7 @@ interface ExploreGridProps {
 }
 
 /**
- * ExploreGrid
- * Displays navigation cards; hides Projects card when requested.
+ * ExploreGrid – centres each NavCard for a balanced layout.
  */
 const ExploreGrid: React.FC<ExploreGridProps> = ({ showProjects = true }) => {
   const navItems = [
@@ -18,7 +17,7 @@ const ExploreGrid: React.FC<ExploreGridProps> = ({ showProjects = true }) => {
   ].filter(item => !item.hidden);
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 justify-items-center">
       {navItems.map(item => (
         <NavCard key={item.title} title={item.title} href={item.href} emoji={item.emoji} />
       ))}

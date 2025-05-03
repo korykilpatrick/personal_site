@@ -1,25 +1,40 @@
 import React from 'react';
+import Section from '@/components/layout/Section';
 import WelcomeBlurb from '@/components/home/WelcomeBlurb';
 import SiteNote from '@/components/home/SiteNote';
 import CurrentlyReading from '@/components/home/CurrentlyReading';
 import QuoteCarousel from '@/components/home/QuoteCarousel';
+import ExploreGrid from '@/components/home/ExploreGrid';
 
-const HomePage: React.FC = () => (
-  <>
-    <WelcomeBlurb />
+/**
+ * HomePage
+ * Renders the landing content in a vertically-stacked,
+ * centrally-aligned flow; minimal horizontal distraction.
+ */
+const HomePage: React.FC = () => {
+  return (
+    <>
+      <Section className="text-center">
+        <WelcomeBlurb />
+      </Section>
 
-    <div className="my-10">
-      <SiteNote />
-    </div>
+      <Section className="text-center">
+        <SiteNote />
+      </Section>
 
-    <div className="my-10">
-      <CurrentlyReading />
-    </div>
+      <Section className="text-center">
+        <CurrentlyReading />
+      </Section>
 
-    <div className="my-10">
-      <QuoteCarousel />
-    </div>
-  </>
-);
+      <Section className="text-center">
+        <QuoteCarousel />
+      </Section>
+
+      {/* <Section className="text-center">
+        <ExploreGrid />
+      </Section> */}
+    </>
+  );
+};
 
 export default HomePage;

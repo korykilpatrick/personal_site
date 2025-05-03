@@ -6,15 +6,14 @@ import { BookCard } from '@/components/books';
 import EmptyState from '@/components/ui/EmptyState';
 
 /**
- * CurrentlyReading – lists in-progress books, nicely aligned at left.
+ * CurrentlyReading – lists in-progress books, horizontally centred.
  */
 const CurrentlyReading: React.FC = () => {
   const { books, loading } = useBooks();
 
   const reading: Book[] = useMemo(() => {
     const shelfMatch = (name?: string) =>
-      name &&
-      ['currently reading', 'currently-reading'].includes(name.toLowerCase());
+      name && ['currently reading', 'currently-reading'].includes(name.toLowerCase());
 
     const fromShelf = books.filter(
       b => b.shelves && b.shelves.some(s => shelfMatch((s as any).name))
@@ -32,16 +31,15 @@ const CurrentlyReading: React.FC = () => {
     );
   }
 
+  const containerClasses =
+    'flex gap-4 pb-1 ' +
+    (reading.length > 4 ? 'overflow-x-auto justify-start' : 'justify-center');
+
   return (
     <Card padding="lg">
       <h2 className="text-lg font-semibold mb-3">Currently Reading</h2>
 
-      <div
-        className={`
-          flex gap-4 pb-1
-          ${reading.length > 4 ? 'overflow-x-auto' : ''}
-        `}
-      >
+      <div className={containerClasses}>
         {reading.map(book => (
           <BookCard key={book.id} book={book} bookSize={{ width: 85, height: 128 }} />
         ))}
