@@ -1,21 +1,12 @@
-// Shared types for both frontend and backend
-
-import { LinkIconName } from '@/components/common/LinkIcon';
-
 /**
- * Frontend Application Configuration
+ * Frontend/back shared types
  */
 export interface AppConfig {
   apiBaseUrl: string;
-  // Add other frontend-specific configurations here
 }
 
-/**
- * Represents the authenticated user data.
- */
 export interface User {
-  username: string; // User's unique identifier
-  // role?: string; // Optional: User role for authorization
+  username: string;
 }
 
 /**
@@ -49,47 +40,31 @@ export interface Book extends BaseRecord {
   date_read: string | null;
 }
 
-/**
- * Book with shelves
- */
 export interface BookWithShelves extends Book {
   shelves: BookshelfSummary[];
 }
 
-/**
- * Bookshelf model
- */
 export interface Bookshelf extends BaseRecord {
   name: string;
 }
 
-/**
- * Summary of a bookshelf (used in BookWithShelves)
- */
 export interface BookshelfSummary {
   id: number;
   name: string;
 }
 
-/**
- * Bookshelf with books
- */
 export interface BookshelfWithBooks extends Bookshelf {
   books: Book[];
 }
 
-/**
- * Project link interface
- */
+import type { LinkIconName } from '@/components/common/LinkIcon';
+
 export interface ProjectLink {
   title: string;
   url: string;
   icon?: LinkIconName;
 }
 
-/**
- * Project model
- */
 export interface Project extends BaseRecord {
   title: string;
   description: string;
@@ -99,32 +74,42 @@ export interface Project extends BaseRecord {
   tags?: string[];
 }
 
-/**
- * Represents a single media entry (image or video) associated with a project.
- */
 export interface MediaEntry {
-  type: 'image' | 'video' | ''; // Type of media
-  url: string; // URL of the media asset
+  type: 'image' | 'video' | '';
+  url: string;
 }
 
-/**
- * Work Entry link interface
- */
 export interface WorkEntryLink {
   title: string;
   url: string;
   icon?: LinkIconName;
 }
 
-/**
- * Work Entry model
- */
 export interface WorkEntry extends BaseRecord {
   company: string;
   role: string;
   duration: string;
   achievements: string;
   links?: WorkEntryLink[];
+}
+
+/**
+ * SiteNote model
+ */
+export interface SiteNote extends BaseRecord {
+  content: string;
+  is_active: boolean;
+}
+
+/**
+ * Quote model
+ */
+export interface Quote extends BaseRecord {
+  text: string;
+  author?: string;
+  source?: string;
+  display_order?: number;
+  is_active: boolean;
 }
 
 /**
@@ -140,12 +125,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-/**
- * Represents a generic option used in sorting dropdowns or controls.
- */
 export type SortOption = {
-  label: string; // User-facing label for the sort option
-  value: string; // Internal value used for sorting logic (e.g., API query parameter)
+  label: string;
+  value: string;
 };
-
-// Add other general shared types below

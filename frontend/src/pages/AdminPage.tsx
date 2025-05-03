@@ -1,182 +1,257 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Link, useNavigate, Outlet, useParams, NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
-import api from '../services/api'; // Import configured API service
-import ProjectForm from '@/components/admin/ProjectForm'; // Import the form
-import { Project, WorkEntry } from 'types/index';
-import WorkForm from '../components/admin/WorkForm'; // Import WorkForm
-import ProjectList from '../components/admin/ProjectList';
-import { Button } from '../components/common'; // Import Button
-import WorkList from '../components/admin/WorkList';
-import AdminDashboard from '../components/admin/AdminDashboard';
+import { useAuth } from '../context/AuthContext';
+import ProjectForm from '@/components/admin/ProjectForm';
+import ProjectList from '@/components/admin/ProjectList';
+import WorkForm from '@/components/admin/WorkForm';
+import WorkList from '@/components/admin/WorkList';
+import AdminDashboard from '@/components/admin/AdminDashboard';
+import SiteNoteList from '@/components/admin/SiteNoteList';
+import SiteNoteForm from '@/components/admin/SiteNoteForm';
+import QuoteList from '@/components/admin/QuoteList';
+import QuoteForm from '@/components/admin/QuoteForm';
+import { Project, WorkEntry, SiteNote, Quote } from 'types';
+import api from '../services/api';
+import { Button } from '../components/common';
 
-// Project Form Wrapper (Handles Create/Edit logic)
+// Wrapper for "Projects"
 const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { projectId } = useParams<{ projectId: string }>(); // Get ID for editing
+  const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [initialData, setInitialData] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [initialData, setInitialData] = React.useState<Project | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Fetch project data if in edit mode
-  useEffect(() => {
+  React.useEffect(() => {
     if (mode === 'edit' && projectId) {
-      const fetchProject = async () => {
+      (async () => {
         setIsLoading(true);
-        setError(null);
         try {
-          // Fetch the specific project by ID
-          const response = await api.get<Project>(`/admin/projects/${projectId}`);
-          setInitialData(response.data);
+          const res = await api.get<Project>(`/admin/projects/${projectId}`);
+          setInitialData(res.data);
         } catch (err: any) {
-          console.error('Error fetching project for edit:', err);
-          if (err.response && err.response.status === 404) {
-            setError('Project not found for editing.');
-          } else {
-            setError(err.response?.data?.message || err.message || 'Failed to load project data');
-          }
-          setInitialData(null); // Ensure initialData is null on error
+          setError(err.response?.data?.message || err.message || 'Failed to load project');
         } finally {
           setIsLoading(false);
         }
-      };
-      fetchProject();
+      })();
     }
   }, [mode, projectId]);
 
-  const handleSubmit = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleSubmit = async (data: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
     setError(null);
     try {
       if (mode === 'edit' && projectId) {
-        await api.put(`/admin/projects/${projectId}`, projectData);
-        navigate('../', { relative: 'path' });
+        await api.put(`/admin/projects/${projectId}`, data);
+        navigate('../');
       } else {
-        await api.post('/admin/projects', projectData);
-        navigate('.', { relative: 'path' });
+        await api.post('/admin/projects', data);
+        navigate('.');
       }
     } catch (err: any) {
-      console.error(`Error ${mode === 'edit' ? 'updating' : 'creating'} project:`, err);
-      setError(err.response?.data?.message || err.message || `Failed to ${mode === 'edit' ? 'update' : 'create'} project`);
-      setIsLoading(false); // Keep loading false on error to allow retry
-      throw err; // Re-throw to allow ProjectForm to potentially handle it too
-    }
-    // Don't set loading false here if navigation happens
-  };
-
-  const handleCancel = () => {
-    navigate(mode === 'edit' ? '../' : '.', { relative: 'path' }); // Go back to list
-  };
-
-  // Render loading/error or the form
-  if (mode === 'edit' && isLoading) return <p>Loading project data...</p>; // Simplified loading check
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  // Ensure form doesn't render in edit mode if initialData failed to load
-  if (mode === 'create' || (mode === 'edit' && initialData)) {
-    return (
-      <ProjectForm 
-        initialData={initialData} 
-        onSubmit={handleSubmit} 
-        isLoading={isLoading} 
-        onCancel={handleCancel}
-      />
-    );
-  }
-  // Optional: Add specific message if project not found in edit mode and not loading
-  if (mode === 'edit' && !isLoading && !initialData) {
-      return <p>Could not load project data.</p>;
-  }
-  return null; // Or some fallback UI
-};
-
-// ManageProjects Container (Handles Routing)
-const ManageProjects: React.FC = () => {
-  return (
-    <div>
-      {/* Outlet renders the nested route's element (List, Create Form, Edit Form) */}
-      <Outlet /> 
-    </div>
-  );
-};
-
-// --- Work Form Wrapper ---
-const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { workId } = useParams<{ workId: string }>(); // Use relevant param name
-  const navigate = useNavigate();
-  const [initialData, setInitialData] = useState<WorkEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (mode === 'edit' && workId) {
-      const fetchWorkEntry = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const response = await api.get<WorkEntry>(`/admin/work/${workId}`);
-          setInitialData(response.data);
-        } catch (err: any) {
-          if (err.response && err.response.status === 404) {
-            setError('Work entry not found for editing.');
-          } else {
-            setError(err.response?.data?.message || err.message || 'Failed to load work entry data');
-          }
-          setInitialData(null);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchWorkEntry();
-    }
-  }, [mode, workId]);
-
-  const handleSubmit = async (workData: Omit<WorkEntry, 'id' | 'created_at' | 'updated_at'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (mode === 'edit' && workId) {
-        await api.put(`/admin/work/${workId}`, workData);
-        navigate('../', { relative: 'path' });
-      } else {
-        await api.post('/admin/work', workData);
-        navigate('.', { relative: 'path' });
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || `Failed to ${mode === 'edit' ? 'update' : 'create'} work entry`);
+      setError(err.response?.data?.message || err.message || 'Failed to save project');
       setIsLoading(false);
       throw err;
     }
   };
 
-  const handleCancel = () => {
-    navigate(mode === 'edit' ? '../' : '.', { relative: 'path' });
+  if (mode === 'edit' && isLoading) return <p>Loading project data...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (mode === 'edit' && !initialData && !isLoading) return <p>Project not found.</p>;
+
+  return (
+    <ProjectForm
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
+    />
+  );
+};
+
+const ManageProjects: React.FC = () => {
+  return <Outlet />;
+};
+
+// Wrapper for "Work"
+const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
+  const { workId } = useParams<{ workId: string }>();
+  const navigate = useNavigate();
+  const [initialData, setInitialData] = React.useState<WorkEntry | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (mode === 'edit' && workId) {
+      (async () => {
+        setIsLoading(true);
+        try {
+          const res = await api.get<WorkEntry>(`/admin/work/${workId}`);
+          setInitialData(res.data);
+        } catch (err: any) {
+          setError(err.response?.data?.message || err.message || 'Failed to load work entry');
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [mode, workId]);
+
+  const handleSubmit = async (data: Omit<WorkEntry, 'id' | 'created_at' | 'updated_at'>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (mode === 'edit' && workId) {
+        await api.put(`/admin/work/${workId}`, data);
+        navigate('../');
+      } else {
+        await api.post('/admin/work', data);
+        navigate('.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to save work entry');
+      setIsLoading(false);
+      throw err;
+    }
   };
 
   if (mode === 'edit' && isLoading) return <p>Loading work entry data...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  if (mode === 'create' || (mode === 'edit' && initialData)) {
-    return (
-      <WorkForm 
-        initialData={initialData} 
-        onSubmit={handleSubmit} 
-        isLoading={isLoading} 
-        onCancel={handleCancel}
-      />
-    );
-  }
-  if (mode === 'edit' && !isLoading && !initialData) {
-      return <p>Could not load work entry data.</p>;
-  }
-  return null;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (mode === 'edit' && !initialData && !isLoading) return <p>Work entry not found.</p>;
+
+  return (
+    <WorkForm
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
+    />
+  );
 };
 
-// --- ManageWork Container (Handles Routing) ---
 const ManageWork: React.FC = () => {
+  return <Outlet />;
+};
+
+// Wrapper for "SiteNote"
+const SiteNoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
+  const { siteNoteId } = useParams<{ siteNoteId: string }>();
+  const navigate = useNavigate();
+  const [initialData, setInitialData] = React.useState<SiteNote | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (mode === 'edit' && siteNoteId) {
+      (async () => {
+        setIsLoading(true);
+        try {
+          const res = await api.get<SiteNote>(`/admin/site_notes/${siteNoteId}`);
+          setInitialData(res.data);
+        } catch (err: any) {
+          setError(err.response?.data?.message || err.message || 'Failed to load site note');
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [mode, siteNoteId]);
+
+  const handleSubmit = async (data: Omit<SiteNote, 'id' | 'created_at' | 'updated_at'>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (mode === 'edit' && siteNoteId) {
+        await api.put(`/admin/site_notes/${siteNoteId}`, data);
+        navigate('../');
+      } else {
+        await api.post('/admin/site_notes', data);
+        navigate('.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to save site note');
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  if (mode === 'edit' && isLoading) return <p>Loading site note...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (mode === 'edit' && !initialData && !isLoading) return <p>Site note not found.</p>;
+
   return (
-    <div>
-      <Outlet /> 
-    </div>
+    <SiteNoteForm
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
+    />
   );
+};
+
+const ManageSiteNotes: React.FC = () => {
+  return <Outlet />;
+};
+
+// Wrapper for "Quote"
+const QuoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
+  const { quoteId } = useParams<{ quoteId: string }>();
+  const navigate = useNavigate();
+  const [initialData, setInitialData] = React.useState<Quote | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (mode === 'edit' && quoteId) {
+      (async () => {
+        setIsLoading(true);
+        try {
+          const res = await api.get<Quote>(`/admin/quotes/${quoteId}`);
+          setInitialData(res.data);
+        } catch (err: any) {
+          setError(err.response?.data?.message || err.message || 'Failed to load quote');
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [mode, quoteId]);
+
+  const handleSubmit = async (data: Omit<Quote, 'id' | 'created_at' | 'updated_at'>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (mode === 'edit' && quoteId) {
+        await api.put(`/admin/quotes/${quoteId}`, data);
+        navigate('../');
+      } else {
+        await api.post('/admin/quotes', data);
+        navigate('.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to save quote');
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  if (mode === 'edit' && isLoading) return <p>Loading quote...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (mode === 'edit' && !initialData && !isLoading) return <p>Quote not found.</p>;
+
+  return (
+    <QuoteForm
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
+    />
+  );
+};
+
+const ManageQuotes: React.FC = () => {
+  return <Outlet />;
 };
 
 const AdminPage: React.FC = () => {
@@ -192,7 +267,6 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */} 
       <div className="flex justify-between items-center mb-4 pb-4 border-b">
         <h1 className="text-2xl font-semibold">Admin Area</h1>
         <div>
@@ -201,49 +275,54 @@ const AdminPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Navigation */} 
-      <nav className="flex flex-row space-x-6 mb-6 pb-3 border-b"> {/* Horizontal nav, spacing, margin */} 
-        <NavLink 
-          to="/admin" 
-          end 
-          className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}
-        >
+      <nav className="flex flex-row space-x-6 mb-6 pb-3 border-b">
+        <NavLink to="/admin" end className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
           Dashboard
         </NavLink>
-        <NavLink 
-          to="/admin/projects" 
-          className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}
-        >
+        <NavLink to="/admin/projects" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
           Manage Projects
         </NavLink>
-        <NavLink 
-          to="/admin/work" 
-          className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}
-        >
+        <NavLink to="/admin/work" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
           Manage Work
         </NavLink>
-        {/* Add other admin links here */}
+        <NavLink to="/admin/site_notes" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+          Site Notes
+        </NavLink>
+        <NavLink to="/admin/quotes" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+          Quotes
+        </NavLink>
       </nav>
 
-      {/* Main Content Area - Takes full width now */} 
-      <main> {/* Removed width restrictions */} 
+      <main>
         <Routes>
           <Route index element={<AdminDashboard />} />
+          
           <Route path="projects" element={<ManageProjects />}>
             <Route index element={<ProjectList />} />
             <Route path="new" element={<ProjectFormWrapper mode="create" />} />
             <Route path=":projectId/edit" element={<ProjectFormWrapper mode="edit" />} />
           </Route>
+
           <Route path="work" element={<ManageWork />}>
             <Route index element={<WorkList />} />
             <Route path="new" element={<WorkFormWrapper mode="create" />} />
             <Route path=":workId/edit" element={<WorkFormWrapper mode="edit" />} />
           </Route>
-          {/* Add other admin routes here */}
+
+          <Route path="site_notes" element={<ManageSiteNotes />}>
+            <Route index element={<SiteNoteList />} />
+            <Route path="new" element={<SiteNoteFormWrapper mode='create' />} />
+            <Route path=":siteNoteId/edit" element={<SiteNoteFormWrapper mode='edit' />} />
+          </Route>
+
+          <Route path="quotes" element={<ManageQuotes />}>
+            <Route index element={<QuoteList />} />
+            <Route path="new" element={<QuoteFormWrapper mode='create' />} />
+            <Route path=":quoteId/edit" element={<QuoteFormWrapper mode='edit' />} />
+          </Route>
+
         </Routes>
       </main>
-      
-      {/* Removed the outer flex container */}
     </div>
   );
 };

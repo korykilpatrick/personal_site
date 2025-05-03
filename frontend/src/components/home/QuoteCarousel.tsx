@@ -1,26 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Card from '@/components/common/Card';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { Quote } from 'types';
+import { ErrorDisplay, Loading } from '@/components/ui';
+import api from '@/services/api';
 
-interface Quote {
-  text: string;
-  author?: string;
-}
-
-const quotes: Quote[] = [
-  { text: 'In the beginner’s mind there are many possibilities, in the expert’s there are few.', author: 'Shunryū Suzuki' },
-  { text: 'What you truly seek is seeking you.', author: 'Rumi' },
-  { text: 'The obstacle is the way.', author: 'Marcus Aurelius' },
-];
-
+/**
+ * Cycles through active quotes from DB. If none or empty, hides or shows fallback.
+ */
 const DISPLAY_MS = 6000;
 
 const QuoteCarousel: React.FC = () => {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [idx, setIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startAuto = () => {
-    timer.current = setInterval(() => setIdx(i => (i + 1) % quotes.length), DISPLAY_MS);
+    timer.current = setInterval(() => {
+      setIdx(i => {
+        if (!quotes || quotes.length === 0) return 0;
+        return (i + 1) % quotes.length;
+      });
+    }, DISPLAY_MS);
   };
 
   const resetAuto = () => {
@@ -28,13 +32,42 @@ const QuoteCarousel: React.FC = () => {
     startAuto();
   };
 
-  // start on mount
   useEffect(() => {
-    startAuto();
+    const fetchQuotes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get<Quote[]>('/quotes?active=true');
+        setQuotes(res.data || []);
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message || 'Failed to load quotes');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuotes();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && quotes.length > 1) {
+      startAuto();
+    }
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
-  }, []);
+  }, [loading, quotes]);
+
+  if (loading) {
+    return null; // or <Loading />
+  }
+  if (error) {
+    return null; // or <ErrorDisplay error={error} />
+  }
+  if (!quotes || quotes.length === 0) {
+    return null; // no active quotes means hide the carousel
+  }
+
+  const current = quotes[idx];
 
   const prev = () => {
     setIdx(i => (i === 0 ? quotes.length - 1 : i - 1));
@@ -46,20 +79,16 @@ const QuoteCarousel: React.FC = () => {
     resetAuto();
   };
 
-  const current = quotes[idx];
-
   return (
     <Card padding="lg" className="relative text-center">
-      {/* Quote text */}
       <div
-        key={idx} /* triggers key-based re-animation */
+        key={idx}
         className="transition-opacity duration-700 ease-in-out opacity-0 animate-fade-in"
       >
         <p className="italic text-base mb-2">&ldquo;{current.text}&rdquo;</p>
         {current.author && <p className="text-sm text-stone-500">— {current.author}</p>}
       </div>
 
-      {/* Navigation arrows */}
       {quotes.length > 1 && (
         <>
           <button
@@ -79,7 +108,6 @@ const QuoteCarousel: React.FC = () => {
         </>
       )}
 
-      {/* Local keyframes */}
       <style>{`
         @keyframes fadeInQuote { from { opacity: 0 } to { opacity: 1 } }
         .animate-fade-in { animation: fadeInQuote .7s forwards }

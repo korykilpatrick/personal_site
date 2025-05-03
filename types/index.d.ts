@@ -1,3 +1,4 @@
+import type { LinkIconName } from '@/components/common/LinkIcon';
 /**
  * Base model interface that all models will extend
  */
@@ -58,7 +59,7 @@ export interface BookshelfWithBooks extends Bookshelf {
 export interface ProjectLink {
     title: string;
     url: string;
-    icon?: string;
+    icon?: LinkIconName;
 }
 /**
  * Project model

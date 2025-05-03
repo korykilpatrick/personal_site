@@ -5,7 +5,8 @@ import projectRoutes from './project.routes';
 import workEntryRoutes from './work_entry.routes';
 import authRoutes from './authRoutes';
 import adminRoutes from './adminRoutes';
-// import postRoutes from './post.routes'; // Removed
+import siteNoteRoutes from './site_note.routes';
+import quoteRoutes from './quote.routes';
 import config from '../config/config';
 
 const router = express.Router();
@@ -26,6 +27,9 @@ router.use('/books', bookRoutes);
 router.use('/bookshelves', bookshelfRoutes);
 router.use('/projects', projectRoutes);
 router.use('/work', workEntryRoutes);
-// router.use('/posts', postRoutes); // Removed
+
+// New routes
+router.use('/site_notes', siteNoteRoutes);
+router.use('/quotes', quoteRoutes);
 
 export default router;
