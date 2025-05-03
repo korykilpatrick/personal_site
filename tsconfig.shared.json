@@ -12,8 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["frontend/src/*"]
+      "@shared/*": ["./types/*"]
     }
   },
-  "include": ["types/**/*", "frontend/src/**/*"]
+  "include": ["types/**/*"]
 }
