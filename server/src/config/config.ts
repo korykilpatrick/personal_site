@@ -1,11 +1,16 @@
 import path from 'path';
 import dotenvSafe from 'dotenv-safe';
 
+// Define the project root relative to the current file's directory (__dirname)
+// This ensures it works correctly whether running from src/config or dist/config
+const projectRoot = path.resolve(__dirname, '..', '..'); // Goes up two levels to the server/ directory
+
 // Load and validate environment variables using dotenv-safe. This will throw if any
 // variable declared in `.env.example` is missing or empty in `.env`.
 dotenvSafe.config({
-  path: path.resolve(__dirname, '../../.env'),
-  example: path.resolve(__dirname, '../../.env.example'),
+  // Use the explicitly calculated projectRoot path
+  path: path.resolve(projectRoot, '.env'),
+  example: path.resolve(projectRoot, '.env.example'),
   allowEmptyValues: false,
 });
 
