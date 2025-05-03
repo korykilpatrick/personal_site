@@ -5,8 +5,7 @@ import dotenv from 'dotenv';
 // This ensures it works correctly whether running from src/config or dist/config
 const projectRoot = path.resolve(__dirname, '..', '..'); // Goes up two levels to the server/ directory
 
-// Load and validate environment variables using dotenv-safe. This will throw if any
-// variable declared in `.env.example` is missing or empty in `.env`.
+
 dotenv.config({
   // Use the explicitly calculated projectRoot path
   path: path.resolve(projectRoot, '.env'),

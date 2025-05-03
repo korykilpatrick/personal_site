@@ -1,15 +1,13 @@
 import { Client } from 'pg';
 import knex from 'knex';
-import dotenvSafe from 'dotenv-safe';
+import dotenv from 'dotenv';
 import path from 'path';
 import logger from '../utils/logger';
 import knexConfig from '../db/knexfile';
 
 // Load env variables with validation
-dotenvSafe.config({
+dotenv.config({
   path: path.resolve(__dirname, '../../.env'),
-  example: path.resolve(__dirname, '../../.env.example'),
-  allowEmptyValues: false,
 });
 
 /**
