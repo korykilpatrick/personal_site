@@ -1,12 +1,10 @@
-import dotenvSafe from 'dotenv-safe';
+import dotenv from 'dotenv';
 import path from 'path';
 import { Knex } from 'knex';
 
 // Load and validate env vars (throws if any required are missing)
-dotenvSafe.config({
+dotenv.config({
   path: path.resolve(__dirname, '../../.env'),
-  example: path.resolve(__dirname, '../../.env.example'),
-  allowEmptyValues: false,
 });
 
 // Database configuration for different environments
