@@ -1,10 +1,16 @@
 /**
  * Frontend/back shared types
+ *
+ * This file serves as the central repository for all shared types in the application.
+ * All components should import types from here rather than defining their own duplicate types.
  */
+
+// Application configuration
 export interface AppConfig {
   apiBaseUrl: string;
 }
 
+// Authentication
 export interface User {
   username: string;
 }
@@ -57,8 +63,14 @@ export interface BookshelfWithBooks extends Bookshelf {
   books: Book[];
 }
 
-import type { LinkIconName } from '@/components/common/LinkIcon';
+/**
+ * Link icon type used across the application
+ */
+export type LinkIconName = 'github' | 'linkedin' | 'twitter' | 'youtube' | 'website' | 'other' | string | undefined;
 
+/**
+ * Project related types
+ */
 export interface ProjectLink {
   title: string;
   url: string;
@@ -79,6 +91,9 @@ export interface MediaEntry {
   url: string;
 }
 
+/**
+ * Work entry related types
+ */
 export interface WorkEntryLink {
   title: string;
   url: string;

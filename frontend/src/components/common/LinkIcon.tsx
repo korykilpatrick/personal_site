@@ -7,9 +7,7 @@ import {
   FaExternalLinkAlt,
   FaLink, // Keep as a potential fallback/error icon
 } from 'react-icons/fa';
-
-// Define the possible icon identifiers that can be stored in the data
-export type LinkIconName = 'github' | 'linkedin' | 'twitter' | 'youtube' | 'website' | 'other' | undefined;
+import { LinkIconName } from 'types'; // Import from the central types repository
 
 interface LinkIconProps {
   /** The pre-determined icon name (e.g., 'github', 'website'). Takes precedence over URL. */

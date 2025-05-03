@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ProjectLink, WorkEntryLink } from 'types/index';
+import { ProjectLink, WorkEntryLink, LinkIconName } from 'types';
 import { FormInput } from './';
 import { Button } from '../common';
 import { FaTrashAlt, FaPlus } from 'react-icons/fa';
 import { isRequired, isUrl } from '../../utils/validation';
-import LinkIcon, { LinkIconName } from '../common/LinkIcon';
+import LinkIcon from '../common/LinkIcon';
 
 // Define a type that can be either ProjectLink or WorkEntryLink
 type AnyLink = ProjectLink | WorkEntryLink;
