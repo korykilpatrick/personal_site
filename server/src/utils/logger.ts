@@ -1,46 +1,34 @@
+// server/src/utils/logger.ts
 import winston from 'winston';
+import util from 'util';
 import config from '../config/config';
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
-// Custom format for logs
+/** Safely stringify anything, including circular/error objects */
+const safe = (value: unknown): string => {
+  if (value instanceof Error) return value.stack ?? value.message;
+  if (typeof value === 'object')
+    return util.inspect(value, { depth: null, colors: false, breakLength: 120 });
+  return String(value);
+};
+
 const logFormat = printf(({ level, message, timestamp, ...meta }) => {
-  return `${timestamp} [${level}]: ${message} ${
-    Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
-  }`;
+  const metaStr = Object.keys(meta).length ? safe(meta) : '';
+  return `${timestamp} [${level}]: ${safe(message)} ${metaStr}`;
 });
 
-// Create logger instance
 const logger = winston.createLogger({
   level: config.logLevel,
-  format: combine(
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    logFormat
-  ),
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
   transports: [
-    // Console transport for development
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
     new winston.transports.Console({
+      silent: config.env === 'production',
       format: combine(colorize(), logFormat),
-    }),
-    // File transport for errors
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
-      level: 'error' 
-    }),
-    // File transport for all logs
-    new winston.transports.File({ 
-      filename: 'logs/combined.log' 
     }),
   ],
 });
-
-// If we're in production, don't log to console
-if (config.env === 'production') {
-  logger.transports.forEach(transport => {
-    if (transport instanceof winston.transports.Console) {
-      transport.silent = true;
-    }
-  });
-}
 
 export default logger;
