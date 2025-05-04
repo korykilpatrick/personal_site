@@ -31,9 +31,16 @@ const SiteNote: React.FC = () => {
     return null;
   }
 
+  // Format the date: Month 'YY
+  const date = new Date(data.created_at || Date.now());
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'short',
+    year: '2-digit',
+  }).replace(' ', " '");
+
   return (
     <Card variant="default" className="border-l-4 border-l-secondary">
-      <h2 className="text-lg font-semibold mb-3">Captain's Log</h2>
+      <h2 className="text-lg font-semibold mb-1">Captain's Log  <span className="ml-2 text-sm italic text-stone-500">{formattedDate}</span></h2>
       <MarkdownRenderer>
         {data.content}
       </MarkdownRenderer>
