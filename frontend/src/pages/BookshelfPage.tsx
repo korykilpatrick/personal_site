@@ -115,7 +115,7 @@ const BookshelfPage: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
-      <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 85, height: 128 }} />
+      <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 120, height: 180 }} />
     </>
   );
 };
