@@ -41,7 +41,7 @@ const CurrentlyReading: React.FC = () => {
 
       <div className={containerClasses}>
         {reading.map(book => (
-          <BookCard key={book.id} book={book} bookSize={{ width: 85, height: 128 }} />
+          <BookCard key={book.id} book={book} bookSize={{ width: 120, height: 180 }} />
         ))}
       </div>
     </Card>
