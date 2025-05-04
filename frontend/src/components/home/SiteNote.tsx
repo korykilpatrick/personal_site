@@ -33,6 +33,7 @@ const SiteNote: React.FC = () => {
 
   return (
     <Card variant="default" className="border-l-4 border-l-secondary">
+      <h2 className="text-lg font-semibold mb-3">Captain's Log</h2>
       <MarkdownRenderer>
         {data.content}
       </MarkdownRenderer>
