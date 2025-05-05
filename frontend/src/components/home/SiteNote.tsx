@@ -40,7 +40,10 @@ const SiteNote: React.FC = () => {
 
   return (
     <Card variant="default" className="border-l-4 border-l-secondary">
-      <h2 className="text-lg font-semibold mb-1">Captain's Log  <span className="ml-2 text-sm italic text-stone-500">{formattedDate}</span></h2>
+      {/* Title centered by parent Section */}
+      <h2 className="text-lg font-semibold mb-0">Captain's Log</h2>
+      {/* Date centered below title, styled appropriately */}
+      <p className="text-sm italic text-stone-500 mt-0 mb-2">{formattedDate}</p>
       <MarkdownRenderer>
         {data.content}
       </MarkdownRenderer>
