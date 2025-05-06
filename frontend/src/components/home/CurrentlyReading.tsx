@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import Card from '@/components/common/Card';
 import { useBooks } from '@/context/BooksContext';
-import { Book } from 'types/index';
+import { BookWithShelves } from 'types/index';
 import { BookCard } from '@/components/books';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -11,14 +11,14 @@ import EmptyState from '@/components/ui/EmptyState';
 const CurrentlyReading: React.FC = () => {
   const { books, loading } = useBooks();
 
-  const reading: Book[] = useMemo(() => {
+  const reading: BookWithShelves[] = useMemo(() => {
     const shelfMatch = (name?: string) =>
       name && ['currently reading', 'currently-reading'].includes(name.toLowerCase());
 
     const fromShelf = books.filter(
       b => b.shelves && b.shelves.some(s => shelfMatch((s as any).name))
     );
-    return (fromShelf.length > 0 ? fromShelf : books.filter(b => !b.date_read)) as Book[];
+    return (fromShelf.length > 0 ? fromShelf : books.filter(b => !b.date_read)) as BookWithShelves[];
   }, [books]);
 
   if (loading) return null;

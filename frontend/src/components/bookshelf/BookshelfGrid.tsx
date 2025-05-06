@@ -1,10 +1,10 @@
 import React from 'react';
-import { Book } from 'types/index'; // Correct path
+import { BookWithShelves } from 'types/index'; // Changed Book to BookWithShelves
 import { BookCard } from '../books';
 import { EmptyState } from '../ui';
 
 interface BookshelfGridProps {
-  books: Book[];
+  books: BookWithShelves[]; // Changed Book[] to BookWithShelves[]
   bookSize: { width: number; height: number };
 }
 

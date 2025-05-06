@@ -1,12 +1,12 @@
 import React from 'react';
-import { Book } from 'types/index'; // Correct path
+import { BookWithShelves, BookshelfSummary } from 'types/index'; // Correct path, changed Book to BookWithShelves
 import { Tooltip } from '../ui'; // Assuming Tooltip is exported from ui/index.ts
 import Card from '../common/Card';
 import Rating from '../common/Rating';
 import Icon from '../common/Icon';
 
 interface BookCardProps {
-  book: Book;
+  book: BookWithShelves; // Changed Book to BookWithShelves
   bookSize: { width: number; height: number };
 }
 
@@ -48,6 +48,16 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
          <div className="flex text-xs items-center">
           <span className="mr-0.5 text-xs">Rating:</span> {renderStars(book.rating)}
          </div>
+      )}
+      {book.shelves && book.shelves.length > 0 && (
+        <div className="text-xs">
+          <span className="mr-0.5 text-gray-300">Shelves:</span>
+          {book.shelves.map((shelf: BookshelfSummary, index: number) => (
+            <span key={shelf.id} className="text-gray-300">
+              {shelf.name}{index < book.shelves.length - 1 ? ', ' : ''}
+            </span>
+          ))}
+        </div>
       )}
       <div className="flex text-xs text-gray-300 gap-2">
         {book.date_read && (
