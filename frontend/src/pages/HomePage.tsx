@@ -14,9 +14,9 @@ import ExploreGrid from '@/components/home/ExploreGrid';
 const HomePage: React.FC = () => {
   return (
     <>
-      <Section className="text-center">
+      {/* <Section className="text-center">
         <WelcomeBlurb />
-      </Section>
+      </Section> */}
 
       <Section className="text-center">
         <SiteNote />

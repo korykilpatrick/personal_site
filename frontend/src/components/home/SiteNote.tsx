@@ -38,14 +38,18 @@ const SiteNote: React.FC = () => {
     year: '2-digit',
   }).replace(' ', " '");
 
+  // Construct the content with styled date
+  const contentWithStyledDate = `\
+<span class="font-serif text-primary font-bold pr-1">${formattedDate}:</span> ${data.content}\
+`;
+
   return (
     <Card variant="default" className="border-l-4 border-l-secondary">
       {/* Title centered by parent Section */}
-      <h2 className="text-lg font-semibold mb-0">Captain's Log</h2>
-      {/* Date centered below title, styled appropriately */}
-      <p className="text-sm italic text-stone-500 mt-0 mb-2">{formattedDate}</p>
+      <h2 className="text-lg font-semibold mb-2">Captain's Log</h2>
+      {/* Date is styled and prepended within MarkdownRenderer */}
       <MarkdownRenderer>
-        {data.content}
+        {contentWithStyledDate}
       </MarkdownRenderer>
     </Card>
   );
