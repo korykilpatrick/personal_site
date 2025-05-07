@@ -1,8 +1,9 @@
 import React from 'react';
-import { MultiSelectDropdown, FilterPill, SortDropdown, Tooltip } from '../ui';
+import { MultiSelectDropdown, SortDropdown, Tooltip } from '../ui';
 import { Bookshelf, SortOption } from 'types/index';
 import SearchInput from '@/components/common/SearchInput';
 import Icon from '@/components/common/Icon';
+import BookshelfPill from '@/components/ui/BookshelfPill';
 
 interface BookshelfControlsProps {
   sortOptions: SortOption[];
@@ -85,7 +86,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             {allBookshelves
               .filter((shelf) => selectedShelfIds.includes(shelf.id))
               .map((shelf) => (
-                <FilterPill
+                <BookshelfPill
                   key={shelf.id}
                   label={shelf.name}
                   onRemove={() => onToggleShelf(shelf.id)}

@@ -1,6 +1,8 @@
 import React from 'react';
-import { MultiSelectDropdown, FilterPill } from '@/components/ui';
+import { MultiSelectDropdown } from '@/components/ui';
 import SearchInput from '@/components/common/SearchInput';
+import LibraryItemTypePill from '@/components/ui/LibraryItemTypePill';
+import TagPill from '@/components/ui/TagPill';
 
 interface ItemType {
   id: number;
@@ -95,7 +97,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
               const found = itemTypes.find(t => t.id === id);
               if (!found) return null;
               return (
-                <FilterPill
+                <LibraryItemTypePill
                   key={id}
                   label={found.name}
                   onRemove={() => onToggleType(id)}
@@ -117,7 +119,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
         {selectedTags.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             {selectedTags.map(tag => (
-              <FilterPill
+              <TagPill
                 key={tag}
                 label={tag}
                 onRemove={() => onToggleTag(tag)}

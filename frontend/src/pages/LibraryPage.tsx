@@ -145,7 +145,7 @@ const LibraryPage: React.FC = () => {
         itemCount={filteredItems.length}
       />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="flex flex-col gap-6">
         {filteredItems.map(item => (
           <LibraryItemCard
             key={item.id}

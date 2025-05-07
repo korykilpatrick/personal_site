@@ -1,4 +1,5 @@
 import React from 'react';
+import Pill from '@/components/common/Pill';
 
 interface TagProps {
   label: string;
@@ -8,12 +9,13 @@ interface TagProps {
 
 const Tag: React.FC<TagProps> = ({ label, onClick, className = '' }) => {
   return (
-    <span
-      className={`px-1.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium ${onClick ? 'cursor-pointer hover:bg-primary/20' : ''} ${className}`}
+    <Pill
+      label={label}
+      variant="primary"
+      size="md"
       onClick={onClick}
-    >
-      {label}
-    </span>
+      className={className}
+    />
   );
 };
 
