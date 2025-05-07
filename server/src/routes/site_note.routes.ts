@@ -24,4 +24,18 @@ router.get(
  */
 router.get('/active', SiteNoteController.getActive);
 
+/**
+ * @route GET /api/site_notes/summary/count
+ * @desc Get total site notes count, or active site notes count if active=true query param is present
+ * @queryparam active {boolean} [Optional] If true, returns count of active site notes.
+ */
+router.get(
+  '/summary/count',
+  [
+    query('active').optional().isBoolean().withMessage('active must be a boolean'),
+  ],
+  validate,
+  SiteNoteController.getCounts
+);
+
 export default router;

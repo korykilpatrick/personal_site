@@ -18,4 +18,18 @@ router.get(
   QuoteController.getAll
 );
 
+/**
+ * @route GET /api/quotes/summary/count
+ * @desc Get total quotes count, or active quotes count if active=true query param is present
+ * @queryparam active {boolean} [Optional] If true, returns count of active quotes.
+ */
+router.get(
+  '/summary/count',
+  [
+    query('active').optional().isBoolean().withMessage('active must be a boolean'),
+  ],
+  validate,
+  QuoteController.getCounts
+);
+
 export default router;

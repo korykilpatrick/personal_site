@@ -16,6 +16,26 @@ export const QuoteController = {
       next(error);
     }
   },
+
+  /**
+   * GET /quotes/summary/count
+   * Return the total count of quotes, or count of active quotes if active=true.
+   */
+  getCounts: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const isActiveQuery = req.query.active === 'true';
+      let count: number;
+
+      if (isActiveQuery) {
+        count = await QuoteService.getActiveCount();
+      } else {
+        count = await QuoteService.getTotalCount();
+      }
+      res.status(StatusCodes.OK).json({ count });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 export default QuoteController;

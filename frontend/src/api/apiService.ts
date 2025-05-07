@@ -1,5 +1,12 @@
 import axios from 'axios';
-import type { BookWithShelves, Bookshelf, Book, Project, WorkEntry } from 'types/index';
+import type {
+  BookWithShelves,
+  Bookshelf,
+  Book,
+  Project,
+  WorkEntry,
+  LibraryItem
+} from 'types/index';
 import api from '../services/api';
 
 // Centralized API service
@@ -49,6 +56,17 @@ export const apiService = {
   },
   getWorkEntryById: async (id: number): Promise<WorkEntry> => {
     const response = await api.get<WorkEntry>(`/work/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Fetch library items. Supports optional filtering by item_type_id and tag.
+   */
+  getLibraryItems: async (itemTypeId?: number, tag?: string): Promise<LibraryItem[]> => {
+    const query: Record<string, any> = {};
+    if (itemTypeId) query.item_type_id = itemTypeId;
+    if (tag) query.tag = tag;
+    const response = await api.get<LibraryItem[]>('/library-items', { params: query });
     return response.data;
   },
 };

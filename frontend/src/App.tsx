@@ -14,6 +14,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { BooksProvider } from './context/BooksContext';
+import LibraryPage from './pages/LibraryPage'; // <--- Newly used
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 
@@ -25,7 +26,6 @@ const GlobalImageModal: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ModalProvider>
-      {/* Provide books context to entire app, so no waiting in BookshelfPage */}
       <BooksProvider>
         <div className="flex flex-col min-h-screen bg-background">
           <Navbar />
@@ -36,7 +36,11 @@ const App: React.FC = () => {
               <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
               <Route path="/work" element={<Layout><WorkPage /></Layout>} />
               <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
+
+              <Route path="/library" element={<Layout><LibraryPage /></Layout>} />
+
               <Route path="/login" element={<LoginPage />} />
+
               <Route element={<ProtectedRoute />}>
                 <Route
                   path="/admin/*"
@@ -47,6 +51,7 @@ const App: React.FC = () => {
                   }
                 />
               </Route>
+
               <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
             </Routes>
           </main>

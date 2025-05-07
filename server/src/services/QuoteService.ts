@@ -23,6 +23,33 @@ class QuoteServiceClass extends BaseService<Quote> {
       throw error;
     }
   }
+
+  /**
+   * Get the total count of all quotes.
+   */
+  async getTotalCount(): Promise<number> {
+    try {
+      // Assuming BaseService has a countAll method or this.model allows direct count
+      const result = await this.model.query().count({ count: '*' }).first() as any;
+      return parseInt(result.count, 10) || 0;
+    } catch (error) {
+      logger.error('Error fetching total quotes count', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get the count of active quotes.
+   */
+  async getActiveCount(): Promise<number> {
+    try {
+      const result = await this.model.query().where({ is_active: true }).count({ count: '*' }).first() as any;
+      return parseInt(result.count, 10) || 0;
+    } catch (error) {
+      logger.error('Error fetching active quotes count', { error });
+      throw error;
+    }
+  }
 }
 
 export const QuoteService = new QuoteServiceClass();

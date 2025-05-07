@@ -4,6 +4,7 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Quote } from 'types';
 import { ErrorDisplay, Loading } from '@/components/ui';
 import api from '@/services/api';
+import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 
 /**
  * Cycles through active quotes from DB. If none or empty, hides or shows fallback.
@@ -85,7 +86,9 @@ const QuoteCarousel: React.FC = () => {
         key={idx}
         className="transition-opacity duration-700 ease-in-out opacity-0 animate-fade-in"
       >
-        <p className="italic text-base mb-2">&ldquo;{current.text}&rdquo;</p>
+        <div className="text-base mb-2">
+          <MarkdownRenderer>{`"${current.text}"`}</MarkdownRenderer>
+        </div>
         {current.author && <p className="text-sm text-stone-500">— {current.author}</p>}
       </div>
 
