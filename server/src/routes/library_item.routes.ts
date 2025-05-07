@@ -22,4 +22,13 @@ router.get(
   LibraryItemController.getById
 );
 
+/**
+ * @route GET /api/library-items/summary/count
+ * @desc Get total library items count
+ */
+router.get(
+  '/summary/count',
+  LibraryItemController.getTotalCount
+);
+
 export default router;

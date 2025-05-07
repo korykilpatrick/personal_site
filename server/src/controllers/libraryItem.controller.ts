@@ -32,6 +32,21 @@ export const LibraryItemController = {
       next(error);
     }
   },
+
+  /**
+   * GET /library-items/summary/count
+   * Return the total count of library items.
+   */
+  getTotalCount: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await LibraryItemModel.query().count({ count: '*' }).first() as any;
+      const count = parseInt(result.count, 10) || 0;
+      res.status(StatusCodes.OK).json({ count });
+    } catch (error) {
+      logger.error('Error fetching total library items count', { error });
+      next(error);
+    }
+  },
 };
 
 export default LibraryItemController;
