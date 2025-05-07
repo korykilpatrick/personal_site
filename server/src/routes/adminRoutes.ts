@@ -8,6 +8,10 @@ import * as siteNoteController from '../controllers/admin/siteNoteController';
 import * as quoteController from '../controllers/admin/quoteController';
 import logger from '../utils/logger';
 
+// NEW library controllers
+import { AdminLibraryItemTypeController } from '../controllers/admin/libraryItemTypeController';
+import { AdminLibraryItemController } from '../controllers/admin/libraryItemController';
+
 const router = express.Router();
 
 // Middleware to handle validation results
@@ -158,5 +162,30 @@ router.put(
   quoteController.updateQuote
 );
 router.delete('/quotes/:id', protect, validateIdParam, quoteController.deleteQuote);
+
+// --- Library Item Types (Admin) ---
+router.get('/library-item-types', protect, AdminLibraryItemTypeController.getAll);
+router.get('/library-item-types/:id', protect, validateIdParam, AdminLibraryItemTypeController.getById);
+router.post('/library-item-types', protect, [
+  body('name').trim().notEmpty().withMessage('Name is required')
+], handleValidationErrors, AdminLibraryItemTypeController.create);
+router.put('/library-item-types/:id', protect, [
+  param('id').isInt({ gt: 0 }).withMessage('ID must be a positive integer'),
+  body('name').trim().notEmpty().withMessage('Name is required'),
+], handleValidationErrors, AdminLibraryItemTypeController.update);
+router.delete('/library-item-types/:id', protect, validateIdParam, AdminLibraryItemTypeController.delete);
+
+// --- Library Items (Admin) ---
+router.get('/library-items', protect, AdminLibraryItemController.getAll);
+router.get('/library-items/:id', protect, validateIdParam, AdminLibraryItemController.getById);
+router.post('/library-items', protect, [
+  body('item_type_id').isInt({ gt: 0 }).withMessage('item_type_id must be a positive integer'),
+  body('link').trim().notEmpty().withMessage('link is required'),
+  body('title').trim().notEmpty().withMessage('title is required'),
+], handleValidationErrors, AdminLibraryItemController.create);
+router.put('/library-items/:id', protect, [
+  param('id').isInt({ gt: 0 }).withMessage('ID must be positive'),
+], handleValidationErrors, AdminLibraryItemController.update);
+router.delete('/library-items/:id', protect, validateIdParam, AdminLibraryItemController.delete);
 
 export default router;

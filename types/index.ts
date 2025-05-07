@@ -128,6 +128,20 @@ export interface Quote extends BaseRecord {
 }
 
 /**
+ * LibraryItem model
+ */
+export interface LibraryItem extends BaseRecord {
+  item_type_id: number;
+  link: string;
+  title: string;
+  blurb?: string | null;
+  thumbnail_url?: string | null;
+  tags?: string[];
+  creators?: string[];
+  type_name?: string; // name from joined library_item_types, optional
+}
+
+/**
  * API response with pagination
  */
 export interface PaginatedResponse<T> {

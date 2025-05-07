@@ -14,7 +14,10 @@ import { Project, WorkEntry, SiteNote, Quote } from 'types';
 import api from '../services/api';
 import { Button } from '../components/common';
 
-// Wrapper for "Projects"
+// New
+import LibraryItemList from '@/components/admin/LibraryItemList';
+import LibraryItemForm from '@/components/admin/LibraryItemForm';
+
 const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -70,11 +73,8 @@ const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => 
   );
 };
 
-const ManageProjects: React.FC = () => {
-  return <Outlet />;
-};
+const ManageProjects: React.FC = () => <Outlet />;
 
-// Wrapper for "Work"
 const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const { workId } = useParams<{ workId: string }>();
   const navigate = useNavigate();
@@ -130,11 +130,8 @@ const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   );
 };
 
-const ManageWork: React.FC = () => {
-  return <Outlet />;
-};
+const ManageWork: React.FC = () => <Outlet />;
 
-// Wrapper for "SiteNote"
 const SiteNoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const { siteNoteId } = useParams<{ siteNoteId: string }>();
   const navigate = useNavigate();
@@ -190,11 +187,8 @@ const SiteNoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) =>
   );
 };
 
-const ManageSiteNotes: React.FC = () => {
-  return <Outlet />;
-};
+const ManageSiteNotes: React.FC = () => <Outlet />;
 
-// Wrapper for "Quote"
 const QuoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const { quoteId } = useParams<{ quoteId: string }>();
   const navigate = useNavigate();
@@ -250,9 +244,15 @@ const QuoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   );
 };
 
-const ManageQuotes: React.FC = () => {
-  return <Outlet />;
+const ManageQuotes: React.FC = () => <Outlet />;
+
+// ******* New: Library Items *******
+const LibraryItemFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
+  const { libraryItemId } = useParams<{ libraryItemId: string }>();
+  return <LibraryItemForm mode={mode} key={libraryItemId || 'new'} />;
 };
+
+const ManageLibraryItems: React.FC = () => <Outlet />;
 
 const AdminPage: React.FC = () => {
   const { logout, user } = useAuth();
@@ -291,6 +291,10 @@ const AdminPage: React.FC = () => {
         <NavLink to="/admin/quotes" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
           Quotes
         </NavLink>
+        {/* New link for Library Items */}
+        <NavLink to="/admin/library-items" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+          Library Items
+        </NavLink>
       </nav>
 
       <main>
@@ -319,6 +323,12 @@ const AdminPage: React.FC = () => {
             <Route index element={<QuoteList />} />
             <Route path="new" element={<QuoteFormWrapper mode='create' />} />
             <Route path=":quoteId/edit" element={<QuoteFormWrapper mode='edit' />} />
+          </Route>
+
+          <Route path="library-items" element={<ManageLibraryItems />}>
+            <Route index element={<LibraryItemList />} />
+            <Route path="new" element={<LibraryItemFormWrapper mode="create" />} />
+            <Route path=":libraryItemId/edit" element={<LibraryItemFormWrapper mode="edit" />} />
           </Route>
 
         </Routes>
