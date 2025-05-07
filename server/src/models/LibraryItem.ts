@@ -35,6 +35,38 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
   }
 
   /**
+   * Update an existing library item, ensuring JSON fields are stringified.
+   */
+  async update(id: number, data: Partial<LibraryItem>): Promise<LibraryItem | null> {
+    const dataForDb: any = { ...data };
+
+    // Ensure that if tags/creators are present, they are stringified.
+    // If they are intended to be cleared, they should be passed as null or an empty array 
+    // and the controller/service layer should handle this logic if super.update doesn't.
+    // For now, we only stringify if they are present and are arrays.
+    if (data.tags && Array.isArray(data.tags)) {
+      dataForDb.tags = JSON.stringify(data.tags);
+    } else if (data.hasOwnProperty('tags') && data.tags === null) {
+      dataForDb.tags = null; // Allow clearing the field
+    }
+
+
+    if (data.creators && Array.isArray(data.creators)) {
+      dataForDb.creators = JSON.stringify(data.creators);
+    } else if (data.hasOwnProperty('creators') && data.creators === null) {
+      dataForDb.creators = null; // Allow clearing the field
+    }
+    
+    // If tags or creators are present in data but not as arrays (e.g. already stringified or incorrect format)
+    // this won't attempt to re-stringify. This relies on controller sending correct array format.
+    // The error 'invalid input syntax for type json' for '{"AI"}' suggests the input itself might be an issue
+    // if it's coming from the client that way and not being parsed into an array of strings correctly.
+    // However, the controller's Array.isArray(tags) check should prevent non-arrays from getting here.
+
+    return super.update(id, dataForDb);
+  }
+
+  /**
    * Get all library items with their type name, filtering by item_type_id or tag if provided.
    */
   async getAllWithType(filter?: { item_type_id?: number; tag?: string }): Promise<any[]> {
