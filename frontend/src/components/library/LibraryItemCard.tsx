@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import Card from '@/components/common/Card';
 import Tag from '@/components/ui/Tag';
-import Icon from '@/components/common/Icon';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
-import { LibraryItem } from 'types'; // now from central types
+import { LibraryItem } from 'types';
 
 interface LibraryItemCardProps {
   item: LibraryItem;
   onTagClick?: (tag: string) => void;
 }
 
+/**
+ * LibraryItemCard – Displays a single library item.
+ * The item title is clickable, removing the previous "Visit Link" at the bottom.
+ */
 const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) => {
   const [imageError, setImageError] = useState(false);
 
@@ -30,7 +33,16 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) =
           </div>
         )}
 
-        <h2 className="text-lg font-bold truncate">{item.title}</h2>
+        <h2 className="text-lg font-bold truncate">
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            {item.title}
+          </a>
+        </h2>
 
         {item.type_name && (
           <p className="text-xs text-gray-500 italic">{item.type_name}</p>
@@ -47,20 +59,9 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) =
             <MarkdownRenderer>{item.blurb}</MarkdownRenderer>
           </div>
         )}
-
-        <div className="flex items-center justify-between">
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-sm text-primary hover:underline"
-          >
-            <Icon name="external-link" size="sm" className="mr-1" />
-            Visit Link
-          </a>
-        </div>
       </div>
 
+      {/* Thumbnail at the bottom (if any) */}
       {!imageError && item.thumbnail_url && (
         <div className="w-full h-40 overflow-hidden rounded-b-lg bg-gray-100">
           <img

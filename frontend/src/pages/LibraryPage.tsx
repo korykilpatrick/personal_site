@@ -1,77 +1,102 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import useApi from '@/hooks/useApi';
-import { Loading, ErrorDisplay, FilterButton, EmptyState } from '@/components/ui';
+import api from '@/services/api';
+import { LibraryItem } from 'types';
+import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import LibraryItemCard from '@/components/library/LibraryItemCard';
-import Card from '@/components/common/Card';
-import apiService from '@/api/apiService'; // For getLibraryItems
-import api from '@/services/api'; // For direct GET calls
-import type { LibraryItem } from 'types';
+import LibraryControls from '@/components/library/LibraryControls';
 
-interface LibraryItemType {
-  id: number;
-  name: string;
-}
-
+/**
+ * LibraryPage – fetches all library items once, provides multi-select filter for item types & tags,
+ * plus a search bar. Replicates bookshelf approach for searching & item count display.
+ */
 const LibraryPage: React.FC = () => {
-  const [itemTypes, setItemTypes] = useState<LibraryItemType[]>([]);
-  const [typesLoading, setTypesLoading] = useState(true);
-  const [typesError, setTypesError] = useState<Error | null>(null);
+  const [allItems, setAllItems] = useState<LibraryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [selectedTypeId, setSelectedTypeId] = useState<number | undefined>(undefined);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  // Filter states
+  const [selectedTypeIds, setSelectedTypeIds] = useState<number[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Load library item types once (public route: /library-item-types)
+  // Fetch library items on mount
   useEffect(() => {
-    const fetchItemTypes = async () => {
-      setTypesLoading(true);
-      setTypesError(null);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const resp = await api.get<LibraryItemType[]>('/library-item-types');
-        setItemTypes(resp.data);
-      } catch (err) {
-        const e = err instanceof Error ? err : new Error(String(err));
-        setTypesError(e);
+        const resp = await api.get<LibraryItem[]>('/library-items');
+        setAllItems(resp.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message || 'Failed to fetch library items');
       } finally {
-        setTypesLoading(false);
+        setLoading(false);
       }
     };
-    fetchItemTypes();
+    fetchData();
   }, []);
 
-  // Use the same pattern as ProjectsPage/WorkPage, passing [selectedTypeId, selectedTag] to useApi
-  const {
-    data: libraryItems,
-    loading,
-    error,
-  } = useApi<LibraryItem[], [number | undefined, string | undefined]>(
-    apiService.getLibraryItems,
-    [selectedTypeId, selectedTag || undefined]
-  );
+  // Distinct item types (id => name) from loaded items
+  const itemTypes = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const item of allItems) {
+      map.set(item.item_type_id, item.type_name || 'Unknown');
+    }
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [allItems]);
 
-  const handleTypeFilter = (typeId: number | undefined) => setSelectedTypeId(typeId);
-  const handleTagClick = (tag: string | null) => setSelectedTag(tag);
-
-  // Collect all tags from libraryItems
+  // Distinct tags from loaded items
   const allTags = useMemo(() => {
-    if (!libraryItems) return [];
-    const tags = libraryItems.flatMap((item) => item.tags || []);
-    return Array.from(new Set(tags));
-  }, [libraryItems]);
+    const tagSet = new Set<string>();
+    for (const item of allItems) {
+      if (item.tags) {
+        for (const t of item.tags) {
+          tagSet.add(t);
+        }
+      }
+    }
+    return Array.from(tagSet.values());
+  }, [allItems]);
 
-  if (typesLoading || loading) {
+  // Filtered items based on type & tag selections, plus search query
+  const filteredItems = useMemo(() => {
+    let result = [...allItems];
+
+    // If any type is selected, item.type must be in that list
+    if (selectedTypeIds.length > 0) {
+      result = result.filter(item => selectedTypeIds.includes(item.item_type_id));
+    }
+
+    // If any tags are selected, item.tags must overlap at least one
+    if (selectedTags.length > 0) {
+      result = result.filter(item => {
+        const itemTags = item.tags || [];
+        return itemTags.some(tag => selectedTags.includes(tag));
+      });
+    }
+
+    // If search is non-empty, filter by matching title, blurb, or creators
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter(item => {
+        if (item.title.toLowerCase().includes(query)) return true;
+        if (item.blurb && item.blurb.toLowerCase().includes(query)) return true;
+        if (item.creators && item.creators.some(c => c.toLowerCase().includes(query))) return true;
+        return false;
+      });
+    }
+
+    return result;
+  }, [allItems, selectedTypeIds, selectedTags, searchQuery]);
+
+  if (loading) {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <Loading className="h-64" />
       </div>
     );
   }
-  if (typesError) {
-    return (
-      <div className="max-w-6xl mx-auto py-8">
-        <ErrorDisplay error={typesError.message} />
-      </div>
-    );
-  }
+
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-8">
@@ -79,56 +104,55 @@ const LibraryPage: React.FC = () => {
       </div>
     );
   }
-  if (!libraryItems || libraryItems.length === 0) {
+
+  if (allItems.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <EmptyState message="No library items found." />
+        <EmptyState message="No library items are available." />
+      </div>
+    );
+  }
+
+  if (filteredItems.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto py-8">
+        <EmptyState message="No library items match your current filters or search." />
       </div>
     );
   }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card className="p-4">
-        <div className="flex flex-wrap gap-2 mb-4">
-          <FilterButton
-            label="All Types"
-            active={!selectedTypeId}
-            onClick={() => handleTypeFilter(undefined)}
-          />
-          {itemTypes.map((type) => (
-            <FilterButton
-              key={type.id}
-              label={type.name}
-              active={selectedTypeId === type.id}
-              onClick={() => handleTypeFilter(type.id)}
-            />
-          ))}
-        </div>
-        {allTags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <FilterButton
-              label="All Tags"
-              active={!selectedTag}
-              onClick={() => handleTagClick(null)}
-            />
-            {allTags.map((tag) => (
-              <FilterButton
-                key={tag}
-                label={tag}
-                active={selectedTag === tag}
-                onClick={() => handleTagClick(tag)}
-              />
-            ))}
-          </div>
-        )}
-      </Card>
+      <LibraryControls
+        itemTypes={itemTypes}
+        selectedTypeIds={selectedTypeIds}
+        onToggleType={id =>
+          setSelectedTypeIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+          )
+        }
+        onClearTypes={() => setSelectedTypeIds([])}
+        tags={allTags}
+        selectedTags={selectedTags}
+        onToggleTag={tag =>
+          setSelectedTags(prev =>
+            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+          )
+        }
+        onClearTags={() => setSelectedTags([])}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        itemCount={filteredItems.length}
+      />
+
       <div className="grid gap-4 md:grid-cols-2">
-        {libraryItems.map((item) => (
+        {filteredItems.map(item => (
           <LibraryItemCard
             key={item.id}
             item={item}
-            onTagClick={handleTagClick}
+            onTagClick={tag => {
+              setSelectedTags(prev => (prev.includes(tag) ? prev : [...prev, tag]));
+            }}
           />
         ))}
       </div>
