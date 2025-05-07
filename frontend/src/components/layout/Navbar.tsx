@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { FaXTwitter, FaGithub, FaLinkedinIn } from 'react-icons/fa6';
+import { MdEmail } from 'react-icons/md';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -47,55 +49,43 @@ const Navbar: React.FC = () => {
 
           {/* Social icons */}
           <div className="justify-self-end flex space-x-4">
-            {/* Twitter */}
+            {/* X (formerly Twitter) */}
             <a
-              href="https://twitter.com/kory_kilpatrick"
+              href="https://x.com/kory_kilpatrick"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light"
-              aria-label="Twitter"
+              className="text-white hover:text-secondary-light no-underline"
+              aria-label="X (formerly Twitter)"
             >
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 ..."/>
-              </svg>
+              <FaXTwitter size={24} />
             </a>
             {/* GitHub */}
             <a
               href="https://github.com/korykilpatrick"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light"
+              className="text-white hover:text-secondary-light no-underline"
               aria-label="GitHub"
             >
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fillRule="evenodd"
-                  d="M12 2C6.477 2 ... "
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FaGithub size={24} />
             </a>
             {/* LinkedIn */}
             <a
               href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light"
+              className="text-white hover:text-secondary-light no-underline"
               aria-label="LinkedIn"
             >
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-..."/>
-              </svg>
+              <FaLinkedinIn size={24} />
             </a>
             {/* Email */}
             <a
               href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
-              className="text-white hover:text-secondary-light"
+              className="text-white hover:text-secondary-light no-underline"
               aria-label="Email"
             >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 ..."/>
-              </svg>
+              <MdEmail size={24} />
             </a>
           </div>
         </div>
@@ -140,46 +130,38 @@ const Navbar: React.FC = () => {
               {/* Social icons for mobile */}
               <div className="flex justify-center space-x-6 pt-2 mt-2 border-t border-primary-light w-full">
                 <a
-                  href="https://twitter.com/kory_kilpatrick"
+                  href="https://x.com/kory_kilpatrick"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light"
-                  aria-label="Twitter"
+                  className="text-white hover:text-secondary-light no-underline"
+                  aria-label="X (formerly Twitter)"
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.29 20.251c7.547 0 ..."/>
-                  </svg>
+                  <FaXTwitter size={18} />
                 </a>
                 <a
                   href="https://github.com/korykilpatrick"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light"
+                  className="text-white hover:text-secondary-light no-underline"
                   aria-label="GitHub"
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12 2C6.477 2 ..." clipRule="evenodd" />
-                  </svg>
+                  <FaGithub size={18} />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light"
+                  className="text-white hover:text-secondary-light no-underline"
                   aria-label="LinkedIn"
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20.447 20.452h-3.554 ..."/>
-                  </svg>
+                  <FaLinkedinIn size={18} />
                 </a>
                 <a
                   href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
-                  className="text-white hover:text-secondary-light"
+                  className="text-white hover:text-secondary-light no-underline"
                   aria-label="Email"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 ..."/>
-                  </svg>
+                  <MdEmail size={18} />
                 </a>
               </div>
             </div>
