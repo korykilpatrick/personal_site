@@ -3,6 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaXTwitter, FaGithub, FaLinkedinIn } from 'react-icons/fa6';
 import { MdEmail } from 'react-icons/md';
 
+// Icon size constants
+const DESKTOP_ICON_SIZE = 32;
+const MOBILE_ICON_SIZE = 18;
+
+// Icon style constants
+const ICON_LINK_CLASSNAME = "text-white hover:text-secondary-light no-underline";
+
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
@@ -48,44 +55,44 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Social icons */}
-          <div className="justify-self-end flex space-x-4">
+          <div className="justify-self-end flex space-x-5">
             {/* X (formerly Twitter) */}
             <a
               href="https://x.com/kory_kilpatrick"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light no-underline"
+              className={ICON_LINK_CLASSNAME}
               aria-label="X (formerly Twitter)"
             >
-              <FaXTwitter size={24} />
+              <FaXTwitter size={DESKTOP_ICON_SIZE} />
             </a>
             {/* GitHub */}
             <a
               href="https://github.com/korykilpatrick"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light no-underline"
+              className={ICON_LINK_CLASSNAME}
               aria-label="GitHub"
             >
-              <FaGithub size={24} />
+              <FaGithub size={DESKTOP_ICON_SIZE} />
             </a>
             {/* LinkedIn */}
             <a
               href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white hover:text-secondary-light no-underline"
+              className={ICON_LINK_CLASSNAME}
               aria-label="LinkedIn"
             >
-              <FaLinkedinIn size={24} />
+              <FaLinkedinIn size={DESKTOP_ICON_SIZE} />
             </a>
             {/* Email */}
             <a
               href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
-              className="text-white hover:text-secondary-light no-underline"
+              className={ICON_LINK_CLASSNAME}
               aria-label="Email"
             >
-              <MdEmail size={24} />
+              <MdEmail size={DESKTOP_ICON_SIZE} />
             </a>
           </div>
         </div>
@@ -128,40 +135,40 @@ const Navbar: React.FC = () => {
                 </Link>
               ))}
               {/* Social icons for mobile */}
-              <div className="flex justify-center space-x-6 pt-2 mt-2 border-t border-primary-light w-full">
+              <div className="flex justify-center space-x-5 pt-2 mt-2 border-t border-primary-light w-full">
                 <a
                   href="https://x.com/kory_kilpatrick"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light no-underline"
+                  className={ICON_LINK_CLASSNAME}
                   aria-label="X (formerly Twitter)"
                 >
-                  <FaXTwitter size={18} />
+                  <FaXTwitter size={MOBILE_ICON_SIZE} />
                 </a>
                 <a
                   href="https://github.com/korykilpatrick"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light no-underline"
+                  className={ICON_LINK_CLASSNAME}
                   aria-label="GitHub"
                 >
-                  <FaGithub size={18} />
+                  <FaGithub size={MOBILE_ICON_SIZE} />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-secondary-light no-underline"
+                  className={ICON_LINK_CLASSNAME}
                   aria-label="LinkedIn"
                 >
-                  <FaLinkedinIn size={18} />
+                  <FaLinkedinIn size={MOBILE_ICON_SIZE} />
                 </a>
                 <a
                   href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
-                  className="text-white hover:text-secondary-light no-underline"
+                  className={ICON_LINK_CLASSNAME}
                   aria-label="Email"
                 >
-                  <MdEmail size={18} />
+                  <MdEmail size={MOBILE_ICON_SIZE} />
                 </a>
               </div>
             </div>
