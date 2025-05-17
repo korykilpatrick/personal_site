@@ -50,7 +50,7 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
   return (
     <>
       <Card variant="hover" padding="none" className="h-full flex flex-col">
-        <div className="p-4 md:p-5 flex flex-col md:flex-row gap-4 md:items-start flex-grow min-h-[200px]">
+        <div className="p-4 md:p-5 flex flex-col md:flex-row gap-4 flex-grow min-h-[200px]">
           <div className="md:flex-1 min-w-0 flex flex-col gap-3 flex-grow">
             <div className="flex justify-between items-baseline">
               <h2 className="text-lg font-bold truncate min-w-0">
@@ -71,13 +71,13 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
             </div>
 
             {item.creators && item.creators.length > 0 && (
-              <p className="text-sm text-stone-700">
+              <p className="text-sm text-stone-700 italic">
                 By {item.creators.join(', ')}
               </p>
             )}
 
             {item.blurb && (
-              <div className="text-textSecondary text-sm prose prose-primary max-w-none flex-grow">
+              <div className="text-textSecondary text-sm prose prose-primary max-w-none">
                 <MarkdownRenderer>
                   {needsTruncation && !isBlurbExpanded
                     ? `${item.blurb.substring(0, blurbPreviewLength)}...`
@@ -86,7 +86,7 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
                 {needsTruncation && (
                   <button
                     onClick={toggleBlurbExpand}
-                    className="text-primary hover:underline text-sm font-medium mt-1 ml-1"
+                    className="text-primary hover:underline text-sm mt-1"
                     aria-expanded={isBlurbExpanded}
                   >
                     {isBlurbExpanded ? 'Show Less' : 'Show More'}
