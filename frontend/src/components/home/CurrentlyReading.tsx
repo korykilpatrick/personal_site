@@ -37,7 +37,8 @@ const CurrentlyReading: React.FC = () => {
 
   return (
     <Card padding="lg">
-      <h2 className="text-lg font-semibold mb-3">Currently Reading</h2>
+      {/* <h2 className="text-lg font-semibold mb-3">Currently Reading</h2> */}
+      {/* <hr className="my-2 border-dashed border-gray-200/50 dark:border-gray-700/25" /> */}
 
       <div className={containerClasses}>
         {reading.map(book => (

@@ -46,7 +46,8 @@ const SiteNote: React.FC = () => {
   return (
     <Card variant="default" className="border-l-4 border-l-secondary">
       {/* Title centered by parent Section */}
-      <h2 className="text-lg font-semibold mb-2">Captain's Log</h2>
+      {/* <h2 className="text-lg font-semibold mb-2">Captain's Log</h2> */}
+      {/* <hr className="my-2 border-dashed border-gray-200/50 dark:border-gray-700/25" /> */}
       {/* Date is styled and prepended within MarkdownRenderer */}
       <MarkdownRenderer>
         {contentWithStyledDate}

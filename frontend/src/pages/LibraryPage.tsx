@@ -1,54 +1,36 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import api from '@/services/api';
+import React, { useState, useMemo } from 'react';
 import { LibraryItem } from 'types';
 import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import LibraryItemCard from '@/components/library/LibraryItemCard';
 import LibraryControls from '@/components/library/LibraryControls';
+import { useLibrary } from '@/context/LibraryContext';
 
 /**
- * LibraryPage – fetches all library items once, provides multi-select filter for item types & tags,
+ * LibraryPage – uses global library items, provides multi-select filter for item types & tags,
  * plus a search bar. Replicates bookshelf approach for searching & item count display.
  */
 const LibraryPage: React.FC = () => {
-  const [allItems, setAllItems] = useState<LibraryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use global context for library items, loading, and error states
+  const { libraryItems, loading, error: contextError } = useLibrary();
 
   // Filter states
   const [selectedTypeIds, setSelectedTypeIds] = useState<number[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch library items on mount
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const resp = await api.get<LibraryItem[]>('/library-items');
-        setAllItems(resp.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Failed to fetch library items');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
   // Distinct item types (id => name) from loaded items
   const itemTypes = useMemo(() => {
     const map = new Map<number, string>();
-    for (const item of allItems) {
+    for (const item of libraryItems) {
       map.set(item.item_type_id, item.type_name || 'Unknown');
     }
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [allItems]);
+  }, [libraryItems]);
 
   // Distinct tags from loaded items
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
-    for (const item of allItems) {
+    for (const item of libraryItems) {
       if (item.tags) {
         for (const t of item.tags) {
           tagSet.add(t);
@@ -56,11 +38,11 @@ const LibraryPage: React.FC = () => {
       }
     }
     return Array.from(tagSet.values());
-  }, [allItems]);
+  }, [libraryItems]);
 
   // Filtered items based on type & tag selections, plus search query
   const filteredItems = useMemo(() => {
-    let result = [...allItems];
+    let result = [...libraryItems];
 
     // If any type is selected, item.type must be in that list
     if (selectedTypeIds.length > 0) {
@@ -87,7 +69,7 @@ const LibraryPage: React.FC = () => {
     }
 
     return result;
-  }, [allItems, selectedTypeIds, selectedTags, searchQuery]);
+  }, [libraryItems, selectedTypeIds, selectedTags, searchQuery]);
 
   // Handler for when an item type is clicked on a card
   const handleItemTypeCardClick = (itemTypeId: number) => {
@@ -102,15 +84,15 @@ const LibraryPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (contextError) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <ErrorDisplay error={error} />
+        <ErrorDisplay error={`Failed to load library items: ${contextError.message}`} />
       </div>
     );
   }
 
-  if (allItems.length === 0) {
+  if (!loading && libraryItems.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8">
         <EmptyState message="No library items are available." />
@@ -118,10 +100,31 @@ const LibraryPage: React.FC = () => {
     );
   }
 
-  if (filteredItems.length === 0) {
+  if (!loading && !contextError && libraryItems.length > 0 && filteredItems.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <EmptyState message="No library items match your current filters or search." />
+        <LibraryControls
+          itemTypes={itemTypes}
+          selectedTypeIds={selectedTypeIds}
+          onToggleType={id =>
+            setSelectedTypeIds(prev =>
+              prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+            )
+          }
+          onClearTypes={() => setSelectedTypeIds([])}
+          tags={allTags}
+          selectedTags={selectedTags}
+          onToggleTag={tag =>
+            setSelectedTags(prev =>
+              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+            )
+          }
+          onClearTags={() => setSelectedTags([])}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          itemCount={filteredItems.length}
+        />
+        <EmptyState message="No library items match your current filters or search." className="mt-6" />
       </div>
     );
   }
