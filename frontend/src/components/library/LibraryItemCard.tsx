@@ -45,16 +45,23 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) =
       <Card variant="hover" padding="none" className="h-full flex flex-col">
         <div className="p-4 md:p-5 flex flex-col md:flex-row gap-4 md:items-start flex-grow min-h-[200px]">
           <div className="md:flex-1 min-w-0 flex flex-col gap-3 flex-grow">
-            <h2 className="text-lg font-bold truncate">
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                {item.title}
-              </a>
-            </h2>
+            <div className="flex justify-between items-baseline">
+              <h2 className="text-lg font-bold truncate min-w-0">
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  {item.title}
+                </a>
+              </h2>
+              {item.created_at && (
+                <div className="text-xs text-stone-500 whitespace-nowrap ml-2" title="Date Added">
+                  {new Date(item.created_at).toLocaleDateString()}
+                </div>
+              )}
+            </div>
 
             {item.creators && item.creators.length > 0 && (
               <p className="text-sm text-stone-700">
