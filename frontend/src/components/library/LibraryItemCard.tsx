@@ -8,13 +8,14 @@ import { LibraryItem } from 'types';
 interface LibraryItemCardProps {
   item: LibraryItem;
   onTagClick?: (tag: string) => void;
+  onItemTypeClick?: (itemTypeId: number) => void;
 }
 
 /**
  * LibraryItemCard – Displays a single library item.
  * The item title is clickable, removing the previous "Visit Link" at the bottom.
  */
-const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) => {
+const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onItemTypeClick }) => {
   const [imageError, setImageError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
@@ -23,6 +24,12 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) =
   const handleTagClick = (tag: string) => {
     if (onTagClick) {
       onTagClick(tag);
+    }
+  };
+
+  const handleItemTypeClick = (itemTypeId: number) => {
+    if (onItemTypeClick) {
+      onItemTypeClick(itemTypeId);
     }
   };
 
@@ -93,7 +100,14 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick }) =
             {(item.type_name || (item.tags && item.tags.length > 0)) && (
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 pt-2">
                 {item.type_name && (
-                  <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                  <span 
+                    className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full cursor-pointer hover:bg-blue-200"
+                    onClick={() => handleItemTypeClick(item.item_type_id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleItemTypeClick(item.item_type_id); }}
+                    title={`Filter by type: ${item.type_name}`}
+                  >
                     {item.type_name}
                   </span>
                 )}

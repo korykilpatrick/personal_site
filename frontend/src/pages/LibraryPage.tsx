@@ -89,6 +89,11 @@ const LibraryPage: React.FC = () => {
     return result;
   }, [allItems, selectedTypeIds, selectedTags, searchQuery]);
 
+  // Handler for when an item type is clicked on a card
+  const handleItemTypeCardClick = (itemTypeId: number) => {
+    setSelectedTypeIds(prev => (prev.includes(itemTypeId) ? prev : [...prev, itemTypeId]));
+  };
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto py-8">
@@ -153,6 +158,7 @@ const LibraryPage: React.FC = () => {
             onTagClick={tag => {
               setSelectedTags(prev => (prev.includes(tag) ? prev : [...prev, tag]));
             }}
+            onItemTypeClick={handleItemTypeCardClick}
           />
         ))}
       </div>
