@@ -135,6 +135,7 @@ const QuoteCarousel: React.FC = () => {
             <MarkdownRenderer>{`"${current.text}"`}</MarkdownRenderer>
           </div>
           {current.author && <p className="text-sm text-stone-500">— {current.author}</p>}
+          {current.source && <p className="text-xs text-stone-400 italic mt-1">{current.source}</p>}
         </div>
 
         {quotes.length > 1 && (
