@@ -25,18 +25,18 @@ const CurrentlyReading: React.FC = () => {
 
   if (reading.length === 0) {
     return (
-      <Card padding="lg" className="max-w-sm mx-auto">
+      <Card padding="lg" className="w-full">
         <EmptyState message="No books in progress — pick something juicy!" />
       </Card>
     );
   }
 
   const containerClasses =
-    'flex gap-4 pb-1 ' +
+    'flex w-full gap-4 pb-1 ' +
     (reading.length > 4 ? 'overflow-x-auto justify-start' : 'justify-center');
 
   return (
-    <Card padding="lg">
+    <Card padding="lg" className="w-full">
       <div className={containerClasses}>
         {reading.map(book => (
           <BookCard key={book.id} book={book} bookSize={{ width: 120, height: 180 }} />

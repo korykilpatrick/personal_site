@@ -30,41 +30,42 @@ const HomePage: React.FC = () => {
   }, [libraryItems]);
 
   return (
-    <>
-      <Section className="text-center">
-        <h2 className="text-xl font-semibold mb-4">Captain's Log</h2>
-        <SiteNote />
-      </Section>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      {/* Left Column: Captain's Log and Quotes (1/3 width) */}
+      <div className="md:col-span-1 flex flex-col gap-4">
+        <Section className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Captain's Log</h2>
+          <SiteNote />
+        </Section>
+        <Section className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Quotes</h2>
+          <QuoteCarousel />
+        </Section>
+      </div>
 
-      <Section className="text-center">
-        <h2 className="text-xl font-semibold mb-4">Currently Reading</h2>
-        <CurrentlyReading />
-      </Section>
-
-      <Section className="text-center">
-        <h2 className="text-xl font-semibold mb-4">Library's Latest</h2>
-        <Card padding="lg" className="mx-auto">
-          
-          {loading && <Loading />}
-          {error && <ErrorDisplay error={`Error loading library: ${error.message}`} />}
-          
-          {!loading && !error && !latestLibraryItem && (
-            <EmptyState message="The library is quiet right now. Check back soon!" />
-          )}
-          
-          {!loading && !error && latestLibraryItem && (
-            <div className="mt-4">
-              <HomepageLibraryItem item={latestLibraryItem} />
-            </div>
-          )}
-        </Card>
-      </Section>
-
-      <Section className="text-center">
-        <h2 className="text-xl font-semibold mb-4">Quotes</h2>
-        <QuoteCarousel />
-      </Section>
-    </>
+      {/* Right Column: Library's Latest and Currently Reading (2/3 width) */}
+      <div className="md:col-span-2 flex flex-col gap-4">
+        <Section className="text-center w-full max-w-none">
+          <h2 className="text-xl font-semibold mb-4">Library's Latest</h2>
+          <Card padding="lg" className="w-full">
+            {loading && <Loading />}
+            {error && <ErrorDisplay error={`Error loading library: ${error.message}`} />}
+            {!loading && !error && !latestLibraryItem && (
+              <EmptyState message="The library is quiet right now. Check back soon!" />
+            )}
+            {!loading && !error && latestLibraryItem && (
+              <div className="mt-4">
+                <HomepageLibraryItem item={latestLibraryItem} />
+              </div>
+            )}
+          </Card>
+        </Section>
+        <Section className="text-center w-full max-w-none">
+          <h2 className="text-xl font-semibold mb-4">Currently Reading</h2>
+          <CurrentlyReading />
+        </Section>
+      </div>
+    </div>
   );
 };
 
