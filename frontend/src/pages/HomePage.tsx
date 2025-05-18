@@ -32,17 +32,18 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Section className="text-center">
+        <h2 className="text-xl font-semibold mb-4">Captain's Log</h2>
         <SiteNote />
       </Section>
 
       <Section className="text-center">
+        <h2 className="text-xl font-semibold mb-4">Currently Reading</h2>
         <CurrentlyReading />
       </Section>
 
       <Section className="text-center">
+        <h2 className="text-xl font-semibold mb-4">Library's Latest</h2>
         <Card padding="lg" className="mx-auto">
-          {/* <h2 className="text-xl font-semibold mb-4">Library's Latest</h2> */}
-          {/* <hr className="my-2 border-dashed border-gray-200/50 dark:border-gray-700/25" /> */}
           
           {loading && <Loading />}
           {error && <ErrorDisplay error={`Error loading library: ${error.message}`} />}
@@ -60,6 +61,7 @@ const HomePage: React.FC = () => {
       </Section>
 
       <Section className="text-center">
+        <h2 className="text-xl font-semibold mb-4">Quotes</h2>
         <QuoteCarousel />
       </Section>
     </>
