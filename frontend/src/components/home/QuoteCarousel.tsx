@@ -34,6 +34,19 @@ const calculateDisplayTime = (text: string): number => {
 };
 
 /**
+ * Shuffles an array in place using the Fisher-Yates algorithm.
+ * @param array The array to shuffle.
+ * @returns The shuffled array (mutated in place).
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+}
+
+/**
  * Cycles through active quotes from DB. If none or empty, hides or shows fallback.
  */
 const QuoteCarousel: React.FC = () => {
@@ -51,7 +64,11 @@ const QuoteCarousel: React.FC = () => {
       setError(null);
       try {
         const res = await api.get<Quote[]>('/quotes?active=true');
-        setQuotes(res.data || []);
+        if (res.data && Array.isArray(res.data)) {
+          setQuotes(shuffleArray([...res.data])); // Shuffle a copy of the array
+        } else {
+          setQuotes([]);
+        }
       } catch (err: any) {
         setError(err.response?.data?.message || err.message || 'Failed to load quotes');
       } finally {
