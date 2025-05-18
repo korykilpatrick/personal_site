@@ -129,7 +129,7 @@ const QuoteCarousel: React.FC = () => {
       <Card padding="lg" className="w-full">
         <div
           key={idx}
-          className="transition-opacity duration-700 ease-in-out opacity-0 animate-fade-in"
+          className="transition-opacity duration-700 ease-in-out opacity-0 animate-fade-in px-4"
         >
           <div className="text-base mb-2">
             <MarkdownRenderer>{`"${current.text}"`}</MarkdownRenderer>
@@ -143,14 +143,14 @@ const QuoteCarousel: React.FC = () => {
             <button
               onClick={prevQuote}
               aria-label="Previous quote"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary hover:text-primary"
+              className="absolute left-3 top-4 text-textSecondary hover:text-primary"
             >
               <FaChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={nextQuote}
               aria-label="Next quote"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-textSecondary hover:text-primary"
+              className="absolute right-3 top-4 text-textSecondary hover:text-primary"
             >
               <FaChevronRight className="w-5 h-5" />
             </button>
