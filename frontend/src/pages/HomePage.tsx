@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
       {/* Right Column: Library's Latest and Currently Reading (2/3 width) */}
       <div className="md:col-span-2 flex flex-col gap-2">
         <Section className="w-full max-w-none mb-0">
-          <h2 className="text-xl font-semibold mb-4">Library's Latest</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center">Library's Latest</h2>
           <Card padding="lg" className="w-full">
             {loading && <Loading />}
             {error && <ErrorDisplay error={`Error loading library: ${error.message}`} />}
