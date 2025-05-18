@@ -55,7 +55,7 @@ const HomepageLibraryItem: React.FC<HomepageLibraryItemProps> = ({ item }) => {
       <div className="flex flex-col md:flex-row gap-4 flex-grow min-h-[200px]">
         {/* Content Column */}
         <div className="md:flex-1 min-w-0 flex flex-col gap-3 flex-grow">
-          <div className="flex flex-col items-center text-center mb-2">
+          <div className="flex flex-col items-start text-left mb-2">
             <h2 className="text-lg font-bold">
               <a
                 href={item.link}
@@ -74,7 +74,7 @@ const HomepageLibraryItem: React.FC<HomepageLibraryItemProps> = ({ item }) => {
           </div>
 
           {item.creators && item.creators.length > 0 && (
-            <p className="text-sm text-stone-700 italic text-center">
+            <p className="text-sm text-stone-700 italic text-left">
               By {item.creators.join(', ')}
             </p>
           )}
@@ -101,7 +101,7 @@ const HomepageLibraryItem: React.FC<HomepageLibraryItemProps> = ({ item }) => {
           <div className="flex-grow"></div> {/* Spacer */}
 
           {(item.type_name || (item.tags && item.tags.length > 0)) && (
-            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-2 pt-2">
+            <div className="flex flex-wrap items-center justify-start gap-x-2 gap-y-1 mt-2 pt-2">
               {item.type_name && (
                 <span 
                   className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full cursor-pointer hover:bg-blue-200"
