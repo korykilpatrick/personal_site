@@ -30,6 +30,16 @@ interface IConfig {
     secret: string;
     expiresIn: string;
   };
+  openai: {
+    apiKey: string;
+    model: string;
+    temperature: number;
+    maxTokens: number;
+  };
+  extraction: {
+    cacheTTL: number;
+    rateLimit: number;
+  };
 }
 
 const config: IConfig = {
@@ -50,6 +60,16 @@ const config: IConfig = {
   jwt: {
     secret: process.env.JWT_SECRET!,
     expiresIn: process.env.JWT_EXPIRES_IN!,
+  },
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
+    temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.3'),
+    maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '1000', 10),
+  },
+  extraction: {
+    cacheTTL: parseInt(process.env.EXTRACTION_CACHE_TTL || '3600', 10),
+    rateLimit: parseInt(process.env.EXTRACTION_RATE_LIMIT || '10', 10),
   },
 };
 
