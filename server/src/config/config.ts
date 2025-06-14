@@ -40,6 +40,12 @@ interface IConfig {
     cacheTTL: number;
     rateLimit: number;
   };
+  redis?: {
+    host: string;
+    port: number;
+    password?: string;
+    db?: number;
+  };
 }
 
 const config: IConfig = {
@@ -71,6 +77,12 @@ const config: IConfig = {
     cacheTTL: parseInt(process.env.EXTRACTION_CACHE_TTL || '3600', 10),
     rateLimit: parseInt(process.env.EXTRACTION_RATE_LIMIT || '10', 10),
   },
+  redis: process.env.REDIS_HOST ? {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    password: process.env.REDIS_PASSWORD,
+    db: process.env.REDIS_DB ? parseInt(process.env.REDIS_DB, 10) : 0,
+  } : undefined,
 };
 
 export default config;

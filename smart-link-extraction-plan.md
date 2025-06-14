@@ -20,104 +20,104 @@ Implement an intelligent system that automatically extracts and populates metada
 
 ### Phase 1: Core Infrastructure Setup
 1. **Create shared types**
-   - Define `ExtractedContent` interface in `/types/contentExtraction.ts`
-   - Define request/response types
-   - Define error types and codes
+   - [x] Define `ExtractedContent` interface in `/types/contentExtraction.ts`
+   - [x] Define request/response types
+   - [x] Define error types and codes
 
 2. **Set up OpenAI integration**
-   - Create `backend/src/services/llm/OpenAIService.ts`
-   - Implement secure API key management
-   - Add configuration for model settings
+   - [x] Create `backend/src/services/llm/OpenAIService.ts`
+   - [x] Implement secure API key management
+   - [x] Add configuration for model settings
 
 3. **Create extraction service architecture**
-   - Create `backend/src/services/contentExtraction/` directory structure
-   - Implement `ContentExtractionService.ts` with dependency injection
-   - Add Zod schemas for runtime validation
+   - [x] Create `backend/src/services/contentExtraction/` directory structure
+   - [x] Implement `ContentExtractionService.ts` with dependency injection
+   - [x] Add Zod schemas for runtime validation
 
 ### Phase 2: Backend Implementation
 1. **Implement extraction logic**
-   - Create prompt templates with versioning
-   - Implement URL validation and sanitization
-   - Add extraction method with OpenAI function calling
-   - Map OpenAI responses to our domain types
+   - [ ] Create prompt templates with versioning
+   - [ ] Implement URL validation and sanitization
+   - [ ] Add extraction method with OpenAI function calling
+   - [ ] Map OpenAI responses to our domain types
 
 2. **Add caching layer**
-   - Implement Redis caching service
-   - Add cache key generation with URL normalization
-   - Configure TTL based on content type
+   - [ ] Implement Redis caching service
+   - [ ] Add cache key generation with URL normalization
+   - [ ] Configure TTL based on content type
 
 3. **Create API endpoint**
-   - Add `POST /api/library/extract-metadata` route
-   - Implement request validation with express-validator
-   - Add rate limiting middleware
-   - Return properly typed responses
+   - [ ] Add `POST /api/library/extract-metadata` route
+   - [ ] Implement request validation with express-validator
+   - [ ] Add rate limiting middleware
+   - [ ] Return properly typed responses
 
 4. **Error handling**
-   - Create custom error classes hierarchy
-   - Add proper error logging
-   - Implement graceful degradation
+   - [ ] Create custom error classes hierarchy
+   - [ ] Add proper error logging
+   - [ ] Implement graceful degradation
 
 ### Phase 3: Frontend Integration
 1. **Create React hook**
-   - Implement `useContentExtraction` hook
-   - Handle loading, error, and success states
-   - Add request debouncing
+   - [ ] Implement `useContentExtraction` hook
+   - [ ] Handle loading, error, and success states
+   - [ ] Add request debouncing
 
 2. **Update library form**
-   - Create `SmartLinkInput` component
-   - Add URL paste detection
-   - Show loading state during extraction
-   - Auto-populate form fields on success
-   - Allow manual override of extracted data
+   - [ ] Create `SmartLinkInput` component
+   - [ ] Add URL paste detection
+   - [ ] Show loading state during extraction
+   - [ ] Auto-populate form fields on success
+   - [ ] Allow manual override of extracted data
 
 3. **Add UI feedback**
-   - Success toast on extraction
-   - Error messages for failures
-   - Field indicators for auto-filled vs manual data
+   - [ ] Success toast on extraction
+   - [ ] Error messages for failures
+   - [ ] Field indicators for auto-filled vs manual data
 
 ### Phase 4: Testing & Quality Assurance
 1. **Unit tests**
-   - Test extraction service with mocked OpenAI
-   - Test URL validation edge cases
-   - Test error scenarios
-   - Test caching behavior
+   - [ ] Test extraction service with mocked OpenAI
+   - [ ] Test URL validation edge cases
+   - [ ] Test error scenarios
+   - [ ] Test caching behavior
 
 2. **Integration tests**
-   - Test full extraction flow
-   - Test API endpoint with various URLs
-   - Test rate limiting
+   - [ ] Test full extraction flow
+   - [ ] Test API endpoint with various URLs
+   - [ ] Test rate limiting
 
 3. **Frontend tests**
-   - Test hook behavior
-   - Test form auto-population
-   - Test error states
+   - [ ] Test hook behavior
+   - [ ] Test form auto-population
+   - [ ] Test error states
 
 ### Phase 5: Observability & Monitoring
 1. **Logging**
-   - Add structured logging for extraction requests
-   - Log OpenAI API usage
-   - Track extraction success/failure rates
+   - [ ] Add structured logging for extraction requests
+   - [ ] Log OpenAI API usage
+   - [ ] Track extraction success/failure rates
 
 2. **Metrics**
-   - Add extraction latency tracking
-   - Monitor cache hit rates
-   - Track API costs
+   - [ ] Add extraction latency tracking
+   - [ ] Monitor cache hit rates
+   - [ ] Track API costs
 
 3. **Documentation**
-   - Update API documentation
-   - Add inline code documentation
-   - Update CLAUDE.md with new commands
+   - [ ] Update API documentation
+   - [ ] Add inline code documentation
+   - [ ] Update CLAUDE.md with new commands
 
 ### Phase 6: Performance & Optimization
 1. **Performance improvements**
-   - Implement request queuing
-   - Add circuit breaker for OpenAI failures
-   - Optimize prompt for faster responses
+   - [ ] Implement request queuing
+   - [ ] Add circuit breaker for OpenAI failures
+   - [ ] Optimize prompt for faster responses
 
 2. **Cost optimization**
-   - Monitor and alert on API usage
-   - Implement smart caching strategies
-   - Add option to disable for specific domains
+   - [ ] Monitor and alert on API usage
+   - [ ] Implement smart caching strategies
+   - [ ] Add option to disable for specific domains
 
 ## File Structure
 ```

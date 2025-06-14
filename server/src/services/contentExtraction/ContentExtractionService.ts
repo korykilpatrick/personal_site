@@ -4,6 +4,7 @@ import { ExtractedContentSchema, UrlSchema } from './schemas/extraction.schema';
 import { createExtractionPrompt, CATEGORIES, EXTRACTION_PROMPT_VERSION } from './prompts/extractionPrompt';
 import logger from '../../utils/logger';
 import { ApiError } from '../../middleware/error';
+import config from '../../config/config';
 
 export interface ICache {
   get(key: string): Promise<string | null>;
@@ -66,7 +67,7 @@ export class ContentExtractionService {
         extractionMetadata: {
           confidence: 0.9, // You could implement confidence scoring based on completeness
           extractedAt: new Date(),
-          llmModel: 'gpt-4-turbo-preview',
+          llmModel: config.openai.model,
           version: EXTRACTION_PROMPT_VERSION,
         },
       };

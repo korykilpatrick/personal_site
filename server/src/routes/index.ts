@@ -12,6 +12,7 @@ import config from '../config/config';
 // New library routes
 import libraryItemTypeRoutes from './library_item_type.routes';
 import libraryItemRoutes from './library_item.routes';
+import libraryExtractionRoutes from './library_extraction.routes';
 
 const router = express.Router();
 
@@ -37,5 +38,6 @@ router.use('/quotes', quoteRoutes);
 // Add library routes
 router.use('/library-item-types', libraryItemTypeRoutes);
 router.use('/library-items', libraryItemRoutes);
+router.use('/library', libraryExtractionRoutes);
 
 export default router;
