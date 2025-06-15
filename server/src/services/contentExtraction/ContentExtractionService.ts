@@ -1,5 +1,5 @@
 import { OpenAIService } from '../llm/OpenAIService';
-import { ExtractedContent, ExtractionError } from '../../../../types/contentExtraction';
+import { ExtractedContent } from '../../../../types/contentExtraction';
 import { ExtractedContentSchema, UrlSchema } from './schemas/extraction.schema';
 import { createExtractionPrompt, CATEGORIES, EXTRACTION_PROMPT_VERSION } from './prompts/extractionPrompt';
 import logger from '../../utils/logger';
@@ -11,6 +11,15 @@ export interface ICache {
   set(key: string, value: string, ttl?: number): Promise<void>;
 }
 
+/**
+ * Service for extracting metadata from web content using OpenAI
+ * 
+ * Features:
+ * - URL validation and normalization
+ * - Caching support with configurable TTL
+ * - Graceful error handling
+ * - Type-safe extraction using Zod schemas
+ */
 export class ContentExtractionService {
   private cache?: ICache;
   private cacheTTL: number = 3600; // 1 hour default
@@ -26,6 +35,14 @@ export class ContentExtractionService {
     }
   }
 
+  /**
+   * Extract metadata from a URL
+   * 
+   * @param url - The URL to extract content from
+   * @param forceRefresh - Force extraction even if cached
+   * @returns Extracted content metadata
+   * @throws {ApiError} If URL is invalid or extraction fails
+   */
   async extractContent(url: string, forceRefresh = false): Promise<ExtractedContent> {
     try {
       // Validate URL

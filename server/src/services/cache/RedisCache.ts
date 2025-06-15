@@ -3,6 +3,15 @@ import { ICache } from '../../services/contentExtraction/ContentExtractionServic
 import logger from '../../utils/logger';
 import config from '../../config/config';
 
+/**
+ * Redis implementation of the caching interface
+ * 
+ * Features:
+ * - Automatic reconnection with exponential backoff
+ * - Graceful error handling (never throws, logs errors)
+ * - Configurable TTL with sensible defaults
+ * - Connection event logging
+ */
 export class RedisCache implements ICache {
   private client: Redis;
   private readonly defaultTTL: number = 60 * 60 * 24 * 7; // 7 days in seconds

@@ -27,6 +27,25 @@ const getExtractionService = (): ContentExtractionService => {
   return extractionService;
 };
 
+/**
+ * Extract metadata from a URL using OpenAI
+ * 
+ * @route POST /api/library/extract-metadata
+ * @body {string} url - The URL to extract metadata from
+ * @body {boolean} [forceRefresh=false] - Force refresh bypassing cache
+ * @returns {ExtractedContent} Extracted metadata including title, author, description, etc.
+ * 
+ * @example
+ * POST /api/library/extract-metadata
+ * {
+ *   "url": "https://example.com/article",
+ *   "forceRefresh": false
+ * }
+ * 
+ * @throws {400} Invalid URL format
+ * @throws {429} Rate limit exceeded
+ * @throws {500} Extraction failed
+ */
 export const extractMetadata = async (
   req: Request,
   res: Response,
