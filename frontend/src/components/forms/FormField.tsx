@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 
 interface FormFieldProps {
-  label: string;
+  label: string | ReactNode;
   htmlFor: string;
   children: ReactNode;
   className?: string;

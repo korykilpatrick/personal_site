@@ -7,8 +7,10 @@ A modern, responsive personal portfolio website built with React, TypeScript, an
 - **Project Portfolio** - Display software projects with detailed descriptions, tags, links, and media
 - **Work Experience** - Showcase professional work history with company details and achievements
 - **Digital Bookshelf** - Present books you've read with sorting and filtering capabilities
+- **Library** - Curated collection of articles, videos, tools, and resources
+- **Smart Link Extraction** - AI-powered metadata extraction from URLs for quick library additions
 - **Responsive Design** - Fully responsive layout that works on all device sizes
-- **Admin Dashboard** - Secure admin area to manage content (projects, work entries, books)
+- **Admin Dashboard** - Secure admin area to manage content (projects, work entries, books, library)
 - **Authentication** - JWT-based authentication for admin functionality
 
 ## Tech Stack
@@ -27,6 +29,8 @@ A modern, responsive personal portfolio website built with React, TypeScript, an
 - **Knex.js** - SQL query builder and migrations
 - **JWT** - Authentication and authorization
 - **Winston** - Structured logging
+- **OpenAI API** - AI-powered content extraction
+- **Redis** (optional) - Caching layer
 
 ### DevOps
 - **Webpack** - Module bundling

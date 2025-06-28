@@ -15,6 +15,7 @@ import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { BooksProvider } from './context/BooksContext';
 import { LibraryProvider } from './context/LibraryContext';
+import { ToastProvider } from './contexts/ToastContext';
 import LibraryPage from './pages/LibraryPage'; // <--- Newly used
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
@@ -29,10 +30,11 @@ const App: React.FC = () => {
     <ModalProvider>
       <BooksProvider>
         <LibraryProvider>
-          <div className="flex flex-col min-h-screen bg-background">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
+          <ToastProvider>
+            <div className="flex flex-col min-h-screen bg-background">
+              <Navbar />
+              <main className="flex-grow">
+                <Routes>
                 <Route path="/" element={<Layout><HomePage /></Layout>} />
                 <Route path="/about" element={<Layout><AboutPage /></Layout>} />
                 <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} />
@@ -60,6 +62,7 @@ const App: React.FC = () => {
             <Footer />
             <GlobalImageModal />
           </div>
+          </ToastProvider>
         </LibraryProvider>
       </BooksProvider>
     </ModalProvider>

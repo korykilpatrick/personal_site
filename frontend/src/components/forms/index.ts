@@ -8,4 +8,6 @@ export type { MediaEntriesInputProps } from './MediaEntriesInput';
 export { default as TagInput } from './TagInput';
 export type { TagInputProps } from './TagInput';
 export { default as LinkListInput } from './LinkListInput';
-export type { LinkListInputProps } from './LinkListInput'; 
+export type { LinkListInputProps } from './LinkListInput';
+export { default as SmartLinkInput } from './SmartLinkInput';
+export { default as AutoFilledIndicator } from './AutoFilledIndicator'; 

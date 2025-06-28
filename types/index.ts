@@ -158,3 +158,8 @@ export type SortOption = {
   label: string;
   value: string;
 };
+
+/**
+ * Re-export content extraction types
+ */
+export * from './contentExtraction';

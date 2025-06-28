@@ -5,7 +5,8 @@ import type {
   Book,
   Project,
   WorkEntry,
-  LibraryItem
+  LibraryItem,
+  ExtractedContent
 } from 'types/index';
 import api from '../services/api';
 
@@ -67,6 +68,17 @@ export const apiService = {
     if (itemTypeId) query.item_type_id = itemTypeId;
     if (tag) query.tag = tag;
     const response = await api.get<LibraryItem[]>('/library-items', { params: query });
+    return response.data;
+  },
+
+  /**
+   * Extract metadata from a URL for library item creation.
+   */
+  extractMetadata: async (url: string, forceRefresh?: boolean): Promise<ExtractedContent> => {
+    const response = await api.post<ExtractedContent>('/library/extract-metadata', {
+      url,
+      forceRefresh
+    });
     return response.data;
   },
 };
