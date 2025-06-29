@@ -78,6 +78,29 @@ export class RedisCache implements ICache {
     await this.client.quit();
     logger.info('Redis client disconnected');
   }
+
+  /**
+   * Check if Redis client is connected
+   */
+  isConnected(): boolean {
+    return this.client.status === 'ready';
+  }
+
+  /**
+   * Clear cache entries matching a pattern
+   * @param pattern Redis pattern (e.g., 'api:*')
+   */
+  async clear(pattern: string): Promise<void> {
+    try {
+      const keys = await this.client.keys(pattern);
+      if (keys.length > 0) {
+        await this.client.del(...keys);
+        logger.debug(`Cleared ${keys.length} cache entries matching pattern: ${pattern}`);
+      }
+    } catch (error) {
+      logger.error(`Redis clear error for pattern ${pattern}:`, error);
+    }
+  }
 }
 
 let cacheInstance: RedisCache | null = null;
