@@ -23,7 +23,7 @@ interface IConfig {
     password: string;
   };
   cors: {
-    origin: string;
+    origin: string | string[];
   };
   logLevel: string;
   jwt: {
@@ -60,7 +60,9 @@ const config: IConfig = {
     password: process.env.DB_PASSWORD!,
   },
   cors: {
-    origin: process.env.CORS_ORIGIN!,
+    origin: process.env.CORS_ORIGIN!.includes(',') 
+      ? process.env.CORS_ORIGIN!.split(',').map(origin => origin.trim())
+      : process.env.CORS_ORIGIN!,
   },
   logLevel: process.env.LOG_LEVEL!,
   jwt: {
