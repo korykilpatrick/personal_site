@@ -133,4 +133,27 @@ export class BaseService<T extends BaseRecord> {
   async getActiveCount(): Promise<number> {
     return this.getCountWhere({ is_active: true } as unknown as Partial<T>);
   }
+
+  /**
+   * Get paginated records with metadata
+   */
+  async getAllPaginated(options: {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+    order?: 'asc' | 'desc';
+  } = {}): Promise<{
+    data: T[];
+    total: number;
+    page: number;
+    totalPages: number;
+    limit: number;
+  }> {
+    try {
+      return await this.model.getAllPaginated(options);
+    } catch (error) {
+      logger.error(`Error fetching paginated ${this.entityName}s`, { error, options });
+      throw error;
+    }
+  }
 }

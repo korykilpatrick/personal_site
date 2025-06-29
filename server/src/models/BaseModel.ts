@@ -108,6 +108,50 @@ export class BaseModel<T extends BaseRecord> {
     return parseInt(result?.count?.toString() || '0', 10);
   }
 
+  /**
+   * Get paginated records with metadata
+   * @param options Pagination options
+   * @returns Promise with data and pagination metadata
+   */
+  async getAllPaginated(options: {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+    order?: 'asc' | 'desc';
+  } = {}): Promise<{
+    data: T[];
+    total: number;
+    page: number;
+    totalPages: number;
+    limit: number;
+  }> {
+    const { page = 1, limit = 20, orderBy = this.sortField, order = this.sortOrder } = options;
+    
+    // Ensure positive values
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, Math.min(100, limit)); // Cap at 100 for safety
+    
+    // Execute count and data queries in parallel for better performance
+    const [data, countResult] = await Promise.all([
+      this.query()
+        .orderBy(orderBy, order)
+        .offset((safePage - 1) * safeLimit)
+        .limit(safeLimit),
+      this.query().count({ count: '*' }).first()
+    ]);
+    
+    const total = parseInt((countResult as any)?.count?.toString() || '0', 10);
+    const totalPages = Math.ceil(total / safeLimit);
+    
+    return { 
+      data, 
+      total, 
+      page: safePage, 
+      totalPages,
+      limit: safeLimit
+    };
+  }
+
   // --- Many-to-Many Relationship Helpers ---
 
   /**
