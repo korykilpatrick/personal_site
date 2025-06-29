@@ -151,4 +151,14 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
   );
 };
 
-export default LibraryItemCard;
+// Custom comparison function that only re-renders if id or updated_at changes
+const areEqual = (prevProps: LibraryItemCardProps, nextProps: LibraryItemCardProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.updated_at === nextProps.item.updated_at &&
+    prevProps.onTagClick === nextProps.onTagClick &&
+    prevProps.onItemTypeClick === nextProps.onItemTypeClick
+  );
+};
+
+export default React.memo(LibraryItemCard, areEqual);

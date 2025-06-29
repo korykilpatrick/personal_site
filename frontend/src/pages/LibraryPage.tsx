@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { LibraryItem } from 'types';
 import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import LibraryItemCard from '@/components/library/LibraryItemCard';
@@ -71,10 +71,44 @@ const LibraryPage: React.FC = () => {
     return result;
   }, [libraryItems, selectedTypeIds, selectedTags, searchQuery]);
 
+  // Optimized event handlers with useCallback
+  const onToggleType = useCallback((typeId: number) => {
+    setSelectedTypeIds(prev => 
+      prev.includes(typeId) 
+        ? prev.filter(id => id !== typeId)
+        : [...prev, typeId]
+    );
+  }, []);
+
+  const onToggleTag = useCallback((tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  }, []);
+
+  const onClearTypes = useCallback(() => {
+    setSelectedTypeIds([]);
+  }, []);
+
+  const onClearTags = useCallback(() => {
+    setSelectedTags([]);
+  }, []);
+
+  const onSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
   // Handler for when an item type is clicked on a card
-  const handleItemTypeCardClick = (itemTypeId: number) => {
+  const handleItemTypeCardClick = useCallback((itemTypeId: number) => {
     setSelectedTypeIds(prev => (prev.includes(itemTypeId) ? prev : [...prev, itemTypeId]));
-  };
+  }, []);
+
+  // Handler for when a tag is clicked on a card
+  const handleTagCardClick = useCallback((tag: string) => {
+    setSelectedTags(prev => (prev.includes(tag) ? prev : [...prev, tag]));
+  }, []);
 
   if (loading) {
     return (
@@ -106,22 +140,14 @@ const LibraryPage: React.FC = () => {
         <LibraryControls
           itemTypes={itemTypes}
           selectedTypeIds={selectedTypeIds}
-          onToggleType={id =>
-            setSelectedTypeIds(prev =>
-              prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-            )
-          }
-          onClearTypes={() => setSelectedTypeIds([])}
+          onToggleType={onToggleType}
+          onClearTypes={onClearTypes}
           tags={allTags}
           selectedTags={selectedTags}
-          onToggleTag={tag =>
-            setSelectedTags(prev =>
-              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-            )
-          }
-          onClearTags={() => setSelectedTags([])}
+          onToggleTag={onToggleTag}
+          onClearTags={onClearTags}
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          onSearchChange={onSearchChange}
           itemCount={filteredItems.length}
         />
         <EmptyState message="No library items match your current filters or search." className="mt-6" />
@@ -134,22 +160,14 @@ const LibraryPage: React.FC = () => {
       <LibraryControls
         itemTypes={itemTypes}
         selectedTypeIds={selectedTypeIds}
-        onToggleType={id =>
-          setSelectedTypeIds(prev =>
-            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-          )
-        }
-        onClearTypes={() => setSelectedTypeIds([])}
+        onToggleType={onToggleType}
+        onClearTypes={onClearTypes}
         tags={allTags}
         selectedTags={selectedTags}
-        onToggleTag={tag =>
-          setSelectedTags(prev =>
-            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-          )
-        }
-        onClearTags={() => setSelectedTags([])}
+        onToggleTag={onToggleTag}
+        onClearTags={onClearTags}
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={onSearchChange}
         itemCount={filteredItems.length}
       />
 
@@ -158,9 +176,7 @@ const LibraryPage: React.FC = () => {
           <LibraryItemCard
             key={item.id}
             item={item}
-            onTagClick={tag => {
-              setSelectedTags(prev => (prev.includes(tag) ? prev : [...prev, tag]));
-            }}
+            onTagClick={handleTagCardClick}
             onItemTypeClick={handleItemTypeCardClick}
           />
         ))}

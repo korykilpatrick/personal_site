@@ -109,4 +109,14 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
   );
 };
 
-export default BookCard; 
+// Custom comparison function that only re-renders if id or updated_at changes
+const areEqual = (prevProps: BookCardProps, nextProps: BookCardProps) => {
+  return (
+    prevProps.book.id === nextProps.book.id &&
+    prevProps.book.updated_at === nextProps.book.updated_at &&
+    prevProps.bookSize.width === nextProps.bookSize.width &&
+    prevProps.bookSize.height === nextProps.bookSize.height
+  );
+};
+
+export default React.memo(BookCard, areEqual); 

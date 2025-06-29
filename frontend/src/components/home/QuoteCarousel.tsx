@@ -183,4 +183,4 @@ const QuoteCarousel: React.FC = () => {
   );
 };
 
-export default QuoteCarousel;
+export default React.memo(QuoteCarousel);
