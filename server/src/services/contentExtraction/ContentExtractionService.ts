@@ -59,7 +59,16 @@ export class ContentExtractionService {
         const cached = await this.cache.get(cacheKey);
         if (cached) {
           logger.info('Returning cached extraction', { url: normalizedUrl });
-          return JSON.parse(cached);
+          const parsed = JSON.parse(cached);
+          // Convert date strings back to Date objects when retrieving from cache
+          return {
+            ...parsed,
+            publicationDate: parsed.publicationDate ? new Date(parsed.publicationDate) : undefined,
+            extractionMetadata: {
+              ...parsed.extractionMetadata,
+              extractedAt: new Date(parsed.extractionMetadata.extractedAt)
+            }
+          };
         }
       }
 

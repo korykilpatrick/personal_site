@@ -41,8 +41,6 @@ export class OpenAIService {
 
       const completion = await this.client.chat.completions.create({
         model: this.model,
-        temperature: this.temperature,
-        max_tokens: this.maxTokens,
         messages: [
           {
             role: 'system',

@@ -4,21 +4,7 @@ import type { ExtractedContent } from 'types/index';
 import useDebouncedValue from './useDebouncedValue';
 import { isUrl } from '../utils/validation';
 import { ExtractionError, categorizeExtractionError } from '../utils/extractionErrors';
-
-// Simple in-memory cache for request deduplication
-const extractionCache = new Map<string, Promise<ExtractedContent>>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-// Cleanup old cache entries periodically
-setInterval(() => {
-  const now = Date.now();
-  extractionCache.forEach((_, key) => {
-    const [, timestamp] = key.split('::');
-    if (now - parseInt(timestamp) > CACHE_TTL) {
-      extractionCache.delete(key);
-    }
-  });
-}, 60 * 1000); // Clean every minute
+import { extractionCache } from '../utils/extractionCache';
 
 interface UseContentExtractionOptions {
   onSuccess?: (data: ExtractedContent) => void;
@@ -48,12 +34,10 @@ export default function useContentExtraction(
   const [data, setData] = useState<ExtractedContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ExtractionError | null>(null);
-  const isMountedRef = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
-      isMountedRef.current = false;
       abortControllerRef.current?.abort();
     };
   }, []);
@@ -70,51 +54,44 @@ export default function useContentExtraction(
       let extractedData: ExtractedContent;
       
       // Check cache unless force refresh is requested
-      const cacheKey = `${url}::${Date.now()}`;
-      const cachedKey = Array.from(extractionCache.keys()).find(k => k.startsWith(`${url}::`));
+      const cachedPromise = extractionCache.get(url);
       
-      if (!forceRefresh && cachedKey) {
+      if (!forceRefresh && cachedPromise) {
         // Use cached promise
-        extractedData = await extractionCache.get(cachedKey)!;
+        extractedData = await cachedPromise;
       } else {
         // Clear old cache entry if exists
-        if (cachedKey) {
-          extractionCache.delete(cachedKey);
+        if (cachedPromise) {
+          extractionCache.delete(url);
         }
         
         // Create new request and cache the promise
         const promise = apiService.extractMetadata(url, forceRefresh);
-        extractionCache.set(cacheKey, promise);
+        extractionCache.set(url, promise);
         
         try {
           extractedData = await promise;
         } catch (err) {
           // Remove from cache on error
-          extractionCache.delete(cacheKey);
+          extractionCache.delete(url);
           throw err;
         }
       }
       
-      // Only update state if component is still mounted
-      if (isMountedRef.current) {
-        setData(extractedData);
-        onSuccess?.(extractedData);
-      }
+      // Update state
+      setData(extractedData);
+      onSuccess?.(extractedData);
     } catch (err) {
       // Don't update state if request was aborted or component unmounted
       if (err instanceof Error && err.name === 'AbortError') {
         return;
       }
       
-      if (isMountedRef.current) {
-        const categorizedError = categorizeExtractionError(err);
-        setError(categorizedError);
-        onError?.(categorizedError);
-      }
+      const categorizedError = categorizeExtractionError(err);
+      setError(categorizedError);
+      onError?.(categorizedError);
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, [onSuccess, onError]);
 
@@ -149,12 +126,16 @@ export function useContentExtractionWithDebounce(
   const debouncedUrl = useDebouncedValue(url, debounceDelay);
   const extraction = useContentExtraction(hookOptions);
   
+  // Track the last extracted URL to prevent re-extraction
+  const lastExtractedUrlRef = useRef<string>('');
+  
   useEffect(() => {
-    // Only extract if enabled and URL is valid (http/https only)
-    if (enabled && debouncedUrl && isUrl(debouncedUrl)) {
+    // Only extract if enabled, URL is valid, and we haven't already extracted this URL
+    if (enabled && debouncedUrl && isUrl(debouncedUrl) && debouncedUrl !== lastExtractedUrlRef.current) {
+      lastExtractedUrlRef.current = debouncedUrl;
       extraction.extractMetadata(debouncedUrl);
     }
-  }, [debouncedUrl, enabled, extraction]);
+  }, [debouncedUrl, enabled, extraction.extractMetadata]);
 
   return {
     data: extraction.data,

@@ -8,10 +8,6 @@ export const extractionRateLimiter = rateLimit({
   message: 'Too many extraction requests from this IP, please try again after 15 minutes',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req: any) => {
-    // Skip rate limiting for authenticated admin users if needed
-    return req.user?.role === 'admin';
-  },
   handler: (req, res) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,

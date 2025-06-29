@@ -75,11 +75,24 @@ export const apiService = {
    * Extract metadata from a URL for library item creation.
    */
   extractMetadata: async (url: string, forceRefresh?: boolean): Promise<ExtractedContent> => {
-    const response = await api.post<ExtractedContent>('/library/extract-metadata', {
+    const response = await api.post<{ success: boolean; data: any }>('/library/extract-metadata', {
       url,
       forceRefresh
     });
-    return response.data;
+    
+    // Transform date strings back to Date objects and fix backend typo
+    const data = response.data.data;
+    const result = {
+      ...data,
+      suggestedCategory: data.suggestedCategor || data.suggestedCategory, // Handle backend typo
+      publicationDate: data.publicationDate ? new Date(data.publicationDate) : undefined,
+      extractionMetadata: {
+        ...data.extractionMetadata,
+        extractedAt: new Date(data.extractionMetadata.extractedAt)
+      }
+    };
+    
+    return result;
   },
 };
 

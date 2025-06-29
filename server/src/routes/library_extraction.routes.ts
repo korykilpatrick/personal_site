@@ -3,11 +3,13 @@ import { body } from 'express-validator';
 import { extractMetadata } from '../controllers/libraryExtraction.controller';
 import { extractionRateLimiter } from '../middleware/extractionRateLimit';
 import { validate } from '../middleware/validation';
+import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
 
 router.post(
   '/extract-metadata',
+  protect,
   extractionRateLimiter,
   [
     body('url')

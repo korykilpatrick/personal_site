@@ -37,6 +37,7 @@ const SmartLinkInput: React.FC<SmartLinkInputProps> = ({
   className,
   debounceDelay = 1000
 }) => {
+  
   // Use the debounced extraction hook
   const { data, loading, error, reset } = useContentExtractionWithDebounce(value, {
     enabled: !disabled && value.length > 0,
