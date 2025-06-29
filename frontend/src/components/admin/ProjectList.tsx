@@ -1,52 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
 import { Project } from 'types/index';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
+import { useAdminList } from '../../hooks';
 
 const ProjectList: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // Start loading true
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await api.get<Project[]>('/admin/projects');
-        setProjects(response.data);
-      } catch (err: any) {
-        console.error('Error fetching projects:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to fetch projects');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    // Basic confirmation
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      // Ideally show loading state on the specific row/button during delete
-      // For simplicity, we'll just disable buttons via main isLoading
-      // A more complex implementation could track deletingId state.
-      setIsLoading(true); 
-      setError(null);
-      try {
-        await api.delete(`/admin/projects/${id}`);
-        setProjects(projects.filter(p => p.id !== id));
-      } catch (err: any) { 
-        console.error('Error deleting project:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to delete project');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  const { items: projects, isLoading, error, handleDelete } = useAdminList<Project>({
+    endpoint: '/admin/projects',
+    entityName: 'project'
+  });
 
   const renderContent = () => {
     if (isLoading) {
@@ -124,4 +88,4 @@ const ProjectList: React.FC = () => {
   );
 };
 
-export default ProjectList; 
+export default ProjectList;

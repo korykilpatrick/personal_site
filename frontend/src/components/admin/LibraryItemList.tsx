@@ -1,62 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
-import api from '@/services/api';
 import { useNavigate } from 'react-router-dom';
-
-interface LibraryItemType {
-  id: number;
-  name: string;
-}
-
-interface LibraryItem {
-  id: number;
-  item_type_id: number;
-  link: string;
-  title: string;
-  blurb?: string | null;
-  thumbnail_url?: string | null;
-  tags?: string[];
-  created_at?: string;
-  updated_at?: string;
-  type_name?: string;
-}
+import { useAdminList } from '../../hooks';
+import { LibraryItem } from 'types';
 
 const LibraryItemList: React.FC = () => {
-  const [items, setItems] = useState<LibraryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const fetchItems = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await api.get<LibraryItem[]>('/admin/library-items');
-      setItems(res.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch library items');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this library item?')) return;
-    setIsLoading(true);
-    try {
-      await api.delete(`/admin/library-items/${id}`);
-      setItems((prev) => prev.filter((item) => item.id !== id));
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to delete library item');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { items, isLoading, error, handleDelete } = useAdminList<LibraryItem>({
+    endpoint: '/admin/library-items',
+    entityName: 'library item'
+  });
 
   return (
     <Card>

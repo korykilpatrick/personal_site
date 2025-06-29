@@ -1,44 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../services/api';
+import React from 'react';
 import { Quote } from 'types';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
 import { useNavigate } from 'react-router-dom';
+import { useAdminList } from '../../hooks';
 
 const QuoteList: React.FC = () => {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchQuotes = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await api.get<Quote[]>('/admin/quotes');
-        setQuotes(res.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Failed to fetch quotes');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchQuotes();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this quote?')) return;
-    setIsLoading(true);
-    try {
-      await api.delete(`/admin/quotes/${id}`);
-      setQuotes(prev => prev.filter(q => q.id !== id));
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to delete quote');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { items: quotes, isLoading, error, handleDelete } = useAdminList<Quote>({
+    endpoint: '/admin/quotes',
+    entityName: 'quote'
+  });
 
   const renderContent = () => {
     if (isLoading) return <Loading className="mt-4" />;

@@ -1,48 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
 import { WorkEntry } from 'types/index'; // Correct path
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
+import { useAdminList } from '../../hooks';
 
 const WorkList: React.FC = () => {
-  const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchWork = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await api.get<WorkEntry[]>('/admin/work');
-        setWorkEntries(response.data);
-      } catch (err: any) {
-        console.error('Error fetching work entries:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to fetch work entries');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchWork();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this work entry?')) {
-      setIsLoading(true);
-      setError(null);
-      try {
-        await api.delete(`/admin/work/${id}`);
-        setWorkEntries(workEntries.filter(w => w.id !== id));
-      } catch (err: any) {
-        console.error('Error deleting work entry:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to delete work entry');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  const { items: workEntries, isLoading, error, handleDelete } = useAdminList<WorkEntry>({
+    endpoint: '/admin/work',
+    entityName: 'work entry'
+  });
 
   const renderContent = () => {
     if (isLoading) {
@@ -111,4 +79,4 @@ const WorkList: React.FC = () => {
   );
 };
 
-export default WorkList; 
+export default WorkList;

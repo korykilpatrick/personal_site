@@ -1,44 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../services/api';
+import React from 'react';
 import { SiteNote } from 'types';
 import { Button, Card } from '../common';
 import { Loading, ErrorDisplay, EmptyState } from '../ui';
 import { useNavigate } from 'react-router-dom';
+import { useAdminList } from '../../hooks';
 
 const SiteNoteList: React.FC = () => {
-  const [notes, setNotes] = useState<SiteNote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await api.get<SiteNote[]>('/admin/site_notes');
-        setNotes(res.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Failed to fetch site notes');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchNotes();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this site note?')) return;
-    setIsLoading(true);
-    try {
-      await api.delete(`/admin/site_notes/${id}`);
-      setNotes(prev => prev.filter(n => n.id !== id));
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to delete site note');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { items: notes, isLoading, error, handleDelete } = useAdminList<SiteNote>({
+    endpoint: '/admin/site_notes',
+    entityName: 'site note'
+  });
 
   const renderContent = () => {
     if (isLoading) return <Loading className="mt-4" />;
