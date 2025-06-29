@@ -21,7 +21,8 @@
     "lint": "eslint 'frontend/src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint 'frontend/src/**/*.{js,jsx,ts,tsx}' --fix",
     "format": "prettier --write 'frontend/src/**/*.{js,jsx,ts,tsx,css,md}'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist server/dist frontend/dist types/*.js types/*.map"
   },
   "repository": {
     "type": "git",
