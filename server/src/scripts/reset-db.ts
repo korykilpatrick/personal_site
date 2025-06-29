@@ -13,7 +13,7 @@ dotenv.config({
 /**
  * Script to reset the database (drop and recreate)
  */
-async function resetDatabase() {
+async function resetDatabase(): Promise<void> {
   const environment = process.env.NODE_ENV!;
   const dbName = process.env.DB_NAME!;
   

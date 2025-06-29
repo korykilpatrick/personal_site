@@ -22,7 +22,7 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
    * Create a new library item, ensuring JSON fields are stringified.
    */
   async create(data: LibraryItemCreationData): Promise<LibraryItem> {
-    const dataForDb: any = { ...data };
+    const dataForDb: Record<string, any> = { ...data };
 
     if (data.tags) {
       dataForDb.tags = JSON.stringify(data.tags);
@@ -31,14 +31,14 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
       dataForDb.creators = JSON.stringify(data.creators);
     }
 
-    return super.create(dataForDb as any);
+    return super.create(dataForDb as LibraryItemCreationData);
   }
 
   /**
    * Update an existing library item, ensuring JSON fields are stringified.
    */
   async update(id: number, data: Partial<LibraryItem>): Promise<LibraryItem | null> {
-    const dataForDb: any = { ...data };
+    const dataForDb: Record<string, any> = { ...data };
 
     // Ensure that if tags/creators are present, they are stringified.
     // If they are intended to be cleared, they should be passed as null or an empty array 
@@ -69,7 +69,7 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
   /**
    * Get all library items with their type name, filtering by item_type_id or tag if provided.
    */
-  async getAllWithType(filter?: { item_type_id?: number; tag?: string }): Promise<any[]> {
+  async getAllWithType(filter?: { item_type_id?: number; tag?: string }): Promise<(LibraryItem & { type_name: string })[]> {
     const query = this.db('library_items')
       .select(
         'library_items.*',

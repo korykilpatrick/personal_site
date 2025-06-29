@@ -60,7 +60,7 @@ export function cacheMiddleware(ttl: number = 300, keyPrefix: string = 'api') {
         res.setHeader('X-Cache-TTL', ttl.toString());
 
         // Async cache write (don't block response)
-        cache.set(cacheKey, JSON.stringify(data), ttl).catch((error: any) => {
+        cache.set(cacheKey, JSON.stringify(data), ttl).catch((error: unknown) => {
           logger.warn('Cache write error', { error, cacheKey });
         });
       }
@@ -120,7 +120,7 @@ export function clearCacheMiddleware(patterns: string[]) {
 
     // Override json method
     res.json = function(data: any) {
-      clearPatternsIfSuccessful().catch((error: any) => {
+      clearPatternsIfSuccessful().catch((error: unknown) => {
         logger.warn('Error clearing cache after json response', { error });
       });
       return originalJson(data);
@@ -128,7 +128,7 @@ export function clearCacheMiddleware(patterns: string[]) {
 
     // Override send method
     res.send = function(data: any) {
-      clearPatternsIfSuccessful().catch((error: any) => {
+      clearPatternsIfSuccessful().catch((error: unknown) => {
         logger.warn('Error clearing cache after send response', { error });
       });
       return originalSend(data);

@@ -12,7 +12,7 @@ if (!username || !plainPassword) {
 
 const saltRounds = 12; // Increased salt rounds slightly
 
-async function upsertUserPassword() {
+async function upsertUserPassword(): Promise<void> {
   try {
     logger.info(`Hashing password for user: ${username}`);
     const password_hash = await bcrypt.hash(plainPassword, saltRounds);

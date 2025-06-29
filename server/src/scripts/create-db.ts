@@ -13,7 +13,7 @@ dotenv.config({
 /**
  * Script to create the database and tables if they don't exist
  */
-async function createDatabase() {
+async function createDatabase(): Promise<void> {
   const environment = process.env.NODE_ENV!;
   const dbName = process.env.DB_NAME!;
   

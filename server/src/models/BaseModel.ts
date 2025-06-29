@@ -1,6 +1,7 @@
 import { db } from '../db/connection';
 import { Knex } from 'knex';
 import { BaseRecord } from '@shared/index';
+import { DatabaseCountResult } from '../types/database';
 
 /**
  * Generic base model with common CRUD operations
@@ -140,7 +141,7 @@ export class BaseModel<T extends BaseRecord> {
       this.query().count({ count: '*' }).first()
     ]);
     
-    const total = parseInt((countResult as any)?.count?.toString() || '0', 10);
+    const total = parseInt((countResult as DatabaseCountResult)?.count?.toString() || '0', 10);
     const totalPages = Math.ceil(total / safeLimit);
     
     return { 

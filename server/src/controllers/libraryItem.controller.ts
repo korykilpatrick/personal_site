@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { LibraryItemModel } from '../models/LibraryItem';
 import logger from '../utils/logger';
+import { DatabaseCountResult } from '../types/database';
 
 export const LibraryItemController = {
   // GET /api/library-items
@@ -39,8 +40,8 @@ export const LibraryItemController = {
    */
   getTotalCount: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await LibraryItemModel.query().count({ count: '*' }).first() as any;
-      const count = parseInt(result.count, 10) || 0;
+      const result = await LibraryItemModel.query().count({ count: '*' }).first() as DatabaseCountResult;
+      const count = parseInt(result.count.toString(), 10) || 0;
       res.status(StatusCodes.OK).json({ count });
     } catch (error) {
       logger.error('Error fetching total library items count', { error });
