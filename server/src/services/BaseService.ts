@@ -97,4 +97,40 @@ export class BaseService<T extends BaseRecord> {
       throw error;
     }
   }
+
+  /**
+   * Get the total count of all records
+   */
+  async getTotalCount(): Promise<number> {
+    try {
+      return await this.model.count();
+    } catch (error) {
+      logger.error(`Error fetching total ${this.entityName} count`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get count of records matching a where clause
+   */
+  async getCountWhere(whereClause: Partial<T>): Promise<number> {
+    try {
+      const result = await this.model.query()
+        .where(whereClause as any)
+        .count({ count: '*' })
+        .first() as { count: string | number };
+      return parseInt(result?.count?.toString() || '0', 10);
+    } catch (error) {
+      logger.error(`Error fetching ${this.entityName} count with conditions`, { error, whereClause });
+      throw error;
+    }
+  }
+
+  /**
+   * Get count of active records (for tables with is_active field)
+   * Note: This assumes the entity has an is_active field
+   */
+  async getActiveCount(): Promise<number> {
+    return this.getCountWhere({ is_active: true } as unknown as Partial<T>);
+  }
 }
