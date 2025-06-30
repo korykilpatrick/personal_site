@@ -116,7 +116,7 @@ export class BaseService<T extends BaseRecord> {
   async getCountWhere(whereClause: Partial<T>): Promise<number> {
     try {
       const result = await this.model.query()
-        .where(whereClause as any)
+        .where(whereClause as Record<string, unknown>)
         .count({ count: '*' })
         .first() as { count: string | number };
       return parseInt(result?.count?.toString() || '0', 10);

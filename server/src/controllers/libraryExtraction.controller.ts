@@ -32,14 +32,12 @@ const getExtractionService = (): ContentExtractionService => {
  * 
  * @route POST /api/library/extract-metadata
  * @body {string} url - The URL to extract metadata from
- * @body {boolean} [forceRefresh=false] - Force refresh bypassing cache
  * @returns {ExtractedContent} Extracted metadata including title, author, description, etc.
  * 
  * @example
  * POST /api/library/extract-metadata
  * {
- *   "url": "https://example.com/article",
- *   "forceRefresh": false
+ *   "url": "https://example.com/article"
  * }
  * 
  * @throws {400} Invalid URL format

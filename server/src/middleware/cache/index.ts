@@ -1,1 +1,1 @@
-export { cacheMiddleware, clearCache, clearCacheMiddleware } from './cacheMiddleware';
+export * from './cacheMiddleware';

@@ -151,11 +151,23 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
   );
 };
 
-// Custom comparison function that only re-renders if id or updated_at changes
+// Custom comparison function that checks all props affecting rendering
 const areEqual = (prevProps: LibraryItemCardProps, nextProps: LibraryItemCardProps) => {
+  const prevItem = prevProps.item;
+  const nextItem = nextProps.item;
+  
   return (
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.item.updated_at === nextProps.item.updated_at &&
+    prevItem.id === nextItem.id &&
+    prevItem.updated_at === nextItem.updated_at &&
+    prevItem.title === nextItem.title &&
+    prevItem.link === nextItem.link &&
+    prevItem.blurb === nextItem.blurb &&
+    prevItem.thumbnail_url === nextItem.thumbnail_url &&
+    prevItem.type_name === nextItem.type_name &&
+    prevItem.item_type_id === nextItem.item_type_id &&
+    prevItem.created_at === nextItem.created_at &&
+    JSON.stringify(prevItem.creators) === JSON.stringify(nextItem.creators) &&
+    JSON.stringify(prevItem.tags) === JSON.stringify(nextItem.tags) &&
     prevProps.onTagClick === nextProps.onTagClick &&
     prevProps.onItemTypeClick === nextProps.onItemTypeClick
   );

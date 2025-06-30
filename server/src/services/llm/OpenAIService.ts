@@ -32,7 +32,7 @@ export class OpenAIService {
     this.maxTokens = config.maxTokens || 1000;
   }
 
-  async extractWebContent(url: string, extractionPrompt: string, responseSchema: z.ZodSchema): Promise<any> {
+  async extractWebContent<T>(url: string, extractionPrompt: string, responseSchema: z.ZodSchema<T>): Promise<T> {
     try {
       logger.info('Starting OpenAI content extraction', {
         url,
@@ -105,7 +105,6 @@ export class OpenAIService {
 
       logger.info('Successfully extracted content', {
         url,
-        title: validationResult.data.title,
       });
 
       return validationResult.data;

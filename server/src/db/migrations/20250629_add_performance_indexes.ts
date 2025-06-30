@@ -12,11 +12,11 @@ export async function up(knex: Knex): Promise<void> {
     
     // Index for sorting by creation date
     table.index('created_at', 'idx_library_items_created_at');
-    
-    // GIN index for JSONB tags column (PostgreSQL specific)
-    // This dramatically improves tag filtering performance
-    knex.raw('CREATE INDEX idx_library_items_tags ON library_items USING GIN (tags)');
   });
+  
+  // GIN index for JSONB tags column (PostgreSQL specific)
+  // This dramatically improves tag filtering performance
+  await knex.raw('CREATE INDEX idx_library_items_tags ON library_items USING GIN (tags)');
 
   // Add indexes for other frequently queried tables
   await knex.schema.alterTable('quotes', (table) => {

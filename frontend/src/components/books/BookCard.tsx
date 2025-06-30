@@ -109,11 +109,22 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
   );
 };
 
-// Custom comparison function that only re-renders if id or updated_at changes
+// Custom comparison function that checks all props affecting rendering
 const areEqual = (prevProps: BookCardProps, nextProps: BookCardProps) => {
+  const prevBook = prevProps.book;
+  const nextBook = nextProps.book;
+  
   return (
-    prevProps.book.id === nextProps.book.id &&
-    prevProps.book.updated_at === nextProps.book.updated_at &&
+    prevBook.id === nextBook.id &&
+    prevBook.updated_at === nextBook.updated_at &&
+    prevBook.title === nextBook.title &&
+    prevBook.author === nextBook.author &&
+    prevBook.rating === nextBook.rating &&
+    prevBook.img_url === nextBook.img_url &&
+    prevBook.book_link === nextBook.book_link &&
+    prevBook.date_read === nextBook.date_read &&
+    prevBook.date_pub === nextBook.date_pub &&
+    JSON.stringify(prevBook.shelves) === JSON.stringify(nextBook.shelves) &&
     prevProps.bookSize.width === nextProps.bookSize.width &&
     prevProps.bookSize.height === nextProps.bookSize.height
   );
