@@ -47,9 +47,16 @@ export function useAdminList<T extends { id: number }>(
       const res = await api.get<T[]>(endpoint, { signal });
       setItems(res.data);
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return; // Ignore abort errors
+      // Check if the error is due to request cancellation
+      if (err instanceof Error && (err.name === 'AbortError' || err.name === 'CanceledError')) {
+        return; // Ignore abort/cancel errors
       }
+      
+      // Also check axios-specific cancel
+      if ((err as any)?.code === 'ERR_CANCELED') {
+        return;
+      }
+      
       const error = err as ApiError;
       const errorMessage = 
         error.response?.data?.message || 
@@ -58,7 +65,10 @@ export function useAdminList<T extends { id: number }>(
       setError(errorMessage);
       console.error(`Error fetching ${entityName}:`, err);
     } finally {
-      setIsLoading(false);
+      // Only set loading to false if not aborted
+      if (!signal || !signal.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [endpoint, entityName]);
 
