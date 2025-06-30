@@ -33,8 +33,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   await knex.schema.alterTable('work_entries', (table) => {
-    table.index('start_date', 'idx_work_entries_start_date');
-    table.index('end_date', 'idx_work_entries_end_date');
+    table.index('created_at', 'idx_work_entries_created_at');
   });
 
   await knex.schema.alterTable('books', (table) => {
@@ -74,8 +73,7 @@ export async function down(knex: Knex): Promise<void> {
   });
 
   await knex.schema.alterTable('work_entries', (table) => {
-    table.dropIndex('start_date', 'idx_work_entries_start_date');
-    table.dropIndex('end_date', 'idx_work_entries_end_date');
+    table.dropIndex('created_at', 'idx_work_entries_created_at');
   });
 
   await knex.schema.alterTable('books', (table) => {
