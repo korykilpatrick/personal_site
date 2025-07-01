@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DotenvWebpackPlugin = require('dotenv-webpack');
+const webpack = require('webpack');
 
 module.exports = {
   entry: './frontend/src/index.tsx',
@@ -37,7 +38,12 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
     }),
-    new DotenvWebpackPlugin(),
+    new DotenvWebpackPlugin({
+      systemvars: true,
+    }),
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_API_BASE_URL': JSON.stringify(process.env.REACT_APP_API_BASE_URL || '/api'),
+    }),
   ],
   devServer: {
     historyApiFallback: true,
