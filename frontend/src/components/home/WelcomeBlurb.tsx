@@ -6,7 +6,7 @@ import React from 'react';
 const WelcomeBlurb: React.FC = () => (
   <div className="text-center mt-4">
     <h1 className="font-serif text-3xl md:text-4xl text-primary font-bold mb-2">
-      Hey, I'm Kory&nbsp;👋
+      Hey, I&apos;m Kory&nbsp;👋
     </h1>
     {/* <p className="text-textSecondary text-base">
       Kick off your shoes, click around, and see what I'm building, reading, or tinkering with today.

@@ -1,3 +1,10 @@
+// Mock OpenAI before any imports that use it
+jest.mock('openai', () => ({
+  default: jest.fn().mockImplementation(() => ({
+    chat: { completions: { create: jest.fn() } },
+  })),
+}));
+
 import { Request, Response, NextFunction } from 'express';
 import { extractMetadata } from '../libraryExtraction.controller';
 import { ContentExtractionService } from '../../services/contentExtraction/ContentExtractionService';

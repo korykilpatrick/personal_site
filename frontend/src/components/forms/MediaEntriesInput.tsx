@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormInput, FormField } from './'; // Import Input from the same directory
+import { FormInput } from './'; // Import Input from the same directory
 import { Button, Select } from '../common';
 import { MediaEntry } from 'types/index'; // Correct path
 

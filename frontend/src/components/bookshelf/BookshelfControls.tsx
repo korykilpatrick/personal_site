@@ -32,7 +32,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
 }) => {
   const goodreadsTooltipContent = (
     <p className="text-xs text-textSecondary italic leading-tight p-1">
-      This page is sync'd with my <a href="https://www.goodreads.com/review/list/76731654?shelf=%23ALL%23" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Goodreads</a> account, where I began tracking books in 2017.
+      This page is sync&apos;d with my <a href="https://www.goodreads.com/review/list/76731654?shelf=%23ALL%23" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Goodreads</a> account, where I began tracking books in 2017.
     </p>
   );
 

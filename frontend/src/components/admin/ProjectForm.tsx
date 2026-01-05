@@ -195,7 +195,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       </FormField>
 
       {/* --- Media URLs Section --- */}
-      <FormField label="Media Entries:" htmlFor={undefined as any}>
+      <FormField label="Media Entries:" htmlFor={undefined}>
         <MediaEntriesInput
           entries={mediaEntries}
           onChange={(index: number, field: keyof MediaEntry, value: string) => handleMediaChange(index, field, value)}

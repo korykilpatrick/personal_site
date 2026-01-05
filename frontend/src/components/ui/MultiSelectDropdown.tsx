@@ -15,7 +15,6 @@ interface MultiSelectDropdownProps {
 }
 
 const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
-  label,
   items,
   selectedItems,
   toggleItem,

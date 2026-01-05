@@ -58,3 +58,4 @@ The application includes an AI-powered metadata extraction feature for library i
 - Categorized error handling
 - Accessibility with ARIA attributes
 - Consistent use of existing UI components
+- No need for backwards compatibility unless explicitly specified

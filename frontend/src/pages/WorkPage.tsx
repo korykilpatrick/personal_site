@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import useApi from '../hooks/useApi';
 import apiService from '../api/apiService';
 // Import shared types
-import { WorkEntry, WorkEntryLink } from 'types/index';
+import { WorkEntry } from 'types/index';
 // Import standard UI components
 import { Loading, ErrorDisplay, EmptyState } from '../components/ui';
 // Import the new WorkCard component

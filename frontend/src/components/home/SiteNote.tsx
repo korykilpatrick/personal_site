@@ -3,7 +3,6 @@ import Card from '@/components/common/Card';
 import { useApi } from '@/hooks';
 import api from '@/services/api';
 import type { SiteNote } from 'types';
-import { Loading, ErrorDisplay } from '@/components/ui';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 
 /**

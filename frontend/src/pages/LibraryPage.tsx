@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { LibraryItem } from 'types';
 import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import LibraryItemCard from '@/components/library/LibraryItemCard';
 import LibraryControls from '@/components/library/LibraryControls';

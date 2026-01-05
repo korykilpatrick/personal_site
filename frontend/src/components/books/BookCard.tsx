@@ -1,9 +1,6 @@
 import React from 'react';
 import { BookWithShelves, BookshelfSummary } from 'types/index'; // Correct path, changed Book to BookWithShelves
 import { Tooltip } from '../ui'; // Assuming Tooltip is exported from ui/index.ts
-import Card from '../common/Card';
-import Rating from '../common/Rating';
-import Icon from '../common/Icon';
 
 interface BookCardProps {
   book: BookWithShelves; // Changed Book to BookWithShelves

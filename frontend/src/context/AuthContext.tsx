@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
 import api from '@/services/api'; // Use the configured Axios instance
-import config from '../config'; // Use frontend config
 import type { User } from 'types/index'; // Use path relative to baseUrl
 
 // interface User { <-- REMOVED

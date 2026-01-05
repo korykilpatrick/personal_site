@@ -4,7 +4,7 @@
  * Provides type-safe error handling for the metadata extraction feature.
  */
 
-import { isAxiosError, isNetworkError, getErrorStatusCode, getErrorMessage as getBaseErrorMessage } from './errorUtils';
+import { isAxiosError, isNetworkError, getErrorMessage as getBaseErrorMessage } from './errorUtils';
 
 export enum ExtractionErrorType {
   NETWORK_ERROR = 'NETWORK_ERROR',

@@ -6,7 +6,6 @@ import QuoteCarousel from '@/components/home/QuoteCarousel';
 import HomepageLibraryItem from '@/components/home/HomepageLibraryItem';
 import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import Card from '@/components/common/Card';
-import { LibraryItem } from 'types';
 import { useLibrary } from '@/context/LibraryContext';
 
 /**
@@ -34,7 +33,7 @@ const HomePage: React.FC = () => {
       {/* Left Column: Captain's Log and Quotes (1/3 width) */}
       <div className="md:col-span-1 flex flex-col gap-2">
         <Section className="text-center mb-0">
-          <h2 className="text-xl font-semibold mb-4">Captain's Log</h2>
+          <h2 className="text-xl font-semibold mb-4">Captain&apos;s Log</h2>
           <SiteNote />
         </Section>
         <Section className="text-center">
@@ -46,7 +45,7 @@ const HomePage: React.FC = () => {
       {/* Right Column: Library's Latest and Currently Reading (2/3 width) */}
       <div className="md:col-span-2 flex flex-col gap-2">
         <Section className="w-full max-w-none mb-0">
-          <h2 className="text-xl font-semibold mb-4 text-center">Library's Latest</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center">Library&apos;s Latest</h2>
           <Card padding="lg" className="w-full">
             {loading && <Loading />}
             {error && <ErrorDisplay error={`Error loading library: ${error.message}`} />}

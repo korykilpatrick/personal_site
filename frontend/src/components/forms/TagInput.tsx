@@ -1,7 +1,6 @@
 import React, { useState, KeyboardEvent, ChangeEvent } from 'react';
 import { FormInput } from './'; // Corrected import path (assuming index export)
 import { Tag } from '../ui'; // Use Tag component for display
-import { Button } from '../common'; // For potential remove button
 import { isRequired } from '../../utils/validation'; // Import the validation utility
 
 interface TagInputProps {

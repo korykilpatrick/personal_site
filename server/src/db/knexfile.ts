@@ -12,6 +12,11 @@ interface IKnexConfig {
   [key: string]: Knex.Config;
 }
 
+// SSL config: encrypt connection but don't verify cert (for self-signed/Let's Encrypt)
+const sslConfig = process.env.DB_SSL === 'true'
+  ? { rejectUnauthorized: false }
+  : false;
+
 const config: IKnexConfig = {
   development: {
     client: 'pg',
@@ -21,7 +26,7 @@ const config: IKnexConfig = {
       database: process.env.DB_NAME!,
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,
-      ssl: process.env.DB_SSL === 'true',
+      ssl: sslConfig,
     },
     pool: {
       min: 2,
@@ -43,7 +48,7 @@ const config: IKnexConfig = {
       database: `${process.env.DB_NAME!}_test`,
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,
-      ssl: process.env.DB_SSL === 'true',
+      ssl: sslConfig,
     },
     pool: {
       min: 2,
@@ -65,7 +70,7 @@ const config: IKnexConfig = {
       database: process.env.DB_NAME!,
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,
-      ssl: process.env.DB_SSL === 'true',
+      ssl: sslConfig,
     },
     pool: {
       min: 2,

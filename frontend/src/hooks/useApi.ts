@@ -7,7 +7,7 @@ interface UseApiOptions<T> {
   autoFetch?: boolean;
 }
 
-interface UseApiResult<T, P extends any[]> {
+interface UseApiResult<T, P extends unknown[]> {
   data: T | null;
   loading: boolean;
   error: Error | null;
@@ -21,7 +21,7 @@ interface UseApiResult<T, P extends any[]> {
  * @param options - Hook configuration options
  * @returns Object with data, loading state, error, and fetch function
  */
-const useApi = <T, P extends any[] = []>(
+const useApi = <T, P extends unknown[] = []>(
   fetchFn: (...params: P) => Promise<T>,
   autoFetchParams: P,
   options: UseApiOptions<T> = {},

@@ -8,11 +8,6 @@ interface CountResponse {
   count: number;
 }
 
-interface ActiveCountResponse extends CountResponse {
-  active_count?: number; // Optional for items that don't have an active state
-  total_count?: number; // Optional, can use 'count' if only total is needed
-}
-
 const AdminDashboard: React.FC = () => {
   const [projectCount, setProjectCount] = useState<number | null>(null);
   const [workCount, setWorkCount] = useState<number | null>(null);

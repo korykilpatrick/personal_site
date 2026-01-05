@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SiteNote } from 'types';
 import { Button } from '../common';
 import { ErrorDisplay, Loading } from '../ui';
-import { FormField, Textarea, FormInput } from '../forms';
+import { FormField, Textarea } from '../forms';
 import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface SiteNoteFormProps {
