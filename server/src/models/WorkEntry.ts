@@ -10,6 +10,14 @@ interface WorkEntryDbRecord extends Omit<SharedWorkEntry, 'links'> {
 }
 
 /**
+ * Raw DB record type that can have work_entry_links as string or array
+ * (Knex/pg may return it parsed as array on reads)
+ */
+interface RawWorkEntryDbRecord extends Omit<SharedWorkEntry, 'links'> {
+  work_entry_links?: string | WorkEntryLink[] | null;
+}
+
+/**
  * Helper function to map SharedWorkEntry to DB record structure
  */
 const mapToDbRecord = (workData: Partial<SharedWorkEntry>): Partial<WorkEntryDbRecord> => {
@@ -29,9 +37,7 @@ const mapToDbRecord = (workData: Partial<SharedWorkEntry>): Partial<WorkEntryDbR
  * Helper function to map DB record structure back to SharedWorkEntry
  * (used after create/update operations that return the DB record)
  */
-const mapToSharedWorkEntry = (dbRecord: any | null): SharedWorkEntry | null => {
-  // Accept 'any' here because the record returned by super.create/update might
-  // not perfectly match WorkEntryDbRecord if base model returns generic T.
+const mapToSharedWorkEntry = (dbRecord: RawWorkEntryDbRecord | null): SharedWorkEntry | null => {
   if (!dbRecord) return null;
   
   // Perform a safer copy

@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import Card from '@/components/common/Card';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Quote } from 'types';
-import { ErrorDisplay, Loading } from '@/components/ui';
 import api from '@/services/api';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 /**
  * Configuration for quote display timing.
@@ -69,8 +69,10 @@ const QuoteCarousel: React.FC = () => {
         } else {
           setQuotes([]);
         }
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || 'Failed to load quotes');
+      } catch (err: unknown) {
+        const errorMsg = getErrorMessage(err, 'Failed to load quotes');
+        setError(errorMsg);
+        logError('fetching quotes', err);
       } finally {
         setLoading(false);
       }

@@ -16,7 +16,7 @@ const CurrentlyReading: React.FC = () => {
       name && ['currently reading', 'currently-reading'].includes(name.toLowerCase());
 
     const fromShelf = books.filter(
-      b => b.shelves && b.shelves.some(s => shelfMatch((s as any).name))
+      b => b.shelves && b.shelves.some(s => shelfMatch(s.name))
     );
     return (fromShelf.length > 0 ? fromShelf : books.filter(b => !b.date_read)) as BookWithShelves[];
   }, [books]);

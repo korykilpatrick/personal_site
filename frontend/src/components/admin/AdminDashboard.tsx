@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { Card } from '../common';
 import { Loading, ErrorDisplay } from '../ui';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface CountResponse {
   count: number;
@@ -48,9 +49,10 @@ const AdminDashboard: React.FC = () => {
         setSiteNoteCounts({ total: siteNotesTotalRes.data.count, active: siteNotesActiveRes.data.count });
         setQuoteCounts({ total: quotesTotalRes.data.count, active: quotesActiveRes.data.count });
         setLibraryItemCount(libraryItemsRes.data.count);
-      } catch (err: any) {
-        console.error("Error fetching dashboard counts:", err);
-        setError(err.response?.data?.message || err.message || 'Failed to load dashboard data');
+      } catch (err: unknown) {
+        logError('fetching dashboard counts', err);
+        const errorMsg = getErrorMessage(err, 'Failed to load dashboard data');
+        setError(errorMsg);
       } finally {
         setIsLoading(false);
       }

@@ -30,7 +30,7 @@ const LinkIcon: React.FC<LinkIconProps> = ({
   className = '',
   ariaLabel,
 }) => {
-  let DeterminedIcon: React.ComponentType<any> | null = null;
+  let DeterminedIcon: React.ComponentType<{ className?: string; 'aria-label'?: string }> | null = null;
   let determinedLabel: string = ariaLabel || 'Link'; // Default label
 
   let effectiveIconName = iconName;

@@ -1,5 +1,12 @@
 import React from 'react';
-import { Routes, Route, Link, useNavigate, Outlet, useParams, NavLink } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useNavigate,
+  Outlet,
+  useParams,
+  NavLink,
+} from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProjectForm from '@/components/admin/ProjectForm';
 import ProjectList from '@/components/admin/ProjectList';
@@ -13,245 +20,157 @@ import QuoteForm from '@/components/admin/QuoteForm';
 import { Project, WorkEntry, SiteNote, Quote } from 'types';
 import api from '../services/api';
 import { Button } from '../components/common';
+import { getErrorMessage, logError } from '../utils/errorUtils';
+import { ErrorDisplay } from '../components/ui';
 
-// New
+// Library Items
 import LibraryItemList from '@/components/admin/LibraryItemList';
 import LibraryItemForm from '@/components/admin/LibraryItemForm';
 
-const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { projectId } = useParams<{ projectId: string }>();
+/**
+ * Generic form wrapper component that handles loading, error states, and CRUD operations.
+ * This eliminates the code duplication in entity-specific wrappers.
+ */
+interface EntityFormWrapperProps<T> {
+  mode: 'create' | 'edit';
+  paramKey: string;
+  entityName: string;
+  apiPath: string;
+  FormComponent: React.ComponentType<{
+    initialData: T | null;
+    onSubmit: (data: Omit<T, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+    isLoading: boolean;
+    onCancel?: () => void;
+  }>;
+}
+
+function EntityFormWrapper<T extends { id: number }>({
+  mode,
+  paramKey,
+  entityName,
+  apiPath,
+  FormComponent,
+}: EntityFormWrapperProps<T>): React.ReactElement {
+  const params = useParams<Record<string, string>>();
+  const entityId = params[paramKey];
   const navigate = useNavigate();
-  const [initialData, setInitialData] = React.useState<Project | null>(null);
+  const [initialData, setInitialData] = React.useState<T | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (mode === 'edit' && projectId) {
-      (async () => {
+    if (mode === 'edit' && entityId) {
+      const fetchData = async () => {
         setIsLoading(true);
         try {
-          const res = await api.get<Project>(`/admin/projects/${projectId}`);
+          const res = await api.get<T>(`${apiPath}/${entityId}`);
           setInitialData(res.data);
-        } catch (err: any) {
-          setError(err.response?.data?.message || err.message || 'Failed to load project');
+        } catch (err: unknown) {
+          const errorMsg = getErrorMessage(err, `Failed to load ${entityName}`);
+          setError(errorMsg);
+          logError(`loading ${entityName}`, err);
         } finally {
           setIsLoading(false);
         }
-      })();
+      };
+      fetchData();
     }
-  }, [mode, projectId]);
+  }, [mode, entityId, apiPath, entityName]);
 
-  const handleSubmit = async (data: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleSubmit = async (data: Omit<T, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
     setError(null);
     try {
-      if (mode === 'edit' && projectId) {
-        await api.put(`/admin/projects/${projectId}`, data);
+      if (mode === 'edit' && entityId) {
+        await api.put(`${apiPath}/${entityId}`, data);
         navigate('../');
       } else {
-        await api.post('/admin/projects', data);
+        await api.post(apiPath, data);
         navigate('.');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to save project');
+    } catch (err: unknown) {
+      const errorMsg = getErrorMessage(err, `Failed to save ${entityName}`);
+      setError(errorMsg);
+      logError(`saving ${entityName}`, err);
       setIsLoading(false);
       throw err;
     }
   };
 
-  if (mode === 'edit' && isLoading) return <p>Loading project data...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (mode === 'edit' && !initialData && !isLoading) return <p>Project not found.</p>;
+  if (mode === 'edit' && isLoading && !initialData) {
+    return <p>Loading {entityName} data...</p>;
+  }
+
+  if (error) {
+    return <ErrorDisplay error={error} />;
+  }
+
+  if (mode === 'edit' && !initialData && !isLoading) {
+    return <p>{entityName} not found.</p>;
+  }
 
   return (
-    <ProjectForm
+    <FormComponent
       initialData={initialData}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
     />
   );
-};
+}
 
-const ManageProjects: React.FC = () => <Outlet />;
+// Type-safe wrapper components for each entity
+const ProjectFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => (
+  <EntityFormWrapper<Project>
+    mode={mode}
+    paramKey="projectId"
+    entityName="Project"
+    apiPath="/admin/projects"
+    FormComponent={ProjectForm}
+  />
+);
 
-const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { workId } = useParams<{ workId: string }>();
-  const navigate = useNavigate();
-  const [initialData, setInitialData] = React.useState<WorkEntry | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+const WorkFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => (
+  <EntityFormWrapper<WorkEntry>
+    mode={mode}
+    paramKey="workId"
+    entityName="Work Entry"
+    apiPath="/admin/work"
+    FormComponent={WorkForm}
+  />
+);
 
-  React.useEffect(() => {
-    if (mode === 'edit' && workId) {
-      (async () => {
-        setIsLoading(true);
-        try {
-          const res = await api.get<WorkEntry>(`/admin/work/${workId}`);
-          setInitialData(res.data);
-        } catch (err: any) {
-          setError(err.response?.data?.message || err.message || 'Failed to load work entry');
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [mode, workId]);
+const SiteNoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => (
+  <EntityFormWrapper<SiteNote>
+    mode={mode}
+    paramKey="siteNoteId"
+    entityName="Site Note"
+    apiPath="/admin/site_notes"
+    FormComponent={SiteNoteForm}
+  />
+);
 
-  const handleSubmit = async (data: Omit<WorkEntry, 'id' | 'created_at' | 'updated_at'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (mode === 'edit' && workId) {
-        await api.put(`/admin/work/${workId}`, data);
-        navigate('../');
-      } else {
-        await api.post('/admin/work', data);
-        navigate('.');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to save work entry');
-      setIsLoading(false);
-      throw err;
-    }
-  };
+const QuoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => (
+  <EntityFormWrapper<Quote>
+    mode={mode}
+    paramKey="quoteId"
+    entityName="Quote"
+    apiPath="/admin/quotes"
+    FormComponent={QuoteForm}
+  />
+);
 
-  if (mode === 'edit' && isLoading) return <p>Loading work entry data...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (mode === 'edit' && !initialData && !isLoading) return <p>Work entry not found.</p>;
-
-  return (
-    <WorkForm
-      initialData={initialData}
-      onSubmit={handleSubmit}
-      isLoading={isLoading}
-      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
-    />
-  );
-};
-
-const ManageWork: React.FC = () => <Outlet />;
-
-const SiteNoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { siteNoteId } = useParams<{ siteNoteId: string }>();
-  const navigate = useNavigate();
-  const [initialData, setInitialData] = React.useState<SiteNote | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (mode === 'edit' && siteNoteId) {
-      (async () => {
-        setIsLoading(true);
-        try {
-          const res = await api.get<SiteNote>(`/admin/site_notes/${siteNoteId}`);
-          setInitialData(res.data);
-        } catch (err: any) {
-          setError(err.response?.data?.message || err.message || 'Failed to load site note');
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [mode, siteNoteId]);
-
-  const handleSubmit = async (data: Omit<SiteNote, 'id' | 'created_at' | 'updated_at'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (mode === 'edit' && siteNoteId) {
-        await api.put(`/admin/site_notes/${siteNoteId}`, data);
-        navigate('../');
-      } else {
-        await api.post('/admin/site_notes', data);
-        navigate('.');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to save site note');
-      setIsLoading(false);
-      throw err;
-    }
-  };
-
-  if (mode === 'edit' && isLoading) return <p>Loading site note...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (mode === 'edit' && !initialData && !isLoading) return <p>Site note not found.</p>;
-
-  return (
-    <SiteNoteForm
-      initialData={initialData}
-      onSubmit={handleSubmit}
-      isLoading={isLoading}
-      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
-    />
-  );
-};
-
-const ManageSiteNotes: React.FC = () => <Outlet />;
-
-const QuoteFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
-  const { quoteId } = useParams<{ quoteId: string }>();
-  const navigate = useNavigate();
-  const [initialData, setInitialData] = React.useState<Quote | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (mode === 'edit' && quoteId) {
-      (async () => {
-        setIsLoading(true);
-        try {
-          const res = await api.get<Quote>(`/admin/quotes/${quoteId}`);
-          setInitialData(res.data);
-        } catch (err: any) {
-          setError(err.response?.data?.message || err.message || 'Failed to load quote');
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [mode, quoteId]);
-
-  const handleSubmit = async (data: Omit<Quote, 'id' | 'created_at' | 'updated_at'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (mode === 'edit' && quoteId) {
-        await api.put(`/admin/quotes/${quoteId}`, data);
-        navigate('../');
-      } else {
-        await api.post('/admin/quotes', data);
-        navigate('.');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to save quote');
-      setIsLoading(false);
-      throw err;
-    }
-  };
-
-  if (mode === 'edit' && isLoading) return <p>Loading quote...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (mode === 'edit' && !initialData && !isLoading) return <p>Quote not found.</p>;
-
-  return (
-    <QuoteForm
-      initialData={initialData}
-      onSubmit={handleSubmit}
-      isLoading={isLoading}
-      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
-    />
-  );
-};
-
-const ManageQuotes: React.FC = () => <Outlet />;
-
-// ******* New: Library Items *******
+// Library Items use a different pattern due to the form component structure
 const LibraryItemFormWrapper: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const { libraryItemId } = useParams<{ libraryItemId: string }>();
   return <LibraryItemForm mode={mode} key={libraryItemId || 'new'} />;
 };
 
+// Outlet wrapper components
+const ManageProjects: React.FC = () => <Outlet />;
+const ManageWork: React.FC = () => <Outlet />;
+const ManageSiteNotes: React.FC = () => <Outlet />;
+const ManageQuotes: React.FC = () => <Outlet />;
 const ManageLibraryItems: React.FC = () => <Outlet />;
 
 const AdminPage: React.FC = () => {
@@ -263,7 +182,7 @@ const AdminPage: React.FC = () => {
     navigate('/login');
   };
 
-  const activeClassName = "underline text-primary";
+  const activeClassName = 'underline text-primary';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -271,28 +190,48 @@ const AdminPage: React.FC = () => {
         <h1 className="text-2xl font-semibold">Admin Area</h1>
         <div>
           <span className="mr-4">Welcome, {user?.username || 'admin'}!</span>
-          <Button variant="outline" size="sm" onClick={handleLogout}>Logout</Button>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
       </div>
 
       <nav className="flex flex-row space-x-6 mb-6 pb-3 border-b">
-        <NavLink to="/admin" end className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin"
+          end
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Dashboard
         </NavLink>
-        <NavLink to="/admin/projects" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin/projects"
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Manage Projects
         </NavLink>
-        <NavLink to="/admin/work" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin/work"
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Manage Work
         </NavLink>
-        <NavLink to="/admin/site_notes" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin/site_notes"
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Site Notes
         </NavLink>
-        <NavLink to="/admin/quotes" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin/quotes"
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Quotes
         </NavLink>
-        {/* New link for Library Items */}
-        <NavLink to="/admin/library-items" className={({ isActive }) => isActive ? activeClassName : 'hover:text-primary'}>
+        <NavLink
+          to="/admin/library-items"
+          className={({ isActive }) => (isActive ? activeClassName : 'hover:text-primary')}
+        >
           Library Items
         </NavLink>
       </nav>
@@ -300,7 +239,7 @@ const AdminPage: React.FC = () => {
       <main>
         <Routes>
           <Route index element={<AdminDashboard />} />
-          
+
           <Route path="projects" element={<ManageProjects />}>
             <Route index element={<ProjectList />} />
             <Route path="new" element={<ProjectFormWrapper mode="create" />} />
@@ -315,14 +254,14 @@ const AdminPage: React.FC = () => {
 
           <Route path="site_notes" element={<ManageSiteNotes />}>
             <Route index element={<SiteNoteList />} />
-            <Route path="new" element={<SiteNoteFormWrapper mode='create' />} />
-            <Route path=":siteNoteId/edit" element={<SiteNoteFormWrapper mode='edit' />} />
+            <Route path="new" element={<SiteNoteFormWrapper mode="create" />} />
+            <Route path=":siteNoteId/edit" element={<SiteNoteFormWrapper mode="edit" />} />
           </Route>
 
           <Route path="quotes" element={<ManageQuotes />}>
             <Route index element={<QuoteList />} />
-            <Route path="new" element={<QuoteFormWrapper mode='create' />} />
-            <Route path=":quoteId/edit" element={<QuoteFormWrapper mode='edit' />} />
+            <Route path="new" element={<QuoteFormWrapper mode="create" />} />
+            <Route path=":quoteId/edit" element={<QuoteFormWrapper mode="edit" />} />
           </Route>
 
           <Route path="library-items" element={<ManageLibraryItems />}>
@@ -330,11 +269,10 @@ const AdminPage: React.FC = () => {
             <Route path="new" element={<LibraryItemFormWrapper mode="create" />} />
             <Route path=":libraryItemId/edit" element={<LibraryItemFormWrapper mode="edit" />} />
           </Route>
-
         </Routes>
       </main>
     </div>
   );
 };
 
-export default AdminPage; 
+export default AdminPage;

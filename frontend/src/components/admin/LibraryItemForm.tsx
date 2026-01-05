@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '@/services/api';
 import type { ExtractedContent } from 'types/index';
 import { useToast } from '@/contexts/ToastContext';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface LibraryItemType {
   id: number;
@@ -51,8 +52,9 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     try {
       const res = await api.get<LibraryItemType[]>('/admin/library-item-types');
       setItemTypes(res.data);
-    } catch (err: any) {
-      // ignoring error here
+    } catch (err: unknown) {
+      // Log error but don't block the form - types are optional
+      logError('fetching library item types', err);
     } finally {
       setLoadingTypes(false);
     }
@@ -73,8 +75,10 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
         tags: res.data.tags || [],
         creators: res.data.creators || [],
       });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch library item');
+    } catch (err: unknown) {
+      const errorMsg = getErrorMessage(err, 'Failed to fetch library item');
+      setError(errorMsg);
+      logError('fetching library item', err);
     } finally {
       setIsLoading(false);
     }
@@ -189,8 +193,10 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
         });
       }
       navigate('/admin/library-items');
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to save library item');
+    } catch (err: unknown) {
+      const errorMsg = getErrorMessage(err, 'Failed to save library item');
+      setError(errorMsg);
+      logError('saving library item', err);
       setIsLoading(false);
     }
   };
@@ -201,8 +207,10 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     try {
       const res = await api.post('/admin/library-item-types', { name });
       setItemTypes(prev => [...prev, res.data]);
-    } catch (err: any) {
-      alert(err.response?.data?.message || err.message || 'Failed to create type');
+    } catch (err: unknown) {
+      const errorMsg = getErrorMessage(err, 'Failed to create type');
+      alert(errorMsg);
+      logError('creating library item type', err);
     }
   };
 

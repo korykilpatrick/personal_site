@@ -1,6 +1,11 @@
 /**
  * Error classification for content extraction
+ *
+ * Provides type-safe error handling for the metadata extraction feature.
  */
+
+import { isAxiosError, isNetworkError, getErrorStatusCode, getErrorMessage as getBaseErrorMessage } from './errorUtils';
+
 export enum ExtractionErrorType {
   NETWORK_ERROR = 'NETWORK_ERROR',
   INVALID_URL = 'INVALID_URL',
@@ -8,7 +13,7 @@ export enum ExtractionErrorType {
   EXTRACTION_FAILED = 'EXTRACTION_FAILED',
   UNAUTHORIZED = 'UNAUTHORIZED',
   SERVER_ERROR = 'SERVER_ERROR',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN',
 }
 
 export class ExtractionError extends Error {
@@ -17,8 +22,8 @@ export class ExtractionError extends Error {
   retryable: boolean;
 
   constructor(
-    message: string, 
-    type: ExtractionErrorType, 
+    message: string,
+    type: ExtractionErrorType,
     statusCode?: number,
     retryable: boolean = false
   ) {
@@ -32,10 +37,13 @@ export class ExtractionError extends Error {
 
 /**
  * Categorize extraction errors based on error details
+ *
+ * @param error - The caught error (unknown type from catch block)
+ * @returns A properly typed ExtractionError
  */
-export function categorizeExtractionError(error: any): ExtractionError {
+export function categorizeExtractionError(error: unknown): ExtractionError {
   // Network errors
-  if (error.code === 'ECONNABORTED' || error.message?.includes('Network')) {
+  if (isNetworkError(error)) {
     return new ExtractionError(
       'Network connection failed. Please check your internet connection.',
       ExtractionErrorType.NETWORK_ERROR,
@@ -45,7 +53,7 @@ export function categorizeExtractionError(error: any): ExtractionError {
   }
 
   // API response errors
-  if (error.response) {
+  if (isAxiosError(error) && error.response) {
     const status = error.response.status;
     const message = error.response.data?.message || error.message;
 
@@ -59,8 +67,13 @@ export function categorizeExtractionError(error: any): ExtractionError {
             false
           );
         }
-        break;
-      
+        return new ExtractionError(
+          message || 'Invalid request',
+          ExtractionErrorType.UNKNOWN,
+          status,
+          false
+        );
+
       case 401:
         return new ExtractionError(
           'Authentication required. Please log in again.',
@@ -68,7 +81,7 @@ export function categorizeExtractionError(error: any): ExtractionError {
           status,
           false
         );
-      
+
       case 429:
         return new ExtractionError(
           'Too many requests. Please wait a moment before trying again.',
@@ -76,7 +89,7 @@ export function categorizeExtractionError(error: any): ExtractionError {
           status,
           true
         );
-      
+
       case 422:
         return new ExtractionError(
           'Unable to extract metadata from this URL. Please fill in the details manually.',
@@ -84,7 +97,7 @@ export function categorizeExtractionError(error: any): ExtractionError {
           status,
           false
         );
-      
+
       case 500:
       case 502:
       case 503:
@@ -95,16 +108,20 @@ export function categorizeExtractionError(error: any): ExtractionError {
           status,
           true
         );
+
+      default:
+        return new ExtractionError(
+          message || 'An unexpected error occurred.',
+          ExtractionErrorType.UNKNOWN,
+          status,
+          true
+        );
     }
   }
 
-  // Default error
-  return new ExtractionError(
-    error.message || 'An unexpected error occurred.',
-    ExtractionErrorType.UNKNOWN,
-    undefined,
-    true
-  );
+  // Default error - use base error message extraction
+  const errorMessage = getBaseErrorMessage(error, 'An unexpected error occurred.');
+  return new ExtractionError(errorMessage, ExtractionErrorType.UNKNOWN, undefined, true);
 }
 
 /**

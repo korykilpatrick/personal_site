@@ -1,14 +1,12 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 // Import main Project and ProjectLink types
-import { Project, ProjectLink } from 'types/index'; 
-import { Button } from '../common'; // Select might not be needed directly here
+import { Project, ProjectLink } from 'types/index';
+import { Button } from '../common';
 import { ErrorDisplay, Loading } from '../ui';
-// Import StructuredLinkInput, remove LinkListInput
-import { FormInput, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms'; // Remove MediaEntry from here
-import { MediaEntry } from 'types/index'; // <-- Import MediaEntry from root types
+import { FormInput, Textarea, FormField, MediaEntriesInput, TagInput } from '../forms';
+import { MediaEntry } from 'types/index';
 import StructuredLinkInput from '../forms/StructuredLinkInput';
-// Remove unused helper
-// import { parseCommaSeparatedString } from '../../utils/helpers'; 
+import { getErrorMessage, isAxiosError, logError } from '@/utils/errorUtils'; 
 
 // Interface for individual media entries (seems defined in MediaEntriesInput? check if needed here)
 
@@ -143,20 +141,29 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         setFormData({ title: '', description: '', links: [], writeup: '', tags: [] });
         setMediaEntries([]); 
       }
-    } catch (submitError: any) {
-      console.error("Form submission error:", submitError);
-      // Check if the error response has the structured validation errors
-      const validationErrors = submitError.response?.data?.errors;
-      if (Array.isArray(validationErrors) && validationErrors.length > 0) {
-        // Format the validation errors for display
-        const errorMessages = validationErrors.map((err: any) => 
-          `${err.param ? `${err.param}: ` : ''}${err.msg}`
-        ).join('\n'); // Join with newline for better readability in ErrorDisplay
-        setError(`Validation failed:\n${errorMessages}`);
-      } else {
-        // Fallback to general error message
-        setError(submitError.response?.data?.message || submitError.message || 'Failed to save project');
+    } catch (submitError: unknown) {
+      logError('saving project', submitError);
+
+      // Check if the error response has structured validation errors
+      if (isAxiosError(submitError)) {
+        const responseData = submitError.response?.data as Record<string, unknown> | undefined;
+        const validationErrors = responseData?.errors;
+
+        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+          // Format the validation errors for display
+          const errorMessages = validationErrors
+            .map((err: { param?: string; msg?: string }) =>
+              `${err.param ? `${err.param}: ` : ''}${err.msg || 'Unknown error'}`
+            )
+            .join('\n');
+          setError(`Validation failed:\n${errorMessages}`);
+          return;
+        }
       }
+
+      // Fallback to general error message
+      const errorMsg = getErrorMessage(submitError, 'Failed to save project');
+      setError(errorMsg);
     }
   };
 

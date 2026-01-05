@@ -3,6 +3,7 @@ import { SiteNote } from 'types';
 import { Button } from '../common';
 import { ErrorDisplay, Loading } from '../ui';
 import { FormField, Textarea, FormInput } from '../forms';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface SiteNoteFormProps {
   initialData?: SiteNote | null;
@@ -51,8 +52,10 @@ const SiteNoteForm: React.FC<SiteNoteFormProps> = ({
         // clear form
         setFormData({ content: '', is_active: false });
       }
-    } catch (submitErr: any) {
-      setError(submitErr.response?.data?.message || submitErr.message || 'Failed to save site note');
+    } catch (submitErr: unknown) {
+      logError('saving site note', submitErr);
+      const errorMsg = getErrorMessage(submitErr, 'Failed to save site note');
+      setError(errorMsg);
     }
   };
 

@@ -64,7 +64,7 @@ export const apiService = {
    * Fetch library items. Supports optional filtering by item_type_id and tag.
    */
   getLibraryItems: async (itemTypeId?: number, tag?: string): Promise<LibraryItem[]> => {
-    const query: Record<string, any> = {};
+    const query: Record<string, string | number> = {};
     if (itemTypeId) query.item_type_id = itemTypeId;
     if (tag) query.tag = tag;
     const response = await api.get<LibraryItem[]>('/library-items', { params: query });
@@ -75,23 +75,42 @@ export const apiService = {
    * Extract metadata from a URL for library item creation.
    */
   extractMetadata: async (url: string, forceRefresh?: boolean): Promise<ExtractedContent> => {
-    const response = await api.post<{ success: boolean; data: any }>('/library/extract-metadata', {
+    // API may return suggestedCategor (typo) instead of suggestedCategory
+    interface ApiExtractedContent extends Omit<ExtractedContent, 'publicationDate' | 'extractionMetadata'> {
+      suggestedCategor?: string;
+      publicationDate?: string | Date;
+      extractionMetadata: {
+        confidence: number;
+        extractedAt: string | Date;
+        llmModel: string;
+        version: string;
+      };
+    }
+
+    const response = await api.post<{ success: boolean; data: ApiExtractedContent }>('/library/extract-metadata', {
       url,
       forceRefresh
     });
-    
+
     // Transform date strings back to Date objects and fix backend typo
     const data = response.data.data;
-    const result = {
-      ...data,
-      suggestedCategory: data.suggestedCategor || data.suggestedCategory, // Handle backend typo
+    const result: ExtractedContent = {
+      title: data.title,
+      author: data.author,
+      description: data.description,
+      imageUrl: data.imageUrl,
+      suggestedCategory: (data.suggestedCategor || data.suggestedCategory) as ExtractedContent['suggestedCategory'],
+      tags: data.tags,
+      contentType: data.contentType,
       publicationDate: data.publicationDate ? new Date(data.publicationDate) : undefined,
       extractionMetadata: {
-        ...data.extractionMetadata,
+        confidence: data.extractionMetadata.confidence,
+        llmModel: data.extractionMetadata.llmModel,
+        version: data.extractionMetadata.version,
         extractedAt: new Date(data.extractionMetadata.extractedAt)
       }
     };
-    
+
     return result;
   },
 };

@@ -52,7 +52,7 @@ export function cacheMiddleware(ttl: number = 300, keyPrefix: string = 'api') {
     const originalJson = res.json.bind(res);
 
     // Override json method to cache successful responses
-    res.json = function(data: any) {
+    res.json = function(data: unknown) {
       // Only cache successful responses (2xx status codes)
       if (res.statusCode >= 200 && res.statusCode < 300) {
         // Set cache headers
@@ -119,7 +119,7 @@ export function clearCacheMiddleware(patterns: string[]) {
     };
 
     // Override json method
-    res.json = function(data: any) {
+    res.json = function(data: unknown) {
       clearPatternsIfSuccessful().catch((error: unknown) => {
         logger.warn('Error clearing cache after json response', { error });
       });
@@ -127,7 +127,7 @@ export function clearCacheMiddleware(patterns: string[]) {
     };
 
     // Override send method
-    res.send = function(data: any) {
+    res.send = function(data: unknown) {
       clearPatternsIfSuccessful().catch((error: unknown) => {
         logger.warn('Error clearing cache after send response', { error });
       });

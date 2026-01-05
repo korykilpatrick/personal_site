@@ -6,7 +6,7 @@ import logger from '../utils/logger';
 // import { db } from '../db/connection'; // Uncomment if implementing DB check
 
 // Define payload structure expected from JWT
-interface JwtPayload {
+export interface JwtPayload {
   id: number;
   username: string;
   // role?: string; // Add role if using role-based access control

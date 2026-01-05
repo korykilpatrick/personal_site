@@ -3,6 +3,7 @@ import { Quote } from 'types';
 import { Button } from '../common';
 import { ErrorDisplay, Loading } from '../ui';
 import { FormField, FormInput, Textarea } from '../forms';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface QuoteFormProps {
   initialData?: Quote | null;
@@ -66,8 +67,10 @@ const QuoteForm: React.FC<QuoteFormProps> = ({
           is_active: false
         });
       }
-    } catch (submitErr: any) {
-      setError(submitErr.response?.data?.message || submitErr.message || 'Failed to save quote');
+    } catch (submitErr: unknown) {
+      logError('saving quote', submitErr);
+      const errorMsg = getErrorMessage(submitErr, 'Failed to save quote');
+      setError(errorMsg);
     }
   };
 

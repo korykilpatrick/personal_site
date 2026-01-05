@@ -1,15 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-
-interface ApiError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-    status?: number;
-  };
-  message?: string;
-}
+import { getErrorMessage, isCancelledError, logError } from '../utils/errorUtils';
 
 interface UseAdminListOptions {
   endpoint: string;
@@ -27,7 +18,7 @@ interface UseAdminListReturn<T> {
 /**
  * Reusable hook for admin list components
  * Handles fetching, loading states, error handling, and delete operations
- * 
+ *
  * @param options Configuration options for the hook
  * @returns Object with items, loading state, error, and handler functions
  */
@@ -35,81 +26,74 @@ export function useAdminList<T extends { id: number }>(
   options: UseAdminListOptions
 ): UseAdminListReturn<T> {
   const { endpoint, entityName } = options;
-  
+
   const [items, setItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchItems = useCallback(async (signal?: AbortSignal) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await api.get<T[]>(endpoint, { signal });
-      setItems(res.data);
-    } catch (err: unknown) {
-      // Check if the error is due to request cancellation
-      if (err instanceof Error && (err.name === 'AbortError' || err.name === 'CanceledError')) {
-        return; // Ignore abort/cancel errors
+  const fetchItems = useCallback(
+    async (signal?: AbortSignal) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await api.get<T[]>(endpoint, { signal });
+        setItems(res.data);
+      } catch (err: unknown) {
+        // Ignore cancelled requests
+        if (isCancelledError(err)) {
+          return;
+        }
+
+        const errorMessage = getErrorMessage(err, `Failed to fetch ${entityName}`);
+        setError(errorMessage);
+        logError(`fetching ${entityName}`, err);
+      } finally {
+        // Only set loading to false if not aborted
+        if (!signal || !signal.aborted) {
+          setIsLoading(false);
+        }
       }
-      
-      // Also check axios-specific cancel
-      if ((err as any)?.code === 'ERR_CANCELED') {
-        return;
-      }
-      
-      const error = err as ApiError;
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
-        `Failed to fetch ${entityName}`;
-      setError(errorMessage);
-      console.error(`Error fetching ${entityName}:`, err);
-    } finally {
-      // Only set loading to false if not aborted
-      if (!signal || !signal.aborted) {
-        setIsLoading(false);
-      }
-    }
-  }, [endpoint, entityName]);
+    },
+    [endpoint, entityName]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
     fetchItems(controller.signal);
-    
+
     return () => {
       controller.abort();
     };
   }, [fetchItems]);
 
-  const handleDelete = useCallback(async (id: number) => {
-    const confirmMessage = `Are you sure you want to delete this ${entityName.toLowerCase()}?`;
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      await api.delete(`${endpoint}/${id}`);
-      // Optimistic update - remove from local state
-      setItems(prevItems => prevItems.filter(item => item.id !== id));
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
-        `Failed to delete ${entityName}`;
-      setError(errorMessage);
-      console.error(`Error deleting ${entityName}:`, err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [endpoint, entityName]);
+  const handleDelete = useCallback(
+    async (id: number) => {
+      const confirmMessage = `Are you sure you want to delete this ${entityName.toLowerCase()}?`;
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        await api.delete(`${endpoint}/${id}`);
+        // Update local state after successful deletion
+        setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      } catch (err: unknown) {
+        const errorMessage = getErrorMessage(err, `Failed to delete ${entityName}`);
+        setError(errorMessage);
+        logError(`deleting ${entityName}`, err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [endpoint, entityName]
+  );
 
   return {
     items,
     isLoading,
     error,
     handleDelete,
-    refetch: () => fetchItems()
+    refetch: () => fetchItems(),
   };
 }

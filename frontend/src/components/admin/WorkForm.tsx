@@ -1,9 +1,10 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { WorkEntry, WorkEntryLink } from 'types/index';
-import { Button } from '../common'; // Corrected import path
-import { ErrorDisplay, Loading } from '../ui'; // Corrected import path
-import { FormInput, Textarea, FormField } from '../forms'; // Import new form components and FormField
+import { Button } from '../common';
+import { ErrorDisplay, Loading } from '../ui';
+import { FormInput, Textarea, FormField } from '../forms';
 import StructuredLinkInput from '../forms/StructuredLinkInput';
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface WorkFormProps {
   initialData?: WorkEntry | null;
@@ -67,9 +68,10 @@ const WorkForm: React.FC<WorkFormProps> = ({
       if (!initialData) { // Clear form on create success only
         setFormData({ company: '', role: '', duration: '', achievements: '', links: [] });
       }
-    } catch (submitError: any) {
-      console.error("Work form submission error:", submitError);
-      setError(submitError.response?.data?.message || submitError.message || 'Failed to save work entry');
+    } catch (submitError: unknown) {
+      logError('saving work entry', submitError);
+      const errorMsg = getErrorMessage(submitError, 'Failed to save work entry');
+      setError(errorMsg);
     }
   };
 

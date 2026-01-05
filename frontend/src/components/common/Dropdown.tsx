@@ -38,7 +38,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
       <div onClick={() => setIsOpen(!isOpen)}>
         {React.isValidElement(trigger)
-          ? React.cloneElement(trigger as React.ReactElement<any>, {
+          ? React.cloneElement(trigger as React.ReactElement<Record<string, unknown>>, {
               'aria-haspopup': 'true',
               'aria-expanded': isOpen,
             })

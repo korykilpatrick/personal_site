@@ -1,10 +1,10 @@
 import { OpenAIService } from '../llm/OpenAIService';
-import { ContentExtractionService } from './ContentExtractionService';
+import { ContentExtractionService, ICache } from './ContentExtractionService';
 import config from '../../config/config';
 
 let extractionService: ContentExtractionService | null = null;
 
-export function initializeExtractionService(cache?: any): ContentExtractionService {
+export function initializeExtractionService(cache?: ICache): ContentExtractionService {
   if (!extractionService) {
     // Initialize OpenAI service
     const openAIService = new OpenAIService({

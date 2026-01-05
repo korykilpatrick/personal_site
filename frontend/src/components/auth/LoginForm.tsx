@@ -1,15 +1,12 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
 
 // Shared form & UI components
 import { FormInput, FormField } from '../forms';
 import { Button } from '../common';
 import { ErrorDisplay } from '../ui';
-
-// REMOVE useLocalStorage hook - no longer needed here
-// const useLocalStorage = (key: string, initialValue: string | null) => { ... };
+import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -29,16 +26,10 @@ const LoginForm: React.FC = () => {
     try {
       await login(username, password); // Call login method from context
       navigate(from, { replace: true }); // Redirect to intended page or admin dashboard
-    } catch (err: any) {
-      console.error('Login error:', err);
-      // Handle specific error messages from the backend/context
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || 'Invalid credentials or server error');
-      } else if (err instanceof Error) {
-         setError(err.message || 'An unexpected error occurred during login.');
-      } else {
-        setError('An unexpected error occurred during login.');
-      }
+    } catch (err: unknown) {
+      logError('login', err);
+      const errorMsg = getErrorMessage(err, 'An unexpected error occurred during login.');
+      setError(errorMsg);
     }
   };
 
