@@ -120,6 +120,13 @@ describe('libraryExtraction.controller', () => {
     });
 
     it('should handle extraction errors', async () => {
+      // Reset validationResult mock to pass validation (may have been modified by previous test)
+      const { validationResult } = jest.requireMock('express-validator');
+      validationResult.mockReturnValue({
+        isEmpty: () => true,
+        array: () => [],
+      });
+
       mockReq.body = { url: 'https://example.com/article' };
       const error = new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Extraction failed');
       mockContentExtractionService.extractContent.mockRejectedValue(error);
@@ -132,14 +139,38 @@ describe('libraryExtraction.controller', () => {
     it('should handle missing OpenAI API key', async () => {
       // Mock config to have no API key
       jest.doMock('../../config/config', () => ({
+        __esModule: true,
         default: {
           openai: { apiKey: '' },
+          redis: null,
+          extraction: { cacheTTL: 3600 },
         },
       }));
 
-      // Clear module cache and re-import
+      // Mock dependencies needed by fresh import
+      jest.doMock('../../services/llm/OpenAIService', () => ({
+        OpenAIService: jest.fn(),
+      }));
+      jest.doMock('../../services/cache/RedisCache', () => ({
+        getCache: jest.fn(),
+      }));
+      jest.doMock('../../services/contentExtraction/ContentExtractionService', () => ({
+        ContentExtractionService: jest.fn(),
+      }));
+      jest.doMock('../../utils/logger', () => ({
+        __esModule: true,
+        default: { info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() },
+      }));
+      jest.doMock('express-validator', () => ({
+        validationResult: jest.fn(() => ({
+          isEmpty: () => true,
+          array: () => [],
+        })),
+      }));
+
+      // Clear module cache and re-import with mocked config
       jest.resetModules();
-      const { extractMetadata: extractMetadataWithoutKey } = jest.requireActual('../libraryExtraction.controller');
+      const { extractMetadata: extractMetadataWithoutKey } = require('../libraryExtraction.controller');
 
       mockReq.body = { url: 'https://example.com/article' };
 
