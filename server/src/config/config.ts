@@ -1,5 +1,6 @@
 import path from 'path';
 import dotenv from 'dotenv';
+import { z } from 'zod';
 
 // Define the project root relative to the current file's directory (__dirname)
 // This ensures it works correctly whether running from src/config or dist/config
@@ -10,6 +11,38 @@ dotenv.config({
   // Use the explicitly calculated projectRoot path
   path: path.resolve(projectRoot, '.env'),
 });
+
+const envSchema = z.object({
+  NODE_ENV: z.string(),
+  PORT: z.coerce.number(),
+  API_PREFIX: z.string(),
+  DB_HOST: z.string(),
+  DB_PORT: z.coerce.number(),
+  DB_NAME: z.string(),
+  DB_USER: z.string(),
+  DB_PASSWORD: z.string(),
+  CORS_ORIGIN: z.string(),
+  LOG_LEVEL: z.string(),
+  JWT_SECRET: z.string(),
+  JWT_EXPIRES_IN: z.string(),
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().optional(),
+  OPENAI_TEMPERATURE: z.coerce.number().optional(),
+  OPENAI_MAX_TOKENS: z.coerce.number().optional(),
+  EXTRACTION_CACHE_TTL: z.coerce.number().optional(),
+  EXTRACTION_RATE_LIMIT: z.coerce.number().optional(),
+  REDIS_HOST: z.string().optional(),
+  REDIS_PORT: z.coerce.number().optional(),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_DB: z.coerce.number().optional(),
+});
+
+const envResult = envSchema.safeParse(process.env);
+if (!envResult.success) {
+  throw new Error(`Invalid environment configuration: ${envResult.error.message}`);
+}
+
+const env = envResult.data;
 
 interface IConfig {
   env: string;
@@ -49,41 +82,41 @@ interface IConfig {
 }
 
 const config: IConfig = {
-  env: process.env.NODE_ENV!,
-  port: parseInt(process.env.PORT!, 10),
-  apiPrefix: process.env.API_PREFIX!,
+  env: env.NODE_ENV,
+  port: env.PORT,
+  apiPrefix: env.API_PREFIX,
   db: {
-    host: process.env.DB_HOST!,
-    port: parseInt(process.env.DB_PORT!, 10),
-    database: process.env.DB_NAME!,
-    user: process.env.DB_USER!,
-    password: process.env.DB_PASSWORD!,
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    database: env.DB_NAME,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
   },
   cors: {
-    origin: process.env.CORS_ORIGIN!.includes(',') 
-      ? process.env.CORS_ORIGIN!.split(',').map(origin => origin.trim())
-      : process.env.CORS_ORIGIN!,
+    origin: env.CORS_ORIGIN.includes(',')
+      ? env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+      : env.CORS_ORIGIN,
   },
-  logLevel: process.env.LOG_LEVEL!,
+  logLevel: env.LOG_LEVEL,
   jwt: {
-    secret: process.env.JWT_SECRET!,
-    expiresIn: process.env.JWT_EXPIRES_IN!,
+    secret: env.JWT_SECRET,
+    expiresIn: env.JWT_EXPIRES_IN,
   },
   openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
-    temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.3'),
-    maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '1000', 10),
+    apiKey: env.OPENAI_API_KEY || '',
+    model: env.OPENAI_MODEL || 'gpt-4-turbo-preview',
+    temperature: env.OPENAI_TEMPERATURE ?? 0.3,
+    maxTokens: env.OPENAI_MAX_TOKENS ?? 1000,
   },
   extraction: {
-    cacheTTL: parseInt(process.env.EXTRACTION_CACHE_TTL || '3600', 10),
-    rateLimit: parseInt(process.env.EXTRACTION_RATE_LIMIT || '10', 10),
+    cacheTTL: env.EXTRACTION_CACHE_TTL ?? 3600,
+    rateLimit: env.EXTRACTION_RATE_LIMIT ?? 10,
   },
-  redis: process.env.REDIS_HOST ? {
-    host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT || '6379', 10),
-    password: process.env.REDIS_PASSWORD,
-    db: process.env.REDIS_DB ? parseInt(process.env.REDIS_DB, 10) : 0,
+  redis: env.REDIS_HOST ? {
+    host: env.REDIS_HOST,
+    port: env.REDIS_PORT ?? 6379,
+    password: env.REDIS_PASSWORD,
+    db: env.REDIS_DB ?? 0,
   } : undefined,
 };
 
