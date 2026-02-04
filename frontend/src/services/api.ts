@@ -1,5 +1,7 @@
 import axios from 'axios';
 import config from '../config'; // Assuming a frontend config file exists or create one
+import { AUTH_TOKEN_KEY, isTokenExpired, readStoredToken } from '../utils/authToken';
+import { redirectToLogin } from '../utils/navigation';
 
 const api = axios.create({
   baseURL: config.apiBaseUrl, // e.g., '/api' or full URL like http://localhost:3001/api
@@ -13,16 +15,20 @@ api.interceptors.request.use(
   (config) => {
     // Retrieve the token from local storage 
     // (or ideally from AuthContext later)
-    const token = localStorage.getItem('authToken'); 
+    const token = readStoredToken();
     if (token) {
-      // Remove quotes if token is stored as JSON string
-      const parsedToken = JSON.parse(token);
-      config.headers.Authorization = `Bearer ${parsedToken}`;
+      if (isTokenExpired(token)) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      } else {
+        const headers = config.headers ?? {};
+        headers.Authorization = `Bearer ${token}`;
+        config.headers = headers;
+      }
     }
     return config;
   },
   (error) => {
-    Promise.reject(error);
+    return Promise.reject(error);
   }
 );
 
@@ -33,12 +39,10 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Token is invalid or expired
       // Clear token (e.g., from local storage / AuthContext)
-      localStorage.removeItem('authToken');
+      localStorage.removeItem(AUTH_TOKEN_KEY);
       // Redirect to login page
       // Use window.location or handle via routing context if possible
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login'; 
-      }
+      redirectToLogin();
       // You might want to show a notification to the user
       console.error('Unauthorized! Redirecting to login.');
     }

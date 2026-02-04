@@ -1,6 +1,12 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
 import api from '@/services/api'; // Use the configured Axios instance
 import type { User } from 'types/index'; // Use path relative to baseUrl
+import {
+  AUTH_TOKEN_KEY,
+  getUserFromToken,
+  isTokenExpired,
+  readStoredToken,
+} from '../utils/authToken';
 
 // interface User { <-- REMOVED
 //   // Define basic user info obtained from token (or fetched after login)
@@ -20,26 +26,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper to parse JWT (simple example, consider using a library like jwt-decode)
-const parseJwt = (token: string): User | null => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    const decoded = JSON.parse(jsonPayload);
-    // Assuming payload contains username, adjust as needed
-    if (decoded && decoded.username) { 
-      return { username: decoded.username };
-    }
-    return null;
-  } catch (e) {
-    console.error("Failed to parse JWT", e);
-    return null;
-  }
-};
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null); // Use imported type
@@ -47,21 +33,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Initial load: Check local storage for token
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
+    const storedToken = readStoredToken();
     if (storedToken) {
-      try {
-        const parsedToken = JSON.parse(storedToken);
-        const decodedUser = parseJwt(parsedToken);
-        // Optional: Add check for token expiry here
-        if (decodedUser) {
-          setToken(parsedToken);
-          setUser(decodedUser);
-        } else {
-          localStorage.removeItem('authToken'); // Clear invalid token
-        }
-      } catch (e) {
-        console.error("Error parsing stored token", e);
-        localStorage.removeItem('authToken');
+      const decodedUser = getUserFromToken(storedToken);
+      if (decodedUser && !isTokenExpired(storedToken)) {
+        setToken(storedToken);
+        setUser(decodedUser);
+      } else {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
       }
     }
     setIsLoading(false);
@@ -76,12 +55,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       const newToken = response.data.token;
-      const decodedUser = parseJwt(newToken);
+      const decodedUser = getUserFromToken(newToken);
 
-      if (newToken && decodedUser) {
+      if (newToken && decodedUser && !isTokenExpired(newToken)) {
         setToken(newToken);
         setUser(decodedUser);
-        localStorage.setItem('authToken', JSON.stringify(newToken));
+        localStorage.setItem(AUTH_TOKEN_KEY, newToken);
       } else {
         throw new Error('Login failed: Invalid token or user data received');
       }
@@ -97,7 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('authToken');
+    localStorage.removeItem(AUTH_TOKEN_KEY);
     // Optional: Redirect to login or home page
     // navigate('/login'); // Requires access to navigate hook
   };

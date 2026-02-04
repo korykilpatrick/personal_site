@@ -13,8 +13,23 @@ import logger from './utils/logger';
 // Create Express server
 const app = express();
 
-// Test database connection
-testConnection();
+const startServer = async () => {
+  try {
+    // Test database connection
+    await testConnection();
+
+    // Start server
+    app.listen(app.get('port'), () => {
+      logger.info(
+        `Server running at http://localhost:${app.get('port')} in ${config.env} mode`
+      );
+      logger.info('Press CTRL-C to stop');
+    });
+  } catch (error) {
+    logger.error('Failed to start server', { error });
+    process.exit(1);
+  }
+};
 
 // Express configuration
 app.set('port', config.port);
@@ -41,13 +56,7 @@ app.use(config.apiPrefix, routes);
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
-app.listen(app.get('port'), () => {
-  logger.info(
-    `Server running at http://localhost:${app.get('port')} in ${config.env} mode`
-  );
-  logger.info('Press CTRL-C to stop');
-});
+void startServer();
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
