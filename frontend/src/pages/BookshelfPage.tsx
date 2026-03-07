@@ -1,9 +1,9 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Loading, ErrorDisplay } from '../components/ui';
 import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
-import PersonalNote from '../components/bookshelf/PersonalNote';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
+import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
 import useMultiSelect from '../hooks/useMultiSelect';
 import apiService from '../api/apiService';
 import { useBooks } from '../context/BooksContext';
@@ -54,16 +54,18 @@ const BookshelfPage: React.FC = () => {
 
     // Filter by shelves
     if (selectedShelves.length > 0) {
-      result = result.filter((b: BookWithShelves) =>
-        b.shelves && b.shelves.some((shelf) => selectedShelves.includes(shelf.id))
+      result = result.filter(
+        (b: BookWithShelves) =>
+          b.shelves && b.shelves.some((shelf) => selectedShelves.includes(shelf.id)),
       );
     }
 
     // Filter by search query (case-insensitive)
     const query = searchQuery.trim().toLowerCase();
     if (query) {
-      result = result.filter((b: BookWithShelves) =>
-        b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query)
+      result = result.filter(
+        (b: BookWithShelves) =>
+          b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query),
       );
     }
 
@@ -101,8 +103,12 @@ const BookshelfPage: React.FC = () => {
   }
 
   return (
-    <>
-      <PersonalNote />
+    <div
+      style={{
+        paddingBottom:
+          'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
+      }}
+    >
       <BookshelfControls
         sortOptions={sortOptions}
         selectedSortBy={sortBy}
@@ -116,7 +122,8 @@ const BookshelfPage: React.FC = () => {
         onSearchChange={setSearchQuery}
       />
       <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 120, height: 180 }} />
-    </>
+      <BookshelfQuoteDock />
+    </div>
   );
 };
 

@@ -46,6 +46,10 @@ jest.mock('../pages/NotFoundPage', () => {
 });
 
 describe('App component', () => {
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   test('renders the main layout components', () => {
     render(
       <BrowserRouter>
@@ -59,5 +63,18 @@ describe('App component', () => {
 
     // Check that the home page is rendered by default
     expect(screen.getByTestId('home-page')).toBeInTheDocument();
+  });
+
+  test('hides the footer on the bookshelf route', () => {
+    window.history.pushState({}, '', '/bookshelf');
+
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>,
+    );
+
+    expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
+    expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
   });
 });

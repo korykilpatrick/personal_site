@@ -37,7 +37,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   );
 
   return (
-    <div className="mb-3">
+    <div className="mb-2">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center">
           <span className="text-xs font-medium text-stone-700 mr-1.5">Sort By</span>
@@ -80,7 +80,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
         </div>
       </div>
 
-      <div className="min-h-8 mt-3"> 
+      <div className={selectedShelfIds.length > 0 ? 'min-h-8 mt-3' : 'min-h-4 mt-2'}>
         {selectedShelfIds.length > 0 && (
           <div className="flex flex-wrap gap-1.5"> 
             {allBookshelves

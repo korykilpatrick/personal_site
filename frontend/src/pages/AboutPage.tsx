@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import ImageModal from '../components/common/ImageModal';
+import Card from '@/components/common/Card';
 
 const AboutPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
-  const imageUrl = "https://korykilpatrick-bucket.s3.us-west-1.amazonaws.com/kory_winnie_mountains.jpg";
-  const altText = "Kory Kilpatrick with his dog Winnie in the Canadian Rockies";
+  const imageUrl =
+    'https://korykilpatrick-bucket.s3.us-west-1.amazonaws.com/kory_winnie_mountains.jpg';
+  const altText = 'Kory Kilpatrick with his dog Winnie in the Canadian Rockies';
 
   const handleImageClick = () => {
     setModalImageUrl(imageUrl);
@@ -18,8 +20,8 @@ const AboutPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white p-8 rounded-lg shadow-md">
+    <div className="max-w-5xl mx-auto flex flex-col gap-8">
+      <Card padding="lg" className="border-primary/10 shadow-lg">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <div
@@ -28,28 +30,41 @@ const AboutPage: React.FC = () => {
               role="button"
               aria-label={`View larger image: ${altText}`}
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleImageClick(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleImageClick();
+              }}
             >
               <img
                 src={imageUrl}
                 alt={altText}
                 className="w-full aspect-square rounded-lg object-cover shadow-sm pointer-events-none"
               />
-              <p className="text-xs text-center text-gray-500 mt-2">
+              <p className="text-xs text-center text-gray-500 mt-2 mb-0">
                 My dog Winnie and I in the Canadian Rockies
               </p>
             </div>
           </div>
           <div className="md:w-2/3">
-            <h2 className="text-2xl font-bold mb-4">Hey, I&apos;m Kory 👋</h2>
-            <p className="text-textSecondary mb-4">
-              I like solving problems, helping people, and cleaning the lens through which I see the world.
-              When I&apos;m not building or reading, I&apos;m doing physical activities (🎾 being the current favorite), trying to be a good role model to young people, or enjoying the company of people and animals I love.
+            <p className="font-sans text-xs uppercase tracking-[0.22em] text-primary-light mb-3">
+              About
             </p>
-            <p className="text-textSecondary mb-4">I built this site so people and AIs have a better sense of what I&apos;m up to than what was previously available online. Feel free to reach out! ✌️</p>
+            <h1 className="text-3xl font-bold text-primary mb-4">Hey, I&apos;m Kory.</h1>
+            <p className="text-textSecondary mb-4">
+              I&apos;m a software engineer, product person, and consultant. I like figuring out what
+              matters, making sense of messy situations, and helping people get unstuck.
+            </p>
+            <p className="text-textSecondary mb-4">
+              A lot of my work lately has been around AI, but what interests me most is not the
+              technology by itself. It&apos;s how people actually use it: where it helps, where it
+              misleads, and how to build better judgment around it.
+            </p>
+            <p className="text-textSecondary mb-5">
+              Outside of work, I read a lot, stay active, and try to show up well for the people in
+              my life.
+            </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       <ImageModal
         isOpen={isModalOpen}

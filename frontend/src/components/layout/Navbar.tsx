@@ -8,16 +8,14 @@ const DESKTOP_ICON_SIZE = 32;
 const MOBILE_ICON_SIZE = 18;
 
 // Icon style constants
-const ICON_LINK_CLASSNAME = "text-white hover:text-secondary-light no-underline";
+const ICON_LINK_CLASSNAME = 'text-white hover:text-secondary-light no-underline';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Library', path: '/library' },
     { name: 'Bookshelf', path: '/bookshelf' },
-    { name: 'Work', path: '/work' },
     { name: 'About', path: '/about' },
   ];
 
@@ -39,7 +37,7 @@ const Navbar: React.FC = () => {
 
           {/* Links */}
           <div className="justify-self-center flex space-x-6 font-sans text-lg tracking-wider">
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -55,7 +53,16 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Social icons */}
-          <div className="justify-self-end flex space-x-5">
+          <div className="justify-self-end flex items-center space-x-5">
+            <a
+              href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-sans text-xs uppercase tracking-[0.22em] text-white no-underline hover:text-secondary-light"
+              aria-label="Five Hour Consulting profile"
+            >
+              5HC
+            </a>
             {/* X (formerly Twitter) */}
             <a
               href="https://x.com/kory_kilpatrick"
@@ -88,9 +95,9 @@ const Navbar: React.FC = () => {
             </a>
             {/* Email */}
             <a
-              href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
+              href="mailto:koryrkilpatrick@gmail.com?subject=Consulting%20Waitlist&body=Hi%20Kory%2C%0A%0AI%27d%20like%20to%20join%20the%20consulting%20waitlist.%0A%0AContext%3A%0A%0AThanks%2C"
               className={ICON_LINK_CLASSNAME}
-              aria-label="Email"
+              aria-label="Email Kory"
             >
               <MdEmail size={DESKTOP_ICON_SIZE} />
             </a>
@@ -110,9 +117,19 @@ const Navbar: React.FC = () => {
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
               </svg>
             </button>
@@ -120,7 +137,7 @@ const Navbar: React.FC = () => {
 
           {isMenuOpen && (
             <div className="mt-3 flex flex-col items-center space-y-2 py-2 w-full">
-              {navLinks.map(link => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
@@ -135,7 +152,16 @@ const Navbar: React.FC = () => {
                 </Link>
               ))}
               {/* Social icons for mobile */}
-              <div className="flex justify-center space-x-5 pt-2 mt-2 border-t border-primary-light w-full">
+              <div className="flex justify-center items-center space-x-5 pt-2 mt-2 border-t border-primary-light w-full">
+                <a
+                  href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-xs uppercase tracking-[0.22em] text-white no-underline hover:text-secondary-light"
+                  aria-label="Five Hour Consulting profile"
+                >
+                  5HC
+                </a>
                 <a
                   href="https://x.com/kory_kilpatrick"
                   target="_blank"
@@ -164,9 +190,9 @@ const Navbar: React.FC = () => {
                   <FaLinkedinIn size={MOBILE_ICON_SIZE} />
                 </a>
                 <a
-                  href="mailto:koryrkilpatrick@gmail.com?subject=Are%20you%20a%20bank%20loan?&body=Because%20you%20have%20my%20interest."
+                  href="mailto:koryrkilpatrick@gmail.com?subject=Consulting%20Waitlist&body=Hi%20Kory%2C%0A%0AI%27d%20like%20to%20join%20the%20consulting%20waitlist.%0A%0AContext%3A%0A%0AThanks%2C"
                   className={ICON_LINK_CLASSNAME}
-                  aria-label="Email"
+                  aria-label="Email Kory"
                 >
                   <MdEmail size={MOBILE_ICON_SIZE} />
                 </a>
