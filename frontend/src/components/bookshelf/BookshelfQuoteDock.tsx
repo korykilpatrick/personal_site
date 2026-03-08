@@ -3,9 +3,7 @@ import {
   FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
-  FaChevronUp,
   FaQuoteLeft,
-  FaTimes,
 } from 'react-icons/fa';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 import useActiveQuotes from '@/hooks/useActiveQuotes';
@@ -23,6 +21,7 @@ const HIDDEN_DOCK_HEIGHT = 52;
 const FALLBACK_PREVIEW_MIN_HEIGHT = 48;
 const DESKTOP_EXPANDED_BODY_MAX_HEIGHT = 'min(45vh, 24rem)';
 const MOBILE_EXPANDED_BODY_MAX_HEIGHT = 'calc(50vh - 5rem - env(safe-area-inset-bottom))';
+const EXPAND_LABEL = 'more';
 
 interface PreviewFitState {
   text: string;
@@ -149,9 +148,13 @@ const BookshelfQuoteDock: React.FC = () => {
         : currentPlainText;
 
     const measureHeight = (candidate: string) => {
-      previewMeasure.textContent = candidate ? `"${candidate}"` : '';
+      const suffix = truncatedAtLimit(candidate) ? `... ${EXPAND_LABEL}` : '';
+      previewMeasure.textContent = candidate ? `"${candidate}${suffix}` : '';
       return Math.ceil(previewMeasure.getBoundingClientRect().height);
     };
+
+    const truncatedAtLimit = (candidate: string) =>
+      candidate.length < currentPlainText.length || hardCappedText !== currentPlainText;
 
     let nextText = hardCappedText;
     let truncated = nextText !== currentPlainText;
@@ -367,7 +370,7 @@ const BookshelfQuoteDock: React.FC = () => {
         type="button"
         onClick={handleShowDock}
         aria-label="Show quote dock"
-        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-[rgba(250,249,247,0.9)] px-4 py-2 text-[0.75rem] font-medium tracking-[0.12em] text-stone-600 shadow-[0_12px_28px_rgba(15,41,66,0.12)] backdrop-blur-[14px] transition-all duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-[rgba(250,249,247,0.48)] px-4 py-2 text-[0.75rem] font-medium tracking-[0.12em] text-stone-600 shadow-[0_8px_22px_rgba(15,41,66,0.05)] backdrop-blur-[5px] backdrop-saturate-135 transition-all duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] hover:-translate-y-0.5 hover:border-primary/20 hover:bg-[rgba(250,249,247,0.62)] hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 0.875rem)' }}
       >
         <FaQuoteLeft className="h-3 w-3" />
@@ -378,137 +381,155 @@ const BookshelfQuoteDock: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-30 overflow-hidden bg-[linear-gradient(to_top,rgba(250,249,247,0.98),rgba(250,249,247,0.92)_58%,rgba(250,249,247,0.84))] shadow-[0_-18px_42px_rgba(15,41,66,0.1)] backdrop-blur-[14px] transition-[height,box-shadow,background] duration-[1180ms] ease-[cubic-bezier(0.19,1,0.22,1)] will-change-[height]"
+      className="group/bookshelf-dock fixed inset-x-0 bottom-0 z-30 overflow-hidden bg-[linear-gradient(to_top,rgba(250,249,247,0.5),rgba(250,249,247,0.34)_38%,rgba(250,249,247,0.14)_68%,rgba(250,249,247,0.02))] shadow-[0_-8px_20px_rgba(15,41,66,0.035)] backdrop-blur-[2px] backdrop-saturate-130 transition-[height,box-shadow,background] duration-[1180ms] ease-[cubic-bezier(0.19,1,0.22,1)] will-change-[height]"
       style={{ height: `${dockHeight}px` }}
       onFocusCapture={handleFocusCapture}
       onBlurCapture={handleBlurCapture}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-white/80 via-white/28 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/20 via-white/[0.06] to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/45 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-px h-px bg-white/70"
+        className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.16),transparent_72%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[rgba(250,249,247,0.18)] via-[rgba(250,249,247,0.08)] to-transparent"
       />
 
       <div
         ref={contentWrapperRef}
-        className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-4 py-3 sm:px-6 sm:py-3.5"
+        className="relative isolate w-full px-4 py-3 sm:px-6 sm:py-3.5"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
-        {isExpanded ? (
-          <div
-            ref={expandedBodyRef}
-            key={`expanded-${currentIndex}`}
-            className="bookshelf-quote-dock__body row-start-1 min-w-0 overflow-y-auto pr-1 sm:pr-2"
-            style={{
-              maxHeight: isDesktopPreview
-                ? DESKTOP_EXPANDED_BODY_MAX_HEIGHT
-                : MOBILE_EXPANDED_BODY_MAX_HEIGHT,
-            }}
-          >
-            <MarkdownRenderer className="bookshelf-quote-dock__markdown text-stone-700">
-              {`"${currentQuote.text}"`}
-            </MarkdownRenderer>
-          </div>
-        ) : canExpand ? (
-          <button
-            type="button"
-            key={`collapsed-${currentIndex}`}
-            onClick={handleExpand}
-            aria-label={`Expand quote by ${currentQuote.author || 'unknown author'}`}
-            className="bookshelf-quote-dock__body flex min-w-0 items-center justify-center overflow-hidden text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            style={{ minHeight: `${previewFit.minHeight}px` }}
-          >
-            <p className="bookshelf-quote-dock__preview mb-0 max-w-[48rem] font-serif text-[0.93rem] leading-[1.5] text-stone-800 sm:text-[0.98rem] sm:leading-[1.54]">
-              "{previewText}"
-            </p>
-          </button>
-        ) : (
-          <div
-            key={`collapsed-${currentIndex}`}
-            className="bookshelf-quote-dock__body flex min-w-0 items-center justify-center overflow-hidden text-center"
-            style={{ minHeight: `${previewFit.minHeight}px` }}
-          >
-            <p className="bookshelf-quote-dock__preview mb-0 max-w-[48rem] font-serif text-[0.93rem] leading-[1.5] text-stone-800 sm:text-[0.98rem] sm:leading-[1.54]">
-              "{previewText}"
-            </p>
-          </div>
-        )}
-
-        <div className="row-span-2 col-start-2 flex items-center gap-1 self-center pl-1">
-          <button
-            type="button"
-            onClick={moveToPrevious}
-            aria-label="Previous quote"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200/70 bg-white/58 text-stone-500 transition hover:border-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-          >
-            <FaChevronLeft className="h-3 w-3" />
-          </button>
-
-          <button
-            type="button"
-            onClick={moveToNext}
-            aria-label="Next quote"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200/70 bg-white/58 text-stone-500 transition hover:border-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-          >
-            <FaChevronRight className="h-3 w-3" />
-          </button>
-
-          {(canExpand || isExpanded) && (
-            <button
-              type="button"
-              onClick={isExpanded ? handleCollapse : handleExpand}
-              aria-label={isExpanded ? 'Collapse quote dock' : 'Expand quote dock'}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200/70 bg-white/58 text-stone-500 transition hover:border-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            >
-              {isExpanded ? (
-                <FaChevronDown className="h-3 w-3" />
-              ) : (
-                <FaChevronUp className="h-3 w-3" />
-              )}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleHideDock}
-            aria-label="Hide quote dock"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200/70 bg-white/58 text-stone-500 transition hover:border-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-          >
-            <FaTimes className="h-3 w-3" />
-          </button>
+        <div
+          key={`cloud-${currentIndex}-${isExpanded ? 'expanded' : 'collapsed'}`}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+        >
+          <div className="bookshelf-quote-dock__reading-cloud absolute inset-0" />
+          <div className="bookshelf-quote-dock__reading-glow absolute inset-0" />
+          <div className="bookshelf-quote-dock__reading-mist absolute inset-0" />
         </div>
 
-        {(currentQuote.author || currentQuote.source) && (
-          <p
-            key={`meta-${currentIndex}-${isExpanded ? 'expanded' : 'collapsed'}`}
-            className="bookshelf-quote-dock__meta row-start-2 mb-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-sans text-[0.7rem] tracking-[0.06em] text-stone-500 sm:text-[0.74rem]"
-          >
-            {currentQuote.author && <span>{currentQuote.author}</span>}
-            {currentQuote.author && currentQuote.source && <span aria-hidden="true"> · </span>}
-            {currentQuote.source && <span className="italic text-stone-400">{currentQuote.source}</span>}
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={handleHideDock}
+          aria-label="Hide quote dock"
+          className="bookshelf-quote-dock__collapse-control absolute right-3 top-2 z-10 sm:right-4 sm:top-3"
+        >
+          <FaChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
+        </button>
+
+        <div className="relative mx-auto max-w-5xl">
+          {quotes.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={moveToPrevious}
+                aria-label="Previous quote"
+                className="bookshelf-quote-dock__edge-control absolute left-1 top-1/2 z-10 -translate-y-1/2 sm:left-3"
+              >
+                <FaChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={moveToNext}
+                aria-label="Next quote"
+                className="bookshelf-quote-dock__edge-control absolute right-10 top-1/2 z-10 -translate-y-1/2 sm:right-12"
+              >
+                <FaChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
+
+          <div className="mx-auto min-w-0 max-w-[44rem] px-10 sm:px-14">
+          {isExpanded ? (
+            <div
+              ref={expandedBodyRef}
+              key={`expanded-${currentIndex}`}
+              className="bookshelf-quote-dock__body min-w-0 overflow-y-auto pr-1 text-center sm:pr-2"
+              style={{
+                maxHeight: isDesktopPreview
+                  ? DESKTOP_EXPANDED_BODY_MAX_HEIGHT
+                  : MOBILE_EXPANDED_BODY_MAX_HEIGHT,
+              }}
+            >
+              <MarkdownRenderer className="bookshelf-quote-dock__markdown text-stone-700">
+                {`"${currentQuote.text}"`}
+              </MarkdownRenderer>
+            </div>
+          ) : (
+            <div
+              key={`collapsed-${currentIndex}`}
+              className="bookshelf-quote-dock__body flex min-w-0 items-center justify-center overflow-hidden text-center"
+              style={{ minHeight: `${previewFit.minHeight}px` }}
+            >
+              <p className="bookshelf-quote-dock__preview mb-0 max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-stone-900 sm:text-[0.98rem] sm:leading-[1.54]">
+                <span>{`"${previewText}`}</span>
+                {canExpand ? (
+                  <>
+                    <span aria-hidden="true">...</span>{' '}
+                    <button
+                      type="button"
+                      onClick={handleExpand}
+                      className="bookshelf-quote-dock__inline-toggle"
+                    >
+                      {EXPAND_LABEL}
+                    </button>
+                  </>
+                ) : (
+                  <span>"</span>
+                )}
+              </p>
+            </div>
+          )}
+
+          {(currentQuote.author || currentQuote.source || isExpanded) && (
+            <p
+              key={`meta-${currentIndex}-${isExpanded ? 'expanded' : 'collapsed'}`}
+              className="bookshelf-quote-dock__meta mb-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-sans text-[0.7rem] tracking-[0.06em] text-stone-600 sm:text-[0.74rem]"
+            >
+              {currentQuote.author && <span>{currentQuote.author}</span>}
+              {currentQuote.author && currentQuote.source && <span aria-hidden="true"> · </span>}
+              {currentQuote.source && <span className="italic text-stone-500">{currentQuote.source}</span>}
+              {isExpanded && (currentQuote.author || currentQuote.source) && (
+                <span aria-hidden="true"> · </span>
+              )}
+              {isExpanded && (
+                <button
+                  type="button"
+                  onClick={handleCollapse}
+                  className="bookshelf-quote-dock__inline-toggle text-[0.62rem] tracking-[0.18em]"
+                >
+                  less
+                </button>
+              )}
+            </p>
+          )}
+          </div>
+        </div>
       </div>
 
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 invisible"
       >
-        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] gap-x-3 px-4 py-3 sm:px-6 sm:py-3.5">
-          <div className="min-w-0">
+        <div className="w-full px-4 py-3 sm:px-6 sm:py-3.5">
+          <div className="mx-auto max-w-5xl">
+            <div className="mx-auto max-w-[44rem] px-10 sm:px-14">
             <p
               ref={previewMeasureRef}
-              className="bookshelf-quote-dock__preview mx-auto max-w-[48rem] font-serif text-[0.93rem] leading-[1.5] text-center text-stone-800 sm:text-[0.98rem] sm:leading-[1.54]"
+              className="bookshelf-quote-dock__preview mx-auto max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-center text-stone-900 sm:text-[0.98rem] sm:leading-[1.54]"
             />
+            </div>
           </div>
-          <div className="w-[7.25rem]" />
         </div>
       </div>
 
@@ -516,8 +537,8 @@ const BookshelfQuoteDock: React.FC = () => {
         @keyframes fadeInBookshelfDockQuote {
           from {
             opacity: 0;
-            transform: translateY(12px);
-            filter: blur(4px);
+            transform: translateY(18px) scale(0.985);
+            filter: blur(8px);
           }
           to {
             opacity: 1;
@@ -526,30 +547,169 @@ const BookshelfQuoteDock: React.FC = () => {
           }
         }
 
+        @keyframes driftInBookshelfDockVeil {
+          from {
+            opacity: 0;
+            transform: translateY(24px) scale(0.97);
+            filter: blur(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+
         .bookshelf-quote-dock__body {
           opacity: 0;
-          animation: fadeInBookshelfDockQuote 1.1s 120ms cubic-bezier(0.19, 1, 0.22, 1) both;
+          animation: fadeInBookshelfDockQuote 1.28s 180ms cubic-bezier(0.19, 1, 0.22, 1) both;
         }
 
         .bookshelf-quote-dock__meta {
           opacity: 0;
-          animation: fadeInBookshelfDockQuote 1.18s 220ms cubic-bezier(0.19, 1, 0.22, 1) both;
+          animation: fadeInBookshelfDockQuote 1.36s 280ms cubic-bezier(0.19, 1, 0.22, 1) both;
+        }
+
+        .bookshelf-quote-dock__reading-cloud,
+        .bookshelf-quote-dock__reading-glow,
+        .bookshelf-quote-dock__reading-mist {
+          animation: driftInBookshelfDockVeil 1.38s cubic-bezier(0.19, 1, 0.22, 1) both;
+        }
+
+        .bookshelf-quote-dock__reading-cloud {
+          background: radial-gradient(
+            ellipse at center,
+            rgba(252, 251, 249, 0.82) 0%,
+            rgba(252, 251, 249, 0.64) 18%,
+            rgba(252, 251, 249, 0.28) 40%,
+            rgba(252, 251, 249, 0.08) 60%,
+            transparent 100%
+          );
+        }
+
+        .bookshelf-quote-dock__reading-glow {
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 255, 255, 0.28),
+            rgba(255, 255, 255, 0.1) 42%,
+            transparent 76%
+          );
+          filter: blur(26px);
+        }
+
+        .bookshelf-quote-dock__reading-mist {
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.06) 22%,
+            transparent 66%
+          );
+          filter: blur(44px);
         }
 
         .bookshelf-quote-dock__preview {
           text-wrap: pretty;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 0 18px rgba(255, 255, 255, 0.32);
+        }
+
+        .bookshelf-quote-dock__inline-toggle {
+          display: inline-flex;
+          align-items: center;
+          border: 0;
+          background: transparent;
+          padding: 0;
+          margin: 0;
+          color: rgba(39, 63, 92, 0.92);
+          font-family: ui-sans-serif, system-ui, sans-serif;
+          font-size: 0.64rem;
+          font-weight: 600;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          vertical-align: baseline;
+          transition: color 420ms cubic-bezier(0.19, 1, 0.22, 1),
+            opacity 420ms cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .bookshelf-quote-dock__inline-toggle:hover,
+        .bookshelf-quote-dock__inline-toggle:focus-visible {
+          color: #1d4d7b;
+          opacity: 1;
+          outline: none;
+        }
+
+        .bookshelf-quote-dock__edge-control {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 0;
+          background: transparent;
+          color: rgba(87, 83, 78, 0.18);
+          opacity: 0.18;
+          transition: opacity 620ms cubic-bezier(0.19, 1, 0.22, 1),
+            color 620ms cubic-bezier(0.19, 1, 0.22, 1),
+            transform 620ms cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .group\\/bookshelf-dock:hover .bookshelf-quote-dock__edge-control,
+        .group\\/bookshelf-dock:focus-within .bookshelf-quote-dock__edge-control,
+        .bookshelf-quote-dock__edge-control:hover,
+        .bookshelf-quote-dock__edge-control:focus-visible {
+          opacity: 0.72;
+          color: rgba(39, 63, 92, 0.82);
+          transform: translateY(-50%) scale(1.02);
+          outline: none;
+        }
+
+        .bookshelf-quote-dock__collapse-control {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.75rem;
+          height: 1.75rem;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(250, 249, 247, 0.16);
+          color: rgba(39, 63, 92, 0.48);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
+            0 6px 18px rgba(15, 41, 66, 0.03);
+          backdrop-filter: blur(4px) saturate(120%);
+          opacity: 0.44;
+          transition: opacity 520ms cubic-bezier(0.19, 1, 0.22, 1),
+            transform 520ms cubic-bezier(0.19, 1, 0.22, 1),
+            color 520ms cubic-bezier(0.19, 1, 0.22, 1),
+            background 520ms cubic-bezier(0.19, 1, 0.22, 1),
+            border-color 520ms cubic-bezier(0.19, 1, 0.22, 1),
+            box-shadow 520ms cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .group\\/bookshelf-dock:hover .bookshelf-quote-dock__collapse-control,
+        .group\\/bookshelf-dock:focus-within .bookshelf-quote-dock__collapse-control,
+        .bookshelf-quote-dock__collapse-control:hover,
+        .bookshelf-quote-dock__collapse-control:focus-visible {
+          opacity: 0.9;
+          transform: translateY(-1px);
+          color: rgba(29, 77, 123, 0.88);
+          background: rgba(250, 249, 247, 0.4);
+          border-color: rgba(255, 255, 255, 0.26);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 10px 24px rgba(15, 41, 66, 0.06);
+          outline: none;
         }
 
         .bookshelf-quote-dock__markdown p {
           font-size: 0.95rem;
           line-height: 1.62;
           margin-bottom: 0.75rem;
-          color: #292524;
+          color: #1c1917;
           text-align: center;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 0 18px rgba(255, 255, 255, 0.28);
         }
 
         .bookshelf-quote-dock__markdown {
-          max-width: 48rem;
+          max-width: 44rem;
           margin: 0 auto;
         }
 
