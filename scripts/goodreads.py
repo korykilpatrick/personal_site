@@ -21,7 +21,36 @@ from email.utils import parsedate_to_datetime
 
 import requests
 import psycopg2
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv as _load_dotenv
+except ImportError:
+    _load_dotenv = None
+
+
+def load_env_file(env_path):
+    """Load a simple KEY=VALUE env file, even when python-dotenv is unavailable."""
+    if _load_dotenv is not None:
+        _load_dotenv(env_path)
+        return
+
+    if not os.path.exists(env_path):
+        return
+
+    with open(env_path, encoding='utf-8') as env_file:
+        for raw_line in env_file:
+            line = raw_line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip()
+
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+                value = value[1:-1]
+
+            os.environ.setdefault(key, value)
 
 
 def parse_rss_date(date_str):
@@ -35,7 +64,7 @@ def parse_rss_date(date_str):
         return None
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', 'server', '.env'))
+load_env_file(os.path.join(os.path.dirname(__file__), '..', 'server', '.env'))
 
 # Data models (matching existing database schema)
 Book = namedtuple('Book', [
@@ -112,8 +141,8 @@ class Database:
             self.connection.rollback()
             return None
 
-    def insert_books(self, books):
-        """Insert books, ignoring duplicates."""
+    def upsert_books(self, books):
+        """Insert new books and refresh existing Goodreads-backed records."""
         if not books:
             return
 
@@ -123,10 +152,26 @@ class Database:
                 author, author_link, num_pages, avg_rating, num_ratings,
                 date_pub, rating, blurb, date_added, date_started, date_read
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (goodreads_id) DO NOTHING
+            ON CONFLICT (goodreads_id) DO UPDATE SET
+                img_url = EXCLUDED.img_url,
+                img_url_small = EXCLUDED.img_url_small,
+                title = EXCLUDED.title,
+                book_link = EXCLUDED.book_link,
+                author = EXCLUDED.author,
+                author_link = EXCLUDED.author_link,
+                num_pages = EXCLUDED.num_pages,
+                avg_rating = EXCLUDED.avg_rating,
+                num_ratings = EXCLUDED.num_ratings,
+                date_pub = EXCLUDED.date_pub,
+                rating = EXCLUDED.rating,
+                blurb = EXCLUDED.blurb,
+                date_added = EXCLUDED.date_added,
+                date_started = EXCLUDED.date_started,
+                date_read = EXCLUDED.date_read,
+                updated_at = CURRENT_TIMESTAMP
         """
         self.execute(query, [tuple(b) for b in books], many=True)
-        print(f"Inserted {len(books)} books (duplicates ignored)")
+        print(f"Upserted {len(books)} books")
 
     def insert_bookshelves(self, shelves):
         """Insert bookshelves, ignoring duplicates."""
@@ -151,6 +196,18 @@ class Database:
         """
         self.execute(query, [(a.book_id, a.shelf_id) for a in assignments], many=True)
         print(f"Inserted {len(assignments)} shelf assignments (duplicates ignored)")
+
+    def delete_books_shelves(self, assignments):
+        """Delete outdated book-shelf assignments."""
+        if not assignments:
+            return
+
+        query = """
+            DELETE FROM books_shelves
+            WHERE book_id = %s AND shelf_id = %s
+        """
+        self.execute(query, assignments, many=True)
+        print(f"Deleted {len(assignments)} stale shelf assignments")
 
     def close(self):
         if self.connection:
@@ -285,12 +342,12 @@ def sync_books(db):
                 all_books[book.goodreads_id] = book
         all_book_shelves.update(book_shelves)
 
-    # Insert new books
-    new_books = [b for gid, b in all_books.items() if gid not in existing_ids]
-    if new_books:
-        db.insert_books(new_books)
+    # Insert new books and refresh existing records.
+    books_to_sync = list(all_books.values())
+    if books_to_sync:
+        db.upsert_books(books_to_sync)
     else:
-        print("No new books to insert")
+        print("No books returned from Goodreads")
 
     # Report books in DB but not on Goodreads (we don't delete them)
     missing_from_goodreads = existing_ids - set(all_books.keys())
@@ -331,29 +388,47 @@ def sync_books_shelves(db, book_shelves):
     shelves = db.execute('SELECT id, name FROM bookshelves')
     shelf_id_lookup = {s.name: s.id for s in shelves} if shelves else {}
 
-    # Get existing assignments
-    existing = db.execute('SELECT book_id, shelf_id FROM books_shelves')
-    existing_assignments = {(a.book_id, a.shelf_id) for a in existing} if existing else set()
+    # Build a per-book view of current assignments so Goodreads can be the source of truth
+    # for books that still appear in the synced feeds.
+    existing = db.execute("""
+        SELECT books_shelves.book_id, books_shelves.shelf_id, bookshelves.name
+        FROM books_shelves
+        JOIN bookshelves ON bookshelves.id = books_shelves.shelf_id
+    """)
+    existing_assignments = defaultdict(dict)
+    if existing:
+        for assignment in existing:
+            existing_assignments[assignment.book_id][assignment.name] = assignment.shelf_id
 
     # Build new assignments
     new_assignments = []
+    stale_assignments = []
     for goodreads_id, shelf_names in book_shelves.items():
         book_id = book_id_lookup.get(goodreads_id)
         if not book_id:
             continue
 
-        for shelf_name in shelf_names:
-            shelf_id = shelf_id_lookup.get(shelf_name)
-            if not shelf_id:
-                continue
+        desired_shelves = {
+            shelf_name for shelf_name in shelf_names
+            if shelf_name and shelf_name != 'want-to-read' and shelf_name in shelf_id_lookup
+        }
+        current_shelves = set(existing_assignments.get(book_id, {}))
 
-            if (book_id, shelf_id) not in existing_assignments:
-                new_assignments.append(BooksShelves(book_id, shelf_id))
+        for shelf_name in desired_shelves - current_shelves:
+            new_assignments.append(BooksShelves(book_id, shelf_id_lookup[shelf_name]))
+
+        for shelf_name in current_shelves - desired_shelves:
+            stale_assignments.append((book_id, existing_assignments[book_id][shelf_name]))
 
     if new_assignments:
         db.insert_books_shelves(new_assignments)
     else:
         print("No new shelf assignments to insert")
+
+    if stale_assignments:
+        db.delete_books_shelves(stale_assignments)
+    else:
+        print("No stale shelf assignments to delete")
 
 
 def dry_run():
