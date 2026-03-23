@@ -4,10 +4,11 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-14 pt-4 pb-8 border-t border-primary/10">
+    <footer className="mt-16 pb-10 pt-8">
       <div className="container text-center">
-        <p className="text-textSecondary text-xs font-sans">
-          © {currentYear} <span className="text-primary font-medium">Kory Kilpatrick</span>
+        <div className="site-divider mb-4" />
+        <p className="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-textTertiary">
+          © {currentYear} <span className="text-primary/90">Kory Kilpatrick</span>
         </p>
       </div>
     </footer>

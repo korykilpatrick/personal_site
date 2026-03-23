@@ -98,6 +98,10 @@ const BookshelfQuoteDock: React.FC = () => {
     }
   }, [currentIndex, isExpanded]);
 
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [currentIndex]);
+
   const currentQuote = quotes[currentIndex] || null;
   const currentPlainText = useMemo(
     () => (currentQuote ? toPlainText(currentQuote.text) : ''),
@@ -370,7 +374,7 @@ const BookshelfQuoteDock: React.FC = () => {
         type="button"
         onClick={handleShowDock}
         aria-label="Show quote dock"
-        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-[rgba(250,249,247,0.48)] px-4 py-2 text-[0.75rem] font-medium tracking-[0.12em] text-stone-600 shadow-[0_8px_22px_rgba(15,41,66,0.05)] backdrop-blur-[5px] backdrop-saturate-135 transition-all duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] hover:-translate-y-0.5 hover:border-primary/20 hover:bg-[rgba(250,249,247,0.62)] hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 rounded-[14px] border border-primary/12 bg-[rgba(247,250,255,0.52)] px-4 py-2 text-[0.72rem] font-mono font-medium uppercase tracking-[0.1em] text-textSecondary shadow-[0_10px_24px_rgba(12,23,39,0.08)] backdrop-blur-[6px] backdrop-saturate-135 transition-all duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] hover:-translate-y-0.5 hover:border-secondary/30 hover:bg-[rgba(247,250,255,0.68)] hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 0.875rem)' }}
       >
         <FaQuoteLeft className="h-3 w-3" />
@@ -381,26 +385,26 @@ const BookshelfQuoteDock: React.FC = () => {
 
   return (
     <div
-      className="group/bookshelf-dock fixed inset-x-0 bottom-0 z-30 overflow-hidden bg-[linear-gradient(to_top,rgba(250,249,247,0.5),rgba(250,249,247,0.34)_38%,rgba(250,249,247,0.14)_68%,rgba(250,249,247,0.02))] shadow-[0_-8px_20px_rgba(15,41,66,0.035)] backdrop-blur-[2px] backdrop-saturate-130 transition-[height,box-shadow,background] duration-[1180ms] ease-[cubic-bezier(0.19,1,0.22,1)] will-change-[height]"
+      className="group/bookshelf-dock fixed inset-x-0 bottom-0 z-30 overflow-hidden bg-[linear-gradient(to_top,rgba(241,246,252,0.62),rgba(241,246,252,0.4)_34%,rgba(241,246,252,0.16)_62%,rgba(241,246,252,0.02))] shadow-[0_-10px_24px_rgba(12,23,39,0.08)] backdrop-blur-[3px] backdrop-saturate-130 transition-[height,box-shadow,background] duration-[1180ms] ease-[cubic-bezier(0.19,1,0.22,1)] will-change-[height]"
       style={{ height: `${dockHeight}px` }}
       onFocusCapture={handleFocusCapture}
       onBlurCapture={handleBlurCapture}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/20 via-white/[0.06] to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/[0.18] via-white/[0.04] to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/45 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(132,181,255,0.52)] to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.16),transparent_72%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-[radial-gradient(ellipse_at_top,rgba(233,242,255,0.22),transparent_72%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[rgba(250,249,247,0.18)] via-[rgba(250,249,247,0.08)] to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[rgba(12,23,39,0.08)] via-[rgba(241,246,252,0.05)] to-transparent"
       />
 
       <div
@@ -461,7 +465,7 @@ const BookshelfQuoteDock: React.FC = () => {
                   : MOBILE_EXPANDED_BODY_MAX_HEIGHT,
               }}
             >
-              <MarkdownRenderer className="bookshelf-quote-dock__markdown text-stone-700">
+              <MarkdownRenderer className="bookshelf-quote-dock__markdown text-textSecondary">
                 {`"${currentQuote.text}"`}
               </MarkdownRenderer>
             </div>
@@ -471,7 +475,7 @@ const BookshelfQuoteDock: React.FC = () => {
               className="bookshelf-quote-dock__body flex min-w-0 items-center justify-center overflow-hidden text-center"
               style={{ minHeight: `${previewFit.minHeight}px` }}
             >
-              <p className="bookshelf-quote-dock__preview mb-0 max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-stone-900 sm:text-[0.98rem] sm:leading-[1.54]">
+              <p className="bookshelf-quote-dock__preview mb-0 max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-primary sm:text-[0.98rem] sm:leading-[1.54]">
                 <span>{`"${previewText}`}</span>
                 {canExpand ? (
                   <>
@@ -494,11 +498,11 @@ const BookshelfQuoteDock: React.FC = () => {
           {(currentQuote.author || currentQuote.source || isExpanded) && (
             <p
               key={`meta-${currentIndex}-${isExpanded ? 'expanded' : 'collapsed'}`}
-              className="bookshelf-quote-dock__meta mb-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-sans text-[0.7rem] tracking-[0.06em] text-stone-600 sm:text-[0.74rem]"
+              className="bookshelf-quote-dock__meta mb-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-mono text-[0.68rem] tracking-[0.08em] text-textSecondary sm:text-[0.72rem]"
             >
               {currentQuote.author && <span>{currentQuote.author}</span>}
               {currentQuote.author && currentQuote.source && <span aria-hidden="true"> · </span>}
-              {currentQuote.source && <span className="italic text-stone-500">{currentQuote.source}</span>}
+              {currentQuote.source && <span className="italic text-textTertiary">{currentQuote.source}</span>}
               {isExpanded && (currentQuote.author || currentQuote.source) && (
                 <span aria-hidden="true"> · </span>
               )}
@@ -526,7 +530,7 @@ const BookshelfQuoteDock: React.FC = () => {
             <div className="mx-auto max-w-[44rem] px-10 sm:px-14">
             <p
               ref={previewMeasureRef}
-              className="bookshelf-quote-dock__preview mx-auto max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-center text-stone-900 sm:text-[0.98rem] sm:leading-[1.54]"
+              className="bookshelf-quote-dock__preview mx-auto max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-center text-primary sm:text-[0.98rem] sm:leading-[1.54]"
             />
             </div>
           </div>
@@ -579,10 +583,10 @@ const BookshelfQuoteDock: React.FC = () => {
         .bookshelf-quote-dock__reading-cloud {
           background: radial-gradient(
             ellipse at center,
-            rgba(252, 251, 249, 0.82) 0%,
-            rgba(252, 251, 249, 0.64) 18%,
-            rgba(252, 251, 249, 0.28) 40%,
-            rgba(252, 251, 249, 0.08) 60%,
+            rgba(247, 250, 255, 0.82) 0%,
+            rgba(247, 250, 255, 0.64) 18%,
+            rgba(247, 250, 255, 0.28) 42%,
+            rgba(247, 250, 255, 0.08) 62%,
             transparent 100%
           );
         }
@@ -590,8 +594,8 @@ const BookshelfQuoteDock: React.FC = () => {
         .bookshelf-quote-dock__reading-glow {
           background: radial-gradient(
             ellipse at center,
-            rgba(255, 255, 255, 0.28),
-            rgba(255, 255, 255, 0.1) 42%,
+            rgba(132, 181, 255, 0.18),
+            rgba(247, 250, 255, 0.08) 42%,
             transparent 76%
           );
           filter: blur(26px);
@@ -600,8 +604,8 @@ const BookshelfQuoteDock: React.FC = () => {
         .bookshelf-quote-dock__reading-mist {
           background: radial-gradient(
             ellipse at center,
-            rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 255, 255, 0.06) 22%,
+            rgba(233, 242, 255, 0.12) 0%,
+            rgba(233, 242, 255, 0.06) 22%,
             transparent 66%
           );
           filter: blur(44px);
@@ -609,8 +613,8 @@ const BookshelfQuoteDock: React.FC = () => {
 
         .bookshelf-quote-dock__preview {
           text-wrap: pretty;
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38),
-            0 0 18px rgba(255, 255, 255, 0.32);
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52),
+            0 0 18px rgba(233, 242, 255, 0.32);
         }
 
         .bookshelf-quote-dock__inline-toggle {
@@ -620,11 +624,11 @@ const BookshelfQuoteDock: React.FC = () => {
           background: transparent;
           padding: 0;
           margin: 0;
-          color: rgba(39, 63, 92, 0.92);
-          font-family: ui-sans-serif, system-ui, sans-serif;
+          color: rgba(48, 90, 154, 0.92);
+          font-family: 'IBM Plex Mono', ui-monospace, monospace;
           font-size: 0.64rem;
           font-weight: 600;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           white-space: nowrap;
           vertical-align: baseline;
@@ -634,7 +638,7 @@ const BookshelfQuoteDock: React.FC = () => {
 
         .bookshelf-quote-dock__inline-toggle:hover,
         .bookshelf-quote-dock__inline-toggle:focus-visible {
-          color: #1d4d7b;
+          color: #2d63af;
           opacity: 1;
           outline: none;
         }
@@ -645,7 +649,7 @@ const BookshelfQuoteDock: React.FC = () => {
           justify-content: center;
           border: 0;
           background: transparent;
-          color: rgba(87, 83, 78, 0.18);
+          color: rgba(62, 84, 112, 0.22);
           opacity: 0.18;
           transition: opacity 620ms cubic-bezier(0.19, 1, 0.22, 1),
             color 620ms cubic-bezier(0.19, 1, 0.22, 1),
@@ -657,7 +661,7 @@ const BookshelfQuoteDock: React.FC = () => {
         .bookshelf-quote-dock__edge-control:hover,
         .bookshelf-quote-dock__edge-control:focus-visible {
           opacity: 0.72;
-          color: rgba(39, 63, 92, 0.82);
+          color: rgba(42, 73, 120, 0.84);
           transform: translateY(-50%) scale(1.02);
           outline: none;
         }
@@ -669,11 +673,11 @@ const BookshelfQuoteDock: React.FC = () => {
           width: 1.75rem;
           height: 1.75rem;
           border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          background: rgba(250, 249, 247, 0.16);
-          color: rgba(39, 63, 92, 0.48);
+          border: 1px solid rgba(235, 243, 255, 0.18);
+          background: rgba(241, 246, 252, 0.18);
+          color: rgba(57, 78, 105, 0.54);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
-            0 6px 18px rgba(15, 41, 66, 0.03);
+            0 6px 18px rgba(12, 23, 39, 0.05);
           backdrop-filter: blur(4px) saturate(120%);
           opacity: 0.44;
           transition: opacity 520ms cubic-bezier(0.19, 1, 0.22, 1),
@@ -690,11 +694,11 @@ const BookshelfQuoteDock: React.FC = () => {
         .bookshelf-quote-dock__collapse-control:focus-visible {
           opacity: 0.9;
           transform: translateY(-1px);
-          color: rgba(29, 77, 123, 0.88);
-          background: rgba(250, 249, 247, 0.4);
-          border-color: rgba(255, 255, 255, 0.26);
+          color: rgba(45, 99, 175, 0.9);
+          background: rgba(241, 246, 252, 0.42);
+          border-color: rgba(233, 242, 255, 0.3);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            0 10px 24px rgba(15, 41, 66, 0.06);
+            0 10px 24px rgba(12, 23, 39, 0.08);
           outline: none;
         }
 
@@ -702,10 +706,10 @@ const BookshelfQuoteDock: React.FC = () => {
           font-size: 0.95rem;
           line-height: 1.62;
           margin-bottom: 0.75rem;
-          color: #1c1917;
+          color: #223248;
           text-align: center;
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38),
-            0 0 18px rgba(255, 255, 255, 0.28);
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52),
+            0 0 18px rgba(233, 242, 255, 0.28);
         }
 
         .bookshelf-quote-dock__markdown {
@@ -718,11 +722,11 @@ const BookshelfQuoteDock: React.FC = () => {
         }
 
         .bookshelf-quote-dock__markdown strong {
-          color: #1f2937;
+          color: #15263f;
         }
 
         .bookshelf-quote-dock__markdown em {
-          color: #57534e;
+          color: #5f7286;
         }
 
         @media (min-width: 640px) {

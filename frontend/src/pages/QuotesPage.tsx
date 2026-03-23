@@ -1,5 +1,5 @@
 import React from 'react';
-import Section from '@/components/layout/Section';
+import Card from '@/components/common/Card';
 import QuoteCarousel from '@/components/home/QuoteCarousel';
 
 /**
@@ -8,11 +8,12 @@ import QuoteCarousel from '@/components/home/QuoteCarousel';
  */
 const QuotesPage: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-6">
-      <Section className="w-full max-w-2xl text-center">
-        <h1 className="text-2xl font-semibold mb-6">Quotes</h1>
+    <div className="mx-auto flex min-h-[60vh] max-w-4xl items-center justify-center py-6">
+      <Card padding="lg" className="w-full text-center">
+        <p className="site-eyebrow mb-4">Quotes</p>
+        <h1 className="mb-6 text-[2.6rem]">Lines worth keeping</h1>
         <QuoteCarousel />
-      </Section>
+      </Card>
     </div>
   );
 };

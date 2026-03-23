@@ -18,19 +18,20 @@ const Pill: React.FC<PillProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const baseClasses = 'inline-flex items-center rounded-full';
+  const baseClasses =
+    'inline-flex items-center rounded-[12px] border font-mono uppercase tracking-[0.08em] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
 
   const variantClasses = {
-    primary: 'bg-primary text-white',
-    secondary: 'bg-gray-200 text-gray-700',
+    primary: 'border-primary/16 bg-primary/92 text-stone-50',
+    secondary: 'border-[rgba(76,67,56,0.12)] bg-white/60 text-textSecondary',
     success: 'bg-green-100 text-green-800',
     warning: 'bg-yellow-100 text-yellow-800',
     danger: 'bg-red-100 text-red-800',
   };
 
   const sizeClasses = {
-    sm: 'px-1.5 py-0.5 text-xs',
-    md: 'px-2 py-0.5 text-xs',
+    sm: 'px-2 py-1 text-[0.6rem]',
+    md: 'px-3 py-1.5 text-[0.62rem]',
   };
 
   const cursorClass = onClick ? 'cursor-pointer' : '';
@@ -47,7 +48,7 @@ const Pill: React.FC<PillProps> = ({
             e.stopPropagation();
             if(onRemove) onRemove(); 
           }}
-          className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-black hover:bg-opacity-10 focus:outline-none"
+          className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-white/74 transition hover:bg-white/10 hover:text-white focus:outline-none"
           aria-label={`Remove ${label}`}
         >
           <Icon name="close" size="sm" />

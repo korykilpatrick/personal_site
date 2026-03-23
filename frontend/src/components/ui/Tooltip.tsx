@@ -40,8 +40,8 @@ const Tooltip: React.FC<TooltipProps> = ({
             side={side}
             sideOffset={sideOffset}
             className={`
-              z-50 overflow-hidden rounded-md bg-gray-900 px-3 py-1.5 text-xs
-              text-gray-50 shadow-md animate-in fade-in-0 zoom-in-95
+              z-50 overflow-hidden rounded-[16px] border border-[rgba(215,184,135,0.18)] bg-[rgba(45,30,21,0.94)] px-3 py-2 text-xs
+              text-stone-100 shadow-[0_18px_36px_rgba(34,20,13,0.3)] backdrop-blur-md animate-in fade-in-0 zoom-in-95
               data-[state=closed]:animate-out data-[state=closed]:fade-out-0
               data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2
               data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2
@@ -50,7 +50,7 @@ const Tooltip: React.FC<TooltipProps> = ({
             `}
           >
             {content}
-            <RadixTooltip.Arrow className="fill-gray-900" />
+            <RadixTooltip.Arrow className="fill-[rgba(45,30,21,0.94)]" />
           </RadixTooltip.Content>
         </RadixTooltip.Portal>
       </RadixTooltip.Root>

@@ -45,20 +45,20 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, quote, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-primary/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-primary/48 p-4 backdrop-blur-md"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Quote viewer"
     >
       <div
-        className="relative max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-[30px] border border-stone-200 bg-stone-50 shadow-[0_28px_80px_rgba(15,41,66,0.25)]"
+        className="relative max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-[24px] border border-[rgba(21,38,63,0.12)] bg-[linear-gradient(180deg,rgba(252,254,255,0.96),rgba(240,246,252,0.92))] shadow-[0_28px_80px_rgba(12,23,39,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white/90 text-stone-500 transition hover:border-primary/30 hover:text-primary"
+          className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-primary/12 bg-white/74 text-textSecondary transition hover:border-secondary/24 hover:text-primary"
           aria-label="Close quote viewer"
         >
           <FaTimes className="h-4 w-4" />
@@ -66,18 +66,18 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, quote, onClose }) => {
 
         <div className="max-h-[85vh] overflow-y-auto px-6 pb-8 pt-16 sm:px-10 sm:pb-10 sm:pt-20">
           <div className="mx-auto max-w-2xl">
-            <MarkdownRenderer className="quote-modal-markdown text-stone-700">
+            <MarkdownRenderer className="quote-modal-markdown text-textSecondary">
               {`"${quote.text}"`}
             </MarkdownRenderer>
 
-            <div className="mt-8 border-t border-stone-200 pt-4">
+            <div className="mt-8 border-t border-primary/10 pt-4">
               {quote.author && (
-                <p className="mb-1 font-sans text-sm tracking-[0.08em] text-stone-600">
+                <p className="mb-1 font-mono text-[0.76rem] uppercase tracking-[0.12em] text-textSecondary">
                   {quote.author}
                 </p>
               )}
               {quote.source && (
-                <p className="mb-0 text-sm italic text-stone-500">{quote.source}</p>
+                <p className="mb-0 text-sm italic text-textTertiary">{quote.source}</p>
               )}
             </div>
           </div>
@@ -181,26 +181,30 @@ const QuoteCarousel: React.FC = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <div className="relative overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/72 shadow-[0_8px_22px_rgba(15,41,66,0.05)] backdrop-blur-sm">
+        <div className="site-card-soft relative overflow-hidden rounded-[22px]">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(63,127,216,0.14),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.22),transparent_56%)]"
+          />
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
             aria-label={`Open quote by ${current.author || 'unknown author'}`}
-            className="group block h-[5.6rem] w-full cursor-zoom-in px-14 py-3 text-center transition hover:bg-white/88 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-[5.2rem] sm:px-20"
+            className="group relative block h-[6.3rem] w-full cursor-zoom-in px-14 py-4 text-center transition hover:bg-white/28 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25 sm:h-[6rem] sm:px-20"
           >
             <div
               key={idx}
-              className="transition-opacity duration-700 ease-in-out opacity-0 animate-fade-in mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-1 text-center"
+              className="animate-fade-in mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-1.5 text-center opacity-0 transition-opacity duration-700 ease-in-out"
             >
-              <p className="quote-preview mb-0 font-serif text-[0.94rem] leading-[1.4] text-stone-700 transition group-hover:text-stone-800 sm:text-[1rem] sm:leading-[1.38]">
+              <p className="quote-preview mb-0 font-serif text-[1rem] leading-[1.48] text-primary transition group-hover:text-primary-dark sm:text-[1.06rem] sm:leading-[1.46]">
                 "{previewText}"
               </p>
 
               {(current.author || current.source) && (
-                <p className="quote-meta mb-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-sans text-[0.68rem] tracking-[0.06em] text-stone-500 sm:text-[0.72rem]">
+                <p className="quote-meta mb-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.66rem] uppercase tracking-[0.1em] text-textTertiary sm:text-[0.7rem]">
                   {current.author && <span>{current.author}</span>}
                   {current.author && current.source && <span aria-hidden="true"> · </span>}
-                  {current.source && <span className="italic text-stone-400">{current.source}</span>}
+                  {current.source && <span className="italic normal-case tracking-[0.08em] text-textSecondary">{current.source}</span>}
                 </p>
               )}
             </div>
@@ -212,7 +216,7 @@ const QuoteCarousel: React.FC = () => {
                 type="button"
                 onClick={prevQuote}
                 aria-label="Previous quote"
-                className="absolute left-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-textSecondary transition hover:border-primary/30 hover:text-primary sm:left-4"
+                className="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[12px] border border-primary/10 bg-white/54 text-textSecondary transition hover:border-secondary/24 hover:bg-white/72 hover:text-primary sm:left-4"
               >
                 <FaChevronLeft className="h-3 w-3" />
               </button>
@@ -221,7 +225,7 @@ const QuoteCarousel: React.FC = () => {
                 type="button"
                 onClick={nextQuote}
                 aria-label="Next quote"
-                className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-textSecondary transition hover:border-primary/30 hover:text-primary sm:right-4"
+                className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[12px] border border-primary/10 bg-white/54 text-textSecondary transition hover:border-secondary/24 hover:bg-white/72 hover:text-primary sm:right-4"
               >
                 <FaChevronRight className="h-3 w-3" />
               </button>
@@ -239,15 +243,15 @@ const QuoteCarousel: React.FC = () => {
               display: block;
             }
             .quote-modal-markdown p {
-              font-size: 1.05rem;
-              line-height: 1.9;
+              font-size: 1.08rem;
+              line-height: 1.92;
               margin-bottom: 1rem;
             }
             .quote-modal-markdown strong {
-              color: #1f2937;
+              color: #15263f;
             }
             .quote-modal-markdown em {
-              color: #57534e;
+              color: #5f7286;
             }
             @media (min-width: 640px) {
               .quote-preview {

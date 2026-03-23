@@ -1,75 +1,87 @@
 import React, { useState } from 'react';
-import ImageModal from '../components/common/ImageModal';
 import Card from '@/components/common/Card';
+import ImageModal from '../components/common/ImageModal';
+
+const imageUrl =
+  'https://korykilpatrick-bucket.s3.us-west-1.amazonaws.com/kory_winnie_mountains.jpg';
+const altText = 'Kory Kilpatrick with his dog Winnie in the Canadian Rockies';
 
 const AboutPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
-  const imageUrl =
-    'https://korykilpatrick-bucket.s3.us-west-1.amazonaws.com/kory_winnie_mountains.jpg';
-  const altText = 'Kory Kilpatrick with his dog Winnie in the Canadian Rockies';
-
-  const handleImageClick = () => {
-    setModalImageUrl(imageUrl);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setModalImageUrl(null);
-  };
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-8">
-      <Card padding="lg" className="border-primary/10 shadow-lg">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/3">
-            <div
-              className="w-full mb-4 cursor-pointer"
-              onClick={handleImageClick}
-              role="button"
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <Card padding="lg" className="relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(21,38,63,0.12),transparent_28%),radial-gradient(circle_at_85%_18%,rgba(63,127,216,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.24),transparent_58%)]"
+        />
+
+        <div className="relative grid gap-8 lg:grid-cols-[0.78fr_1.18fr] lg:items-start">
+          <div className="mx-auto w-full max-w-[24rem] lg:mx-0">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="site-card-soft group block w-full overflow-hidden rounded-[22px] p-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25"
               aria-label={`View larger image: ${altText}`}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') handleImageClick();
-              }}
             >
               <img
                 src={imageUrl}
                 alt={altText}
-                className="w-full aspect-square rounded-lg object-cover shadow-sm pointer-events-none"
+                className="aspect-[4/5] w-full rounded-[18px] object-cover shadow-[0_18px_40px_rgba(15,28,46,0.18)] transition duration-700 group-hover:scale-[1.01]"
               />
-              <p className="text-xs text-center text-gray-500 mt-2 mb-0">
-                My dog Winnie and I in the Canadian Rockies
+              <p className="site-meta mt-4 text-center">Winnie and me in the Canadian Rockies</p>
+            </button>
+          </div>
+
+          <div className="max-w-3xl">
+            <p className="site-eyebrow mb-4">About</p>
+            <h1 className="mb-5 text-[2.95rem] sm:text-[3.55rem]">Hey, I&apos;m Kory.</h1>
+            <div className="space-y-0 text-[1.04rem]">
+              <p>
+                I&apos;m a software engineer, product person, and consultant. I like figuring out
+                what matters, making sense of messy situations, and helping people get unstuck.
+              </p>
+              <p>
+                A lot of my work lately has been around AI, but what interests me most isn&apos;t
+                the technology by itself. It&apos;s where it genuinely helps, where it quietly
+                misleads, and how people can build better judgment around it.
+              </p>
+              <p>
+                I care about clear thinking, good tools, and the difference between looking
+                sophisticated and being effective. I&apos;m drawn to people who take craft
+                seriously, move with conviction, and still stay grounded.
+              </p>
+              <p className="mb-0">
+                Outside of work, I read a lot, stay active, and try to show up well for the people
+                in my life.
               </p>
             </div>
-          </div>
-          <div className="md:w-2/3">
-            <p className="font-sans text-xs uppercase tracking-[0.22em] text-primary-light mb-3">
-              About
-            </p>
-            <h1 className="text-3xl font-bold text-primary mb-4">Hey, I&apos;m Kory.</h1>
-            <p className="text-textSecondary mb-4">
-              I&apos;m a software engineer, product person, and consultant. I like figuring out what
-              matters, making sense of messy situations, and helping people get unstuck.
-            </p>
-            <p className="text-textSecondary mb-4">
-              A lot of my work lately has been around AI, but what interests me most is not the
-              technology by itself. It&apos;s how people actually use it: where it helps, where it
-              misleads, and how to build better judgment around it.
-            </p>
-            <p className="text-textSecondary mb-5">
-              Outside of work, I read a lot, stay active, and try to show up well for the people in
-              my life.
-            </p>
+
+            <div className="site-divider my-6" />
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <p className="site-meta mb-2">Bias</p>
+                <p className="mb-0 text-sm text-textSecondary">Clarity over sophistication</p>
+              </div>
+              <div>
+                <p className="site-meta mb-2">Work</p>
+                <p className="mb-0 text-sm text-textSecondary">Product, systems, decision-making</p>
+              </div>
+              <div>
+                <p className="site-meta mb-2">North Star</p>
+                <p className="mb-0 text-sm text-textSecondary">Become more useful over time</p>
+              </div>
+            </div>
           </div>
         </div>
       </Card>
 
       <ImageModal
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        imageUrl={modalImageUrl}
+        onClose={() => setIsModalOpen(false)}
+        imageUrl={isModalOpen ? imageUrl : null}
         altText={altText}
       />
     </div>

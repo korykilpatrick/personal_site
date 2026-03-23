@@ -72,33 +72,36 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
   );
 
   return (
-    <div className="flex justify-center last:border-r-0">
+    <div className="group/book flex justify-center last:border-r-0">
       <div
-        className="relative overflow-hidden rounded-lg shadow-md 
-                   transition-all duration-200 ease-out 
-                   transform hover:-translate-y-1 hover:scale-105 hover:translate-z-10 hover:shadow-xl"
+        className="relative overflow-hidden rounded-[15px] transition-all duration-[760ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover/book:-translate-y-1.5 group-hover/book:scale-[1.03]"
         style={{
           width: `${bookSize.width}px`,
           height: `${bookSize.height}px`,
           transformStyle: 'preserve-3d',
+          boxShadow: '0 12px 22px rgba(9, 18, 31, 0.24)',
         }}
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-3 rounded-[22px] bg-[radial-gradient(circle_at_50%_18%,rgba(132,181,255,0.32),transparent_56%)] opacity-0 blur-xl transition duration-[900ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover/book:opacity-100"
+        />
         <Tooltip content={tooltipContent} side="right" sideOffset={15} delayDuration={200}>
           <a
             href={book.book_link || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full h-full rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="group block h-full w-full rounded-[15px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-dark focus:ring-secondary/70"
             aria-label={`View details for ${book.title}`}
           >
             <img
               src={book.img_url || 'https://via.placeholder.com/150x225?text=No+Cover'}
               alt={`Cover of ${book.title}`}
-              className="w-full h-full object-cover rounded-lg"
+              className="h-full w-full rounded-[15px] object-cover transition duration-[760ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover/book:brightness-[1.03]"
               onError={handleImageError}
               loading="lazy"
             />
+            <div className="pointer-events-none absolute inset-0 rounded-[15px] border border-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]" />
           </a>
         </Tooltip>
       </div>

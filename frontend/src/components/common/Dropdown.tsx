@@ -47,7 +47,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       {isOpen && (
         <div
-          className={`absolute z-10 mt-1 ${width} ${positionClasses} bg-white border border-gray-300 rounded-md shadow-lg`}
+          className={`absolute z-10 mt-2 ${width} ${positionClasses} overflow-hidden rounded-[18px] border border-[rgba(76,67,56,0.14)] bg-[rgba(255,252,246,0.94)] shadow-[0_18px_40px_rgba(36,28,18,0.12)] backdrop-blur-[10px]`}
         >
           {children}
         </div>

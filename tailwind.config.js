@@ -3,36 +3,33 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // New color scheme: deep navy primary with warm amber accents
         primary: {
-          DEFAULT: '#1a365d', // Deep navy blue
-          dark: '#0f2942',    // Darker navy for hover states
-          light: '#2c4a7c',   // Lighter navy for subtle elements
+          DEFAULT: '#15263f',
+          dark: '#0c1727',
+          light: '#274361',
         },
         secondary: {
-          DEFAULT: '#d97706', // Warm amber
-          dark: '#b45309',    // Darker amber for hover states
-          light: '#fbbf24',   // Lighter amber/gold for accents
+          DEFAULT: '#3f7fd8',
+          dark: '#2d63af',
+          light: '#84b5ff',
         },
-        // Text colors
-        textPrimary: '#1f2937',   // Dark gray for primary text
-        textSecondary: '#4b5563', // Medium gray for secondary text
-        textTertiary: '#9ca3af',  // Light gray for tertiary text
-        // Background colors
-        background: '#f8fafc',    // Very light blue-gray
-        // Keep the stone colors for certain elements
+        textPrimary: '#172331',
+        textSecondary: '#4a5a6c',
+        textTertiary: '#7d8b99',
+        background: '#edf2f8',
         stone: {
-          50: '#fafaf9',
-          100: '#f5f5f4',
-          200: '#e7e5e4',
-          500: '#78716c',
-          700: '#44403c',
-          800: '#292524',
+          50: '#f7f9fb',
+          100: '#edf2f7',
+          200: '#dce5ef',
+          500: '#7d8a99',
+          700: '#475465',
+          800: '#24313f',
         },
       },
       fontFamily: {
-        sans: ['DM Sans', 'ui-sans-serif', 'system-ui'],
-        serif: ['Merriweather', 'ui-serif', 'Georgia'],
+        sans: ['IBM Plex Sans', 'ui-sans-serif', 'system-ui'],
+        serif: ['IBM Plex Serif', 'ui-serif', 'Georgia'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular'],
       },
     },
   },

@@ -40,29 +40,29 @@ const App: React.FC = () => {
               <main className="flex-grow">
                 <Routes>
                 <Route path="/" element={<Layout><HomePage /></Layout>} />
-                <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-                {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
-                {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
-                <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
-                <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
+                  <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+                  {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
+                  {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
+                  <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
+                  <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
 
-                {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
+                  {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
 
-                <Route path="/login" element={<LoginPage />} />
+                  <Route path="/login" element={<LoginPage />} />
 
-                <Route element={<ProtectedRoute />}>
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <Suspense fallback={<div>Loading Admin...</div>}>
-                        <AdminPage />
-                      </Suspense>
-                    }
-                  />
-                </Route>
+                  <Route element={<ProtectedRoute />}>
+                    <Route
+                      path="/admin/*"
+                      element={
+                        <Suspense fallback={<div>Loading Admin...</div>}>
+                          <AdminPage />
+                        </Suspense>
+                      }
+                    />
+                  </Route>
 
-                <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-              </Routes>
+                  <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
+                </Routes>
             </main>
             {!hideFooter && <Footer />}
             <GlobalImageModal />
