@@ -16,11 +16,16 @@ const Navbar: React.FC = () => {
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Bookshelf', path: '/bookshelf' },
+    { name: 'Bookshelf', path: '/' },
     { name: 'About', path: '/about' },
   ];
 
-  const isActive = (path: string) => location.pathname.startsWith(path) && path !== '/';
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
