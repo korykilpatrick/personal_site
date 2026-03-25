@@ -27,8 +27,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['IBM Plex Sans', 'ui-sans-serif', 'system-ui'],
-        serif: ['IBM Plex Serif', 'ui-serif', 'Georgia'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        serif: ['Newsreader', 'IBM Plex Serif', 'ui-serif', 'Georgia'],
         mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular'],
       },
     },
