@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Card from '@/components/common/Card';
 import ImageModal from '../components/common/ImageModal';
 
 const imageUrl =
@@ -10,73 +9,51 @@ const AboutPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <Card padding="lg" className="relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(21,38,63,0.12),transparent_28%),radial-gradient(circle_at_85%_18%,rgba(63,127,216,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.24),transparent_58%)]"
-        />
+    <div className="mx-auto flex w-full max-w-[62rem] flex-col lg:min-h-[calc(100vh-10rem)] lg:justify-center">
+      <div className="grid gap-10 lg:grid-cols-[21rem_minmax(0,1fr)] lg:items-center lg:gap-14 xl:gap-16">
+        <div className="mx-auto w-full max-w-[21rem] lg:mx-0">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="group block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25"
+            aria-label={`View larger image: ${altText}`}
+          >
+            <img
+              src={imageUrl}
+              alt={altText}
+              className="aspect-[4/5] w-full rounded-[28px] border border-white/70 object-cover shadow-[0_24px_52px_rgba(15,28,46,0.16)] transition duration-700 group-hover:scale-[1.01]"
+            />
+          </button>
+        </div>
 
-        <div className="relative grid gap-8 lg:grid-cols-[0.78fr_1.18fr] lg:items-start">
-          <div className="mx-auto w-full max-w-[24rem] lg:mx-0">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="site-card-soft group block w-full overflow-hidden rounded-[22px] p-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25"
-              aria-label={`View larger image: ${altText}`}
-            >
-              <img
-                src={imageUrl}
-                alt={altText}
-                className="aspect-[4/5] w-full rounded-[18px] object-cover shadow-[0_18px_40px_rgba(15,28,46,0.18)] transition duration-700 group-hover:scale-[1.01]"
-              />
-              <p className="site-meta mt-4 text-center">Winnie and me in the Canadian Rockies</p>
-            </button>
-          </div>
-
-          <div className="max-w-3xl">
-            <p className="site-eyebrow mb-4">About</p>
-            <h1 className="mb-5 text-[2.95rem] sm:text-[3.55rem]">Hey, I&apos;m Kory.</h1>
-            <div className="space-y-0 text-[1.04rem]">
-              <p>
-                I&apos;m a software engineer, product person, and consultant. I like figuring out
-                what matters, making sense of messy situations, and helping people get unstuck.
-              </p>
-              <p>
-                A lot of my work lately has been around AI, but what interests me most isn&apos;t
-                the technology by itself. It&apos;s where it genuinely helps, where it quietly
-                misleads, and how people can build better judgment around it.
-              </p>
-              <p>
-                I care about clear thinking, good tools, and the difference between looking
-                sophisticated and being effective. I&apos;m drawn to people who take craft
-                seriously, move with conviction, and still stay grounded.
-              </p>
-              <p className="mb-0">
-                Outside of work, I read a lot, stay active, and try to show up well for the people
-                in my life.
-              </p>
-            </div>
-
-            <div className="site-divider my-6" />
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <p className="site-meta mb-2">Bias</p>
-                <p className="mb-0 text-sm text-textSecondary">Clarity over sophistication</p>
-              </div>
-              <div>
-                <p className="site-meta mb-2">Work</p>
-                <p className="mb-0 text-sm text-textSecondary">Product, systems, decision-making</p>
-              </div>
-              <div>
-                <p className="site-meta mb-2">North Star</p>
-                <p className="mb-0 text-sm text-textSecondary">Become more useful over time</p>
-              </div>
-            </div>
+        <div className="max-w-[36rem]">
+          <div className="space-y-5 text-[1.04rem] leading-[1.88] sm:text-[1.1rem] sm:leading-[1.92]">
+            <p className="text-textPrimary">
+              I like solving problems, helping people, and cleaning the lens
+              through which I see the world. My first career was as a top-ranked
+              poker player. In 2015 I read{' '}
+              <a
+                href="https://waitbutwhy.com/2015/01/artificial-intelligence-revolution-1.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary underline decoration-secondary/30 underline-offset-2 transition hover:decoration-secondary/60"
+              >
+                this article
+              </a>{' '}
+              and became convinced AI was going to be the most important
+              technology in history, so I taught myself to code and built a
+              fintech business to get up to speed on software. These days
+              I&rsquo;m building in the AI space and helping executives figure
+              out how to use and think about it.
+            </p>
+            <p className="text-textSecondary">
+              When I&rsquo;m not building or reading, I&rsquo;m doing physical
+              activities (&#127934; being the current favorite), trying to be a good
+              role model, or enjoying the company of people and animals I love.
+            </p>
           </div>
         </div>
-      </Card>
+      </div>
 
       <ImageModal
         isOpen={isModalOpen}
