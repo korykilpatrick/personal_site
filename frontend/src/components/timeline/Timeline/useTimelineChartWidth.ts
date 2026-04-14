@@ -20,6 +20,7 @@ export default function useTimelineChartWidth(
     };
 
     updateWidth();
+    let cancelled = false;
 
     if (typeof ResizeObserver === 'undefined') {
       window.addEventListener('resize', updateWidth);
@@ -31,8 +32,6 @@ export default function useTimelineChartWidth(
 
     const resizeObserver = new ResizeObserver(() => updateWidth());
     resizeObserver.observe(node);
-
-    let cancelled = false;
 
     if (typeof document !== 'undefined' && 'fonts' in document) {
       document.fonts.ready.then(() => {

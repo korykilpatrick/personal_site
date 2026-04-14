@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  roots: ['<rootDir>/frontend/src'],
   setupFiles: ['<rootDir>/test/jest.env.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/frontend/src/$1',

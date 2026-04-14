@@ -85,14 +85,14 @@ const QuoteDock: React.FC<QuoteDockProps> = ({
         <div className="bookshelf-quote-dock__reading-mist absolute inset-0" />
       </div>
 
-      <QuoteDockControls
-        quoteCount={quotesLength}
-        onPrevious={onPrevious}
-        onNext={onNext}
-        onHideDock={onHideDock}
-      />
-
       <div className="relative mx-auto max-w-5xl">
+        <QuoteDockControls
+          quoteCount={quotesLength}
+          onPrevious={onPrevious}
+          onNext={onNext}
+          onHideDock={onHideDock}
+        />
+
         <QuoteDockContent
           currentIndex={currentIndex}
           currentQuote={currentQuote}

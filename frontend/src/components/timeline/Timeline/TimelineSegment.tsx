@@ -1,5 +1,4 @@
 import React from 'react';
-import { formatDateRange } from '../utils';
 import {
   AXIS_HEIGHT,
   BAR_HEIGHT,
@@ -8,6 +7,7 @@ import {
   LANE_HEIGHT,
   TYPE_LABELS,
 } from './timeline.constants';
+import { formatDateRange } from './timelineDate';
 import {
   PositionedTimelineItem,
   getHorizontalLabelSizing,

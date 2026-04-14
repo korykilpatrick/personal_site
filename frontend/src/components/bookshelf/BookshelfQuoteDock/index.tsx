@@ -12,6 +12,7 @@ import {
 } from './quoteDock.constants';
 import './quoteDock.css';
 import useDockReservation from './useDockReservation';
+import useQuoteDockAutoAdvance from './useQuoteDockAutoAdvance';
 import usePreviewFit from './usePreviewFit';
 import useQuoteDockController from './useQuoteDockController';
 
@@ -32,12 +33,7 @@ const BookshelfQuoteDock: React.FC = () => {
     [quotes],
   );
 
-  const controller = useQuoteDockController({
-    quoteCount: quotes.length,
-    getPreviewText: (index) => currentPlainTexts[index] || '',
-    loading,
-    hasError: Boolean(error),
-  });
+  const controller = useQuoteDockController({ quoteCount: quotes.length });
 
   const currentQuote = quotes[controller.currentIndex] || null;
   const currentPlainText = currentPlainTexts[controller.currentIndex] || '';
@@ -46,6 +42,16 @@ const BookshelfQuoteDock: React.FC = () => {
     plainText: currentPlainText,
     baseCharLimit: basePreviewCharLimit,
     previewBaseLines,
+  });
+
+  useQuoteDockAutoAdvance({
+    currentIndex: controller.currentIndex,
+    quoteCount: quotes.length,
+    previewText: previewFit.text,
+    loading,
+    hasError: Boolean(error),
+    isPaused: controller.isAutoAdvancePaused,
+    onAdvance: controller.advanceToNext,
   });
 
   useEffect(() => {

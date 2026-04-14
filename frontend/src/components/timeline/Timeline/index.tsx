@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Card from '@/components/common/Card';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import type { TimelineItem } from '@/types/timeline';
-import { getCurrentYearMonth } from '../utils';
 import './timeline.css';
 import TimelineChart from './TimelineChart';
 import TimelineDetailPanel from './TimelineDetailPanel';
+import { getCurrentYearMonth } from './timelineDate';
 import { buildTimelineMetrics } from './timelineLayout';
 import useTimelineChartWidth from './useTimelineChartWidth';
 
@@ -72,9 +72,9 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
   }, [activeItem, isMobile]);
 
   const handleNodeClick = useCallback((id: string) => {
-    shouldScrollDetailRef.current = true;
+    shouldScrollDetailRef.current = isMobile;
     setActiveId((previous) => (previous === id ? null : id));
-  }, []);
+  }, [isMobile]);
 
   if (!timelineMetrics) {
     return null;
