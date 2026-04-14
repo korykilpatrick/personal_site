@@ -46,7 +46,7 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
             backgroundSize: `100% 100%, 100% 100%, 100% ${rowHeight}px, 100% 100%`,
             backgroundPosition: '0 0',
             boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -14px 30px rgba(7,15,28,0.28), 0 28px 58px rgba(12,23,39,0.22)',
+              'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -14px 30px rgba(7,15,28,0.28)',
           };
         })()}
       >
