@@ -5,8 +5,7 @@ import Button from '@/components/common/Button';
 import Timeline from '@/components/timeline/Timeline';
 import timelineData from '@/data/timelineData';
 
-const waitlistHref =
-  'mailto:koryrkilpatrick@gmail.com?subject=Consulting%20Waitlist&body=Hi%20Kory%2C%0A%0AI%27d%20like%20to%20join%20the%20consulting%20waitlist.%0A%0AContext%3A%0A%0AThanks%2C';
+const waitlistHref = 'mailto:koryrkilpatrick@gmail.com';
 const homepageImageUrl =
   'https://sharetribe.imgix.net/68a34eb7-4086-41be-9b2c-074dba6d0972/6930b69e-1db2-4c80-90c4-0e691eedeff0?auto=format&fit=clip&h=2400&w=2400&s=24bed4c4cecc984ab31605a80c498f59';
 

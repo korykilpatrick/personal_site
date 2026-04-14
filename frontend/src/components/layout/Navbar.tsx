@@ -9,6 +9,7 @@ const MOBILE_ICON_SIZE = 18;
 // Icon style constants
 const ICON_LINK_CLASSNAME =
   'text-slate-100 hover:text-secondary-light no-underline transition duration-300';
+const EMAIL_HREF = 'mailto:koryrkilpatrick@gmail.com';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -109,7 +110,7 @@ const Navbar: React.FC = () => {
             </a>
             {/* Email */}
             <a
-              href="mailto:koryrkilpatrick@gmail.com?subject=Consulting%20Waitlist&body=Hi%20Kory%2C%0A%0AI%27d%20like%20to%20join%20the%20consulting%20waitlist.%0A%0AContext%3A%0A%0AThanks%2C"
+              href={EMAIL_HREF}
               className={ICON_LINK_CLASSNAME}
               aria-label="Email Kory"
             >
@@ -213,7 +214,7 @@ const Navbar: React.FC = () => {
                   <FaLinkedinIn size={MOBILE_ICON_SIZE} />
                 </a>
                 <a
-                  href="mailto:koryrkilpatrick@gmail.com?subject=Consulting%20Waitlist&body=Hi%20Kory%2C%0A%0AI%27d%20like%20to%20join%20the%20consulting%20waitlist.%0A%0AContext%3A%0A%0AThanks%2C"
+                  href={EMAIL_HREF}
                   className={ICON_LINK_CLASSNAME}
                   aria-label="Email Kory"
                 >
