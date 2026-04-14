@@ -38,8 +38,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Search icon in absolute pos */}
-      <span className="absolute top-1/2 left-2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-textTertiary">
         <Icon name="search" size="sm" />
       </span>
 
@@ -49,14 +48,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={(e) => setRawValue(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`text-xs px-2.5 py-1 pl-7 ${rawValue ? 'pr-10' : 'pr-7'}`}
+        className={`rounded-[16px] py-2.5 pl-9 text-sm ${rawValue ? 'pr-10' : 'pr-7'}`}
       />
 
       {rawValue && !disabled && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute top-1/2 right-2 transform -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700 focus:outline-none"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-textTertiary transition hover:text-primary focus:outline-none"
           aria-label="Clear search"
         >
           ✕

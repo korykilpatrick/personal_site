@@ -15,19 +15,22 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium focus:outline-none transition-colors';
+    'inline-flex items-center justify-center font-mono font-medium uppercase tracking-[0.1em] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark',
-    secondary: 'bg-secondary text-white hover:bg-secondary-dark',
-    outline: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
-    text: 'bg-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100',
+    primary:
+      'border border-primary/16 bg-[linear-gradient(180deg,rgba(21,38,63,0.98),rgba(12,23,39,0.98))] text-slate-50 shadow-[0_14px_30px_rgba(13,24,39,0.18)] hover:-translate-y-0.5 hover:border-secondary/34 hover:text-secondary-light',
+    secondary:
+      'border border-secondary/20 bg-[linear-gradient(180deg,rgba(63,127,216,0.94),rgba(45,99,175,0.96))] text-slate-50 shadow-[0_14px_26px_rgba(45,99,175,0.18)] hover:-translate-y-0.5 hover:bg-secondary-dark',
+    outline:
+      'border border-primary/12 bg-white/68 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] hover:-translate-y-0.5 hover:border-secondary/24 hover:bg-white/90',
+    text: 'bg-transparent text-textSecondary hover:text-primary',
   };
 
   const sizeClasses = {
-    sm: 'text-xs px-1.5 py-0.5 rounded',
-    md: 'text-xs px-3 py-1.5 rounded',
-    lg: 'text-sm px-4 py-2 rounded-md',
+    sm: 'rounded-[12px] px-3 py-1.5 text-[0.64rem]',
+    md: 'rounded-[14px] px-4 py-2.5 text-[0.68rem]',
+    lg: 'rounded-[16px] px-5 py-3 text-[0.72rem]',
   };
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;

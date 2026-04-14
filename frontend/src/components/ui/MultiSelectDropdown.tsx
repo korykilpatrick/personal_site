@@ -25,25 +25,30 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
   // Create trigger button
   const trigger = (
-    <Button variant="outline" className="w-full px-2.5 py-1 flex justify-between text-xs">
+    <Button
+      variant="outline"
+      className="w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem]"
+    >
       <span className="mr-1">{displayLabel}</span>
-      <Icon name="chevron-down" className="ml-auto text-gray-600" />
+      <Icon name="chevron-down" className="ml-auto text-textTertiary" />
     </Button>
   );
 
   return (
     <Dropdown trigger={trigger} className={className}>
-      <div className="py-0.5 max-h-60 overflow-y-auto">
+      <div className="max-h-60 overflow-y-auto py-1.5">
         {items.map((item) => (
-          <div key={item.id} className="px-2 py-1">
-            <label className="flex items-center space-x-2 cursor-pointer">
+          <div key={item.id} className="px-4 py-1.5">
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={selectedItems.includes(item.id)}
                 onChange={() => toggleItem(item.id)}
-                className="form-checkbox h-4 w-4 text-indigo-500 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 rounded border-primary/20 text-secondary focus:ring-secondary/25"
               />
-              <span className="text-sm text-gray-700">{item.label}</span>
+              <span className="font-sans text-[0.8rem] uppercase tracking-[0.14em] text-textSecondary">
+                {item.label}
+              </span>
             </label>
           </div>
         ))}

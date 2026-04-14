@@ -18,48 +18,58 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
       className="overflow-x-auto pb-4"
       style={{
         scrollbarWidth: 'thin',
-        scrollbarColor: '#a8a29e #f5f5f4', // stone-400 stone-100
+        scrollbarColor: '#6f8196 #edf2f7',
       }}
     >
-      {/* The "Shelf" container */}
       <div
-        className="grid gap-2 p-4 rounded-t-2xl rounded-b-lg shadow-md 
-                   border-t-4 border-x-4 border-b-8 border-primary-dark"
+        className="site-frame relative overflow-hidden rounded-[34px] pt-6 p-4 sm:pt-7 sm:p-5"
         style={(() => {
-          const rowHeight = bookSize.height + 8; // bookSize.height + gap-2 (8px)
-          const shelfThickness = 8;
-          const shelfColor = '#0f2942'; // primary-dark
-          const existingBgImage = `
-            linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
-            linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%),
-            linear-gradient(135deg, #1a365d 0%, #0f2942 100%)
-          `;
-          const existingBgSize = '12px 12px, 12px 12px, 100% 100%, 100% 100%';
+          const rowHeight = bookSize.height + 12;
+          const shelfColor = '#10203a';
 
           return {
-            gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
-            perspective: '1000px',
             backgroundImage: `
-              ${existingBgImage},
+              radial-gradient(circle at 50% 0%, rgba(132, 181, 255, 0.16), transparent 28%),
+              linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.16)),
               repeating-linear-gradient(
                 to bottom,
-                ${shelfColor} 0,
-                ${shelfColor} ${shelfThickness}px,
-                transparent ${shelfThickness}px,
-                transparent ${rowHeight}px 
-              )
+                rgba(255,255,255,0.06) 0,
+                rgba(255,255,255,0.06) 2px,
+                rgba(8,15,27,0) 2px,
+                rgba(8,15,27,0) ${bookSize.height + 2}px,
+                rgba(132,181,255,0.2) ${bookSize.height + 2}px,
+                rgba(14,26,44,0.48) ${bookSize.height + 10}px,
+                ${shelfColor} ${rowHeight}px
+              ),
+              linear-gradient(135deg, #223652 0%, #17283f 38%, #0f1b2c 100%)
             `,
-            backgroundSize: `${existingBgSize}, 100% ${rowHeight}px`,
-            backgroundPosition: `0 0, 0 0, 0 0, 0 0, 0 ${24 + bookSize.height}px`,
+            backgroundSize: `100% 100%, 100% 100%, 100% ${rowHeight}px, 100% 100%`,
+            backgroundPosition: '0 0',
             boxShadow:
-              'inset 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+              'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -14px 30px rgba(7,15,28,0.28), 0 28px 58px rgba(12,23,39,0.22)',
           };
         })()}
       >
-        {books.map((book) => (
-          <BookCard key={book.id} book={book} bookSize={bookSize} />
-        ))}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/[0.07] via-white/[0.02] to-transparent"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(132,181,255,0.14),transparent_34%)]"
+        />
+
+        <div
+          className="relative z-10 grid gap-3"
+          style={{
+            gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
+            perspective: '1000px',
+          }}
+        >
+          {books.map((book) => (
+            <BookCard key={book.id} book={book} bookSize={bookSize} />
+          ))}
+        </div>
       </div>
     </div>
   );

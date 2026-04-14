@@ -1,11 +1,10 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Loading, ErrorDisplay } from '../components/ui';
 import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
-import PersonalNote from '../components/bookshelf/PersonalNote';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
+import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
 import useMultiSelect from '../hooks/useMultiSelect';
-import apiService from '../api/apiService';
 import { useBooks } from '../context/BooksContext';
 
 const sortOptions: SortOption[] = [
@@ -64,10 +63,6 @@ const compareReadingTimeline = (a: BookWithShelves, b: BookWithShelves): number 
 const BookshelfPage: React.FC = () => {
   const { books: allBooks, loading: booksLoading, error: booksError } = useBooks();
 
-  const [bookshelves, setBookshelves] = useState<Bookshelf[]>([]);
-  const [shelvesLoading, setShelvesLoading] = useState(true);
-  const [shelvesError, setShelvesError] = useState<Error | null>(null);
-
   const {
     selectedItems: selectedShelves,
     toggleSelection: toggleShelfSelection,
@@ -77,38 +72,37 @@ const BookshelfPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('date_read');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchShelves = async () => {
-      setShelvesLoading(true);
-      setShelvesError(null);
-      try {
-        const fetchedShelves = await apiService.getBookshelves();
-        setBookshelves(fetchedShelves);
-      } catch (err) {
-        const e = err instanceof Error ? err : new Error(String(err));
-        setShelvesError(e);
-      } finally {
-        setShelvesLoading(false);
-      }
-    };
-    fetchShelves();
-  }, []);
+  const bookshelves = useMemo<Bookshelf[]>(() => {
+    const shelvesById = new Map<number, Bookshelf>();
+
+    allBooks.forEach((book) => {
+      book.shelves?.forEach((shelf) => {
+        if (!shelvesById.has(shelf.id)) {
+          shelvesById.set(shelf.id, shelf);
+        }
+      });
+    });
+
+    return Array.from(shelvesById.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allBooks]);
 
   const filteredAndSortedBooks = useMemo(() => {
     let result = [...(allBooks || [])];
 
     // Filter by shelves
     if (selectedShelves.length > 0) {
-      result = result.filter((b: BookWithShelves) =>
-        b.shelves && b.shelves.some((shelf) => selectedShelves.includes(shelf.id))
+      result = result.filter(
+        (b: BookWithShelves) =>
+          b.shelves && b.shelves.some((shelf) => selectedShelves.includes(shelf.id)),
       );
     }
 
     // Filter by search query (case-insensitive)
     const query = searchQuery.trim().toLowerCase();
     if (query) {
-      result = result.filter((b: BookWithShelves) =>
-        b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query)
+      result = result.filter(
+        (b: BookWithShelves) =>
+          b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query),
       );
     }
 
@@ -138,16 +132,15 @@ const BookshelfPage: React.FC = () => {
   if (booksError) {
     return <ErrorDisplay error={booksError} />;
   }
-  if (shelvesLoading && !booksError) {
-    return <Loading className="h-64" />;
-  }
-  if (shelvesError) {
-    return <ErrorDisplay error={shelvesError} />;
-  }
 
   return (
-    <>
-      <PersonalNote />
+    <div
+      className="space-y-4"
+      style={{
+        paddingBottom:
+          'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
+      }}
+    >
       <BookshelfControls
         sortOptions={sortOptions}
         selectedSortBy={sortBy}
@@ -161,7 +154,8 @@ const BookshelfPage: React.FC = () => {
         onSearchChange={setSearchQuery}
       />
       <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 120, height: 180 }} />
-    </>
+      <BookshelfQuoteDock />
+    </div>
   );
 };
 

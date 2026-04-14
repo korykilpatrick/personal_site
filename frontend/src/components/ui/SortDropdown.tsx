@@ -22,23 +22,26 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   const selectedLabel = options.find((opt) => opt.value === selected)?.label || 'Select...';
 
   const trigger = (
-    <Button variant="outline" className="w-full px-2.5 py-1 flex justify-between text-xs">
+    <Button
+      variant="outline"
+      className="w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem]"
+    >
       <span className="mr-1">{selectedLabel}</span>
-      <Icon name="chevron-down" className="ml-auto text-gray-600" />
+      <Icon name="chevron-down" className="ml-auto text-textTertiary" />
     </Button>
   );
 
   return (
     <Dropdown trigger={trigger} className={className}>
-      <div className="py-0.5 max-h-60 overflow-y-auto">
+      <div className="max-h-60 overflow-y-auto py-1.5">
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`block w-full text-left px-3 py-1.5 text-sm ${
+            className={`block w-full px-4 py-2 text-left font-sans text-[0.8rem] uppercase tracking-[0.16em] transition ${
               selected === option.value
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-primary/[0.07] text-primary'
+                : 'text-textSecondary hover:bg-primary/[0.04] hover:text-primary'
             }`}
             role="menuitem"
           >

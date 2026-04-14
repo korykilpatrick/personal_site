@@ -8,5 +8,6 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/frontend/src/setupTests.ts'],
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
