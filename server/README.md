@@ -1,6 +1,6 @@
 # Personal Portfolio Backend Server
 
-This is the backend server for the personal portfolio website, providing API endpoints for projects, blog posts, bookshelf, and professional experience data.
+This is the backend server for the personal portfolio website, providing public read-only endpoints for published content plus authenticated admin endpoints for private content management.
 
 ## Technology Stack
 
@@ -90,6 +90,8 @@ The server will run at http://localhost:3001 by default.
 
 All endpoints are prefixed with `/api`.
 
+Public content routes are read-only. Any route that creates, updates, or deletes content must live under the authenticated `/api/admin/*` surface.
+
 ### Health Check
 
 - `GET /health` - Check server status
@@ -102,23 +104,12 @@ All endpoints are prefixed with `/api`.
 
 - `GET /books` - Get all books
 - `GET /books/:id` - Get a book by ID
-// Note: POST, PUT, DELETE for books might be admin-only in practice, clarify if needed.
-// Keeping them here for now as they are in book.routes.ts without explicit admin protection.
-- `POST /books` - Create a new book
-- `PUT /books/:id` - Update a book
-- `DELETE /books/:id` - Delete a book
 
 ### Bookshelves (Public)
 
 - `GET /bookshelves` - Get all bookshelves
 - `GET /bookshelves/:id` - Get a bookshelf by ID
 - `GET /bookshelves/:id/books` - Get books in a bookshelf
-// Note: POST, PUT, DELETE for bookshelves might be admin-only in practice, clarify if needed.
-- `POST /bookshelves` - Create a new bookshelf
-- `PUT /bookshelves/:id` - Update a bookshelf
-- `DELETE /bookshelves/:id` - Delete a bookshelf
-- `POST /bookshelves/:id/books` - Add a book to a bookshelf
-- `DELETE /bookshelves/:id/books/:bookId` - Remove a book from a bookshelf
 
 ### Projects (Public)
 
@@ -126,20 +117,12 @@ All endpoints are prefixed with `/api`.
 - `GET /projects?tag=react` - Filter projects by tag (example)
 - `GET /projects/summary/count` - Get the total count of projects
 - `GET /projects/:id` - Get a project by ID
-// Note: POST, PUT, DELETE for projects might be admin-only in practice, clarify if needed.
-- `POST /projects` - Create a new project
-- `PUT /projects/:id` - Update a project
-- `DELETE /projects/:id` - Delete a project
 
 ### Work Entries (Public)
 
 - `GET /work` - Get all work entries
 - `GET /work/summary/count` - Get the total count of work entries
 - `GET /work/:id` - Get a work entry by ID
-// Note: POST, PUT, DELETE for work entries might be admin-only in practice, clarify if needed.
-- `POST /work` - Create a new work entry
-- `PUT /work/:id` - Update a work entry
-- `DELETE /work/:id` - Delete a work entry
 
 ### Admin (Requires Authentication)
 
@@ -158,3 +141,8 @@ These endpoints require a valid JWT token obtained via `/api/auth/login`.
 - `GET /admin/work/:id` - Get a specific work entry by ID (admin view)
 - `PUT /admin/work/:id` - Update a specific work entry
 - `DELETE /admin/work/:id` - Delete a specific work entry
+
+### Notes
+
+- Books and bookshelves are currently curated outside the public API surface.
+- Library metadata extraction is authenticated and intended for admin use only.

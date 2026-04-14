@@ -2,12 +2,12 @@
 
 ## Overview
 
-The Personal Portfolio API provides endpoints for managing portfolio content including projects, work experience, books, and library items. It uses JWT authentication for protected routes.
+The Personal Portfolio API provides read-only public endpoints for published content and authenticated admin endpoints for private content management.
 
 ## Base URL
 
 ```
-http://localhost:5001/api
+http://localhost:3001/api
 ```
 
 ## Authentication
@@ -19,6 +19,8 @@ Authorization: Bearer <token>
 ```
 
 ## Endpoints
+
+Public content routes are read-only. Content mutations happen only through authenticated admin routes.
 
 ### Library
 
@@ -182,6 +184,26 @@ POST /api/auth/login
 
 All admin routes require authentication.
 
+#### Projects Management
+
+```
+GET    /api/admin/projects
+GET    /api/admin/projects/:id
+POST   /api/admin/projects
+PUT    /api/admin/projects/:id
+DELETE /api/admin/projects/:id
+```
+
+#### Work Management
+
+```
+GET    /api/admin/work
+GET    /api/admin/work/:id
+POST   /api/admin/work
+PUT    /api/admin/work/:id
+DELETE /api/admin/work/:id
+```
+
 #### Library Items Management
 
 ```
@@ -218,6 +240,12 @@ All endpoints follow a consistent error response format:
 - Public endpoints: 100 requests per 15 minutes per IP
 - Metadata extraction: 10 requests per 15 minutes per IP
 - Admin endpoints: No rate limiting
+
+## Access Model
+
+- Public routes expose only published, user-facing content.
+- Admin and curation routes require authentication.
+- Books and bookshelves are not writable through the public API.
 
 ## CORS
 

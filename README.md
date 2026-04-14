@@ -10,7 +10,7 @@ A modern, responsive personal portfolio website built with React, TypeScript, an
 - **Library** - Curated collection of articles, videos, tools, and resources
 - **Smart Link Extraction** - AI-powered metadata extraction from URLs for quick library additions
 - **Responsive Design** - Fully responsive layout that works on all device sizes
-- **Admin Dashboard** - Secure admin area to manage content (projects, work entries, books, library)
+- **Admin Dashboard** - Secure admin area to manage private content and curation workflows
 - **Authentication** - JWT-based authentication for admin functionality
 
 ## Tech Stack
@@ -200,7 +200,7 @@ Access the admin dashboard at `/admin` after starting the application. Use the c
 The admin dashboard allows you to:
 - Manage projects
 - Update work experience
-- Curate your bookshelf
+- Manage quotes, site notes, and library items
 
 ## License
 
