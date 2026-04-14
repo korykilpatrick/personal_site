@@ -14,7 +14,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { BooksProvider } from './context/BooksContext';
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider } from './context/ToastContext';
 // import LibraryPage from './pages/LibraryPage';  // Hidden for now
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));

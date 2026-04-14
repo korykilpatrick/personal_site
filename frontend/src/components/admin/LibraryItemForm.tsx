@@ -3,9 +3,9 @@ import { Button } from '../common';
 import { ErrorDisplay, Loading } from '../ui';
 import { FormField, FormInput, Textarea, TagInput, SmartLinkInput, AutoFilledIndicator } from '../forms';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '@/services/api';
+import adminApi from '@/api/adminApi';
 import type { ExtractedContent } from 'types/index';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/context/ToastContext';
 import { getErrorMessage, logError } from '@/utils/errorUtils';
 
 interface LibraryItemType {
@@ -50,8 +50,8 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
   const fetchItemTypes = async () => {
     setLoadingTypes(true);
     try {
-      const res = await api.get<LibraryItemType[]>('/admin/library-item-types');
-      setItemTypes(res.data);
+      const types = await adminApi.getList<LibraryItemType>('/admin/library-item-types');
+      setItemTypes(types);
     } catch (err: unknown) {
       // Log error but don't block the form - types are optional
       logError('fetching library item types', err);
@@ -65,15 +65,15 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.get<LibraryItem>(`/admin/library-items/${id}`);
+      const res = await adminApi.getById<LibraryItem>('/admin/library-items', id);
       setFormData({
-        item_type_id: res.data.item_type_id,
-        link: res.data.link,
-        title: res.data.title,
-        blurb: res.data.blurb || '',
-        thumbnail_url: res.data.thumbnail_url || '',
-        tags: res.data.tags || [],
-        creators: res.data.creators || [],
+        item_type_id: res.item_type_id,
+        link: res.link,
+        title: res.title,
+        blurb: res.blurb || '',
+        thumbnail_url: res.thumbnail_url || '',
+        tags: res.tags || [],
+        creators: res.creators || [],
       });
     } catch (err: unknown) {
       const errorMsg = getErrorMessage(err, 'Failed to fetch library item');
@@ -180,13 +180,13 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     setError(null);
     try {
       if (mode === 'create') {
-        await api.post('/admin/library-items', {
+        await adminApi.create('/admin/library-items', {
           ...formData,
           tags: formData.tags || [],
           creators: formData.creators || [],
         });
       } else {
-        await api.put(`/admin/library-items/${libraryItemId}`, {
+        await adminApi.update('/admin/library-items', libraryItemId!, {
           ...formData,
           tags: formData.tags || [],
           creators: formData.creators || [],
@@ -205,8 +205,11 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
     const name = prompt('Enter new library item type name:');
     if (!name) return;
     try {
-      const res = await api.post('/admin/library-item-types', { name });
-      setItemTypes(prev => [...prev, res.data]);
+      const createdType = await adminApi.create<{ name: string }, LibraryItemType>(
+        '/admin/library-item-types',
+        { name }
+      );
+      setItemTypes(prev => [...prev, createdType]);
     } catch (err: unknown) {
       const errorMsg = getErrorMessage(err, 'Failed to create type');
       alert(errorMsg);

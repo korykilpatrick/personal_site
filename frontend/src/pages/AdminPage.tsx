@@ -8,6 +8,7 @@ import {
   NavLink,
 } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import adminApi from '../api/adminApi';
 import ProjectForm from '@/components/admin/ProjectForm';
 import ProjectList from '@/components/admin/ProjectList';
 import WorkForm from '@/components/admin/WorkForm';
@@ -18,7 +19,6 @@ import SiteNoteForm from '@/components/admin/SiteNoteForm';
 import QuoteList from '@/components/admin/QuoteList';
 import QuoteForm from '@/components/admin/QuoteForm';
 import { Project, WorkEntry, SiteNote, Quote } from 'types';
-import api from '../services/api';
 import { Button } from '../components/common';
 import { getErrorMessage, logError } from '../utils/errorUtils';
 import { ErrorDisplay } from '../components/ui';
@@ -44,6 +44,8 @@ interface EntityFormWrapperProps<T> {
   }>;
 }
 
+type EntityPayload<T extends { id: number }> = Omit<T, 'id' | 'created_at' | 'updated_at'>;
+
 function EntityFormWrapper<T extends { id: number }>({
   mode,
   paramKey,
@@ -63,8 +65,8 @@ function EntityFormWrapper<T extends { id: number }>({
       const fetchData = async () => {
         setIsLoading(true);
         try {
-          const res = await api.get<T>(`${apiPath}/${entityId}`);
-          setInitialData(res.data);
+          const entity = await adminApi.getById<T>(apiPath, entityId);
+          setInitialData(entity);
         } catch (err: unknown) {
           const errorMsg = getErrorMessage(err, `Failed to load ${entityName}`);
           setError(errorMsg);
@@ -82,10 +84,10 @@ function EntityFormWrapper<T extends { id: number }>({
     setError(null);
     try {
       if (mode === 'edit' && entityId) {
-        await api.put(`${apiPath}/${entityId}`, data);
+        await adminApi.update<EntityPayload<T>>(apiPath, entityId, data);
         navigate('../');
       } else {
-        await api.post(apiPath, data);
+        await adminApi.create<EntityPayload<T>>(apiPath, data);
         navigate('.');
       }
     } catch (err: unknown) {

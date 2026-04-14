@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
 
 interface Toast {
   id: string;
@@ -14,7 +21,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const useToast = () => {
+export const useToast = (): ToastContextType => {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error('useToast must be used within a ToastProvider');
@@ -24,19 +31,18 @@ export const useToast = () => {
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const timeoutIds = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const timeoutIds = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Cleanup all timeouts on unmount
   useEffect(() => {
     return () => {
-      timeoutIds.current.forEach(timeoutId => clearTimeout(timeoutId));
+      timeoutIds.current.forEach((timeoutId) => clearTimeout(timeoutId));
       timeoutIds.current.clear();
     };
   }, []);
 
   const hideToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-    // Clear timeout if it exists
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+
     const timeoutId = timeoutIds.current.get(id);
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -44,20 +50,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info', duration = 3000) => {
-    const id = `${Date.now()}-${Math.random()}`;
-    const newToast: Toast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, newToast]);
+  const showToast = useCallback(
+    (message: string, type: 'success' | 'error' | 'info' = 'info', duration = 3000) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      setToasts((prev) => [...prev, { id, message, type, duration }]);
 
-    // Auto-hide toast after duration
-    if (duration > 0) {
-      const timeoutId = setTimeout(() => {
-        hideToast(id);
-      }, duration);
-      timeoutIds.current.set(id, timeoutId);
-    }
-  }, [hideToast]);
+      if (duration > 0) {
+        const timeoutId = setTimeout(() => {
+          hideToast(id);
+        }, duration);
+        timeoutIds.current.set(id, timeoutId);
+      }
+    },
+    [hideToast]
+  );
 
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
@@ -67,13 +73,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-// Toast Container Component
-const ToastContainer: React.FC<{ toasts: Toast[]; onClose: (id: string) => void }> = ({ toasts, onClose }) => {
-  if (toasts.length === 0) return null;
+const ToastContainer: React.FC<{ toasts: Toast[]; onClose: (id: string) => void }> = ({
+  toasts,
+  onClose,
+}) => {
+  if (toasts.length === 0) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2">
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <div
           key={toast.id}
           className={`
@@ -89,7 +99,15 @@ const ToastContainer: React.FC<{ toasts: Toast[]; onClose: (id: string) => void 
             onClick={() => onClose(toast.id)}
             className="ml-4 text-white hover:text-gray-200 focus:outline-none"
           >
-            <svg className="w-4 h-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
               <path d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>

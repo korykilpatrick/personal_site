@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import adminApi from '../api/adminApi';
 import { getErrorMessage, isCancelledError, logError } from '../utils/errorUtils';
 
 interface UseAdminListOptions {
@@ -36,8 +36,8 @@ export function useAdminList<T extends { id: number }>(
       setIsLoading(true);
       setError(null);
       try {
-        const res = await api.get<T[]>(endpoint, { signal });
-        setItems(res.data);
+        const items = await adminApi.getList<T>(endpoint, signal);
+        setItems(items);
       } catch (err: unknown) {
         // Ignore cancelled requests
         if (isCancelledError(err)) {
@@ -75,7 +75,7 @@ export function useAdminList<T extends { id: number }>(
 
       setIsLoading(true);
       try {
-        await api.delete(`${endpoint}/${id}`);
+        await adminApi.remove(endpoint, id);
         // Update local state after successful deletion
         setItems((prevItems) => prevItems.filter((item) => item.id !== id));
       } catch (err: unknown) {

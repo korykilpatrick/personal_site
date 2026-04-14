@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
-import api from '@/services/api'; // Use the configured Axios instance
+import authApi from '@/api/authApi';
 import type { User } from 'types/index'; // Use path relative to baseUrl
 import {
   AUTH_TOKEN_KEY,
@@ -49,12 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (usernameInput: string, passwordInput: string) => {
     setIsLoading(true);
     try {
-      const response = await api.post<{ token: string }>(`/auth/login`, { 
-        username: usernameInput,
-        password: passwordInput,
-      });
-
-      const newToken = response.data.token;
+      const newToken = await authApi.login(usernameInput, passwordInput);
       const decodedUser = getUserFromToken(newToken);
 
       if (newToken && decodedUser && !isTokenExpired(newToken)) {

@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import adminApi from '../../api/adminApi';
 import { Card } from '../common';
 import { Loading, ErrorDisplay } from '../ui';
 import { getErrorMessage, logError } from '@/utils/errorUtils';
-
-interface CountResponse {
-  count: number;
-}
 
 const AdminDashboard: React.FC = () => {
   const [projectCount, setProjectCount] = useState<number | null>(null);
@@ -22,28 +18,12 @@ const AdminDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const [
-          projectRes,
-          workRes,
-          siteNotesTotalRes,
-          siteNotesActiveRes,
-          quotesTotalRes,
-          quotesActiveRes,
-          libraryItemsRes
-        ] = await Promise.all([
-          api.get<CountResponse>('/projects/summary/count'),
-          api.get<CountResponse>('/work/summary/count'),
-          api.get<CountResponse>('/site_notes/summary/count'),
-          api.get<CountResponse>('/site_notes/summary/count?active=true'),
-          api.get<CountResponse>('/quotes/summary/count'),
-          api.get<CountResponse>('/quotes/summary/count?active=true'),
-          api.get<CountResponse>('/library-items/summary/count'),
-        ]);
-        setProjectCount(projectRes.data.count);
-        setWorkCount(workRes.data.count);
-        setSiteNoteCounts({ total: siteNotesTotalRes.data.count, active: siteNotesActiveRes.data.count });
-        setQuoteCounts({ total: quotesTotalRes.data.count, active: quotesActiveRes.data.count });
-        setLibraryItemCount(libraryItemsRes.data.count);
+        const counts = await adminApi.getDashboardCounts();
+        setProjectCount(counts.projectCount);
+        setWorkCount(counts.workCount);
+        setSiteNoteCounts(counts.siteNoteCounts);
+        setQuoteCounts(counts.quoteCounts);
+        setLibraryItemCount(counts.libraryItemCount);
       } catch (err: unknown) {
         logError('fetching dashboard counts', err);
         const errorMsg = getErrorMessage(err, 'Failed to load dashboard data');

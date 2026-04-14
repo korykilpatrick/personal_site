@@ -5,7 +5,9 @@ import type {
   Project,
   WorkEntry,
   LibraryItem,
-  ExtractedContent
+  ExtractedContent,
+  Quote,
+  SiteNote,
 } from 'types/index';
 import api from '../services/api';
 
@@ -70,13 +72,23 @@ export const apiService = {
     return response.data;
   },
 
+  getActiveQuotes: async (): Promise<Quote[]> => {
+    const response = await api.get<Quote[]>('/quotes', {
+      params: { active: 'true' },
+    });
+    return response.data;
+  },
+
+  getActiveSiteNote: async (): Promise<SiteNote> => {
+    const response = await api.get<SiteNote>('/site_notes/active');
+    return response.data;
+  },
+
   /**
    * Extract metadata from a URL for library item creation.
    */
   extractMetadata: async (url: string, forceRefresh?: boolean): Promise<ExtractedContent> => {
-    // API may return suggestedCategor (typo) instead of suggestedCategory
     interface ApiExtractedContent extends Omit<ExtractedContent, 'publicationDate' | 'extractionMetadata'> {
-      suggestedCategor?: string;
       publicationDate?: string | Date;
       extractionMetadata: {
         confidence: number;
@@ -98,7 +110,7 @@ export const apiService = {
       author: data.author,
       description: data.description,
       imageUrl: data.imageUrl,
-      suggestedCategory: (data.suggestedCategor || data.suggestedCategory) as ExtractedContent['suggestedCategory'],
+      suggestedCategory: data.suggestedCategory,
       tags: data.tags,
       contentType: data.contentType,
       publicationDate: data.publicationDate ? new Date(data.publicationDate) : undefined,

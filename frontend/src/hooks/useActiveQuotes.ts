@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Quote } from 'types';
-import api from '@/services/api';
+import apiService from '@/api/apiService';
 import { getErrorMessage, logError } from '@/utils/errorUtils';
 import { shuffleArray } from '@/utils/quoteUtils';
 
@@ -23,13 +23,13 @@ const useActiveQuotes = (): UseActiveQuotesResult => {
       setError(null);
 
       try {
-        const response = await api.get<Quote[]>('/quotes?active=true');
+        const quotes = await apiService.getActiveQuotes();
         if (isCancelled) {
           return;
         }
 
-        if (Array.isArray(response.data)) {
-          setQuotes(shuffleArray([...response.data]));
+        if (Array.isArray(quotes)) {
+          setQuotes(shuffleArray([...quotes]));
         } else {
           setQuotes([]);
         }
