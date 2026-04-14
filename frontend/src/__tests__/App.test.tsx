@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 
 // Mock the components to avoid rendering the entire app
@@ -45,17 +45,23 @@ jest.mock('../pages/NotFoundPage', () => {
   return MockNotFoundPage;
 });
 
+const renderApp = (initialEntries: string[] = ['/']) =>
+  render(
+    <MemoryRouter
+      initialEntries={initialEntries}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
+      <App />
+    </MemoryRouter>,
+  );
+
 describe('App component', () => {
   afterEach(() => {
     window.history.pushState({}, '', '/');
   });
 
   test('renders the about page on the home route and shows the footer', () => {
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>,
-    );
+    renderApp();
 
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
     expect(screen.getByText('About Page')).toBeInTheDocument();
@@ -65,11 +71,7 @@ describe('App component', () => {
   test('renders the bookshelf route and hides the footer', () => {
     window.history.pushState({}, '', '/bookshelf');
 
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>,
-    );
+    renderApp(['/bookshelf']);
 
     expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
     expect(screen.queryByTestId('footer')).not.toBeInTheDocument();

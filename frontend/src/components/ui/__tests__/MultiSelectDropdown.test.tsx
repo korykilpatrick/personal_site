@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MultiSelectDropdown from '../MultiSelectDropdown';
 
@@ -45,7 +45,9 @@ describe('MultiSelectDropdown', () => {
       />
     );
 
-    await user.click(screen.getByText('All'));
+    await act(async () => {
+      await user.click(screen.getByText('All'));
+    });
 
     for (const shelf of shelves) {
       expect(screen.getByText(shelf.label)).toBeInTheDocument();
@@ -64,8 +66,12 @@ describe('MultiSelectDropdown', () => {
       />
     );
 
-    await user.click(screen.getByText('All'));
-    await user.click(screen.getByText('Fiction'));
+    await act(async () => {
+      await user.click(screen.getByText('All'));
+    });
+    await act(async () => {
+      await user.click(screen.getByText('Fiction'));
+    });
 
     expect(toggleItem).toHaveBeenCalledWith(1);
   });
@@ -81,7 +87,9 @@ describe('MultiSelectDropdown', () => {
       />
     );
 
-    await user.click(screen.getByText('1 selected'));
+    await act(async () => {
+      await user.click(screen.getByText('1 selected'));
+    });
 
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes[0]).not.toBeChecked(); // Fiction

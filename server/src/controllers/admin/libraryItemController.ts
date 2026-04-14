@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../utils/logger';
 import { LibraryItemModel, LibraryItem } from '../../models/LibraryItem';
@@ -48,7 +48,7 @@ export const AdminLibraryItemController = {
         creators: Array.isArray(creators) ? creators : [],
       };
 
-      const created = await LibraryItemModel.create(newItem as any);
+      const created = await LibraryItemModel.create(newItem);
       res.status(StatusCodes.CREATED).json(created);
     } catch (error) {
       logger.error('Error creating library item', { error });
@@ -70,7 +70,7 @@ export const AdminLibraryItemController = {
       if (Array.isArray(tags)) updateData.tags = tags;
       if (Array.isArray(creators)) updateData.creators = creators;
 
-      const updated = await LibraryItemModel.update(id, updateData as any);
+      const updated = await LibraryItemModel.update(id, updateData);
       if (!updated) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Library item not found' });
       }

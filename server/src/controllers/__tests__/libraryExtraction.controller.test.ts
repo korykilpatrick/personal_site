@@ -27,7 +27,7 @@ describe('libraryExtraction.controller', () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
-  let mockContentExtractionService: jest.Mocked<ContentExtractionService>;
+  let extractContentSpy: jest.SpiedFunction<ContentExtractionService['extractContent']>;
 
   beforeEach(() => {
     mockReq = {
@@ -41,17 +41,11 @@ describe('libraryExtraction.controller', () => {
 
     mockNext = jest.fn();
 
-    mockContentExtractionService = {
-      extractContent: jest.fn(),
-    } as any;
-
-    // Mock the service getter
-    jest.spyOn(ContentExtractionService.prototype, 'extractContent')
-      .mockImplementation(mockContentExtractionService.extractContent);
+    extractContentSpy = jest.spyOn(ContentExtractionService.prototype, 'extractContent');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('extractMetadata', () => {
@@ -73,11 +67,11 @@ describe('libraryExtraction.controller', () => {
 
     it('should extract metadata successfully', async () => {
       mockReq.body = { url: 'https://example.com/article' };
-      mockContentExtractionService.extractContent.mockResolvedValue(mockExtractedContent);
+      extractContentSpy.mockResolvedValue(mockExtractedContent);
 
       await extractMetadata(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(mockContentExtractionService.extractContent).toHaveBeenCalledWith(
+      expect(extractContentSpy).toHaveBeenCalledWith(
         'https://example.com/article',
         false
       );
@@ -93,11 +87,11 @@ describe('libraryExtraction.controller', () => {
         url: 'https://example.com/article',
         forceRefresh: true,
       };
-      mockContentExtractionService.extractContent.mockResolvedValue(mockExtractedContent);
+      extractContentSpy.mockResolvedValue(mockExtractedContent);
 
       await extractMetadata(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(mockContentExtractionService.extractContent).toHaveBeenCalledWith(
+      expect(extractContentSpy).toHaveBeenCalledWith(
         'https://example.com/article',
         true
       );
@@ -130,7 +124,7 @@ describe('libraryExtraction.controller', () => {
 
       mockReq.body = { url: 'https://example.com/article' };
       const error = new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Extraction failed');
-      mockContentExtractionService.extractContent.mockRejectedValue(error);
+      extractContentSpy.mockRejectedValue(error);
 
       await extractMetadata(mockReq as Request, mockRes as Response, mockNext);
 
@@ -171,7 +165,7 @@ describe('libraryExtraction.controller', () => {
 
       // Clear module cache and re-import with mocked config
       jest.resetModules();
-      const { extractMetadata: extractMetadataWithoutKey } = require('../libraryExtraction.controller');
+      const { extractMetadata: extractMetadataWithoutKey } = await import('../libraryExtraction.controller');
 
       mockReq.body = { url: 'https://example.com/article' };
 

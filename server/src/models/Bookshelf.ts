@@ -1,4 +1,3 @@
-import { db } from '../db/connection';
 import { BaseModel } from './BaseModel';
 import { Bookshelf, BookshelfWithBooks, Book } from '@shared/index';
 

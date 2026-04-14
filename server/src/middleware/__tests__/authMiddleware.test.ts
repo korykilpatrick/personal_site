@@ -1,6 +1,7 @@
 /** @jest-environment node */
+import type { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { protect } from '../authMiddleware';
+import { protect, type AuthenticatedRequest } from '../authMiddleware';
 import config from '../../config/config';
 
 jest.mock('../../utils/logger', () => ({
@@ -10,8 +11,13 @@ jest.mock('../../utils/logger', () => ({
   debug: jest.fn(),
 }));
 
-const createMockResponse = () => {
-  const res: any = {};
+type MockResponse = Pick<Response, 'status' | 'json'> & {
+  status: jest.Mock;
+  json: jest.Mock;
+};
+
+const createMockResponse = (): MockResponse => {
+  const res = {} as MockResponse;
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
   return res;
@@ -19,11 +25,11 @@ const createMockResponse = () => {
 
 describe('protect middleware', () => {
   it('returns 401 when no authorization header is provided', async () => {
-    const req: any = { headers: {} };
+    const req: Partial<AuthenticatedRequest> = { headers: {} };
     const res = createMockResponse();
     const next = jest.fn();
 
-    await protect(req, res, next);
+    await protect(req as AuthenticatedRequest, res as unknown as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not authorized, no token' });
@@ -31,11 +37,11 @@ describe('protect middleware', () => {
   });
 
   it('returns 401 when authorization header is not Bearer', async () => {
-    const req: any = { headers: { authorization: 'Token abc' } };
+    const req: Partial<AuthenticatedRequest> = { headers: { authorization: 'Token abc' } };
     const res = createMockResponse();
     const next = jest.fn();
 
-    await protect(req, res, next);
+    await protect(req as AuthenticatedRequest, res as unknown as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not authorized, no token' });
@@ -43,11 +49,11 @@ describe('protect middleware', () => {
   });
 
   it('returns 401 when bearer token is empty', async () => {
-    const req: any = { headers: { authorization: 'Bearer ' } };
+    const req: Partial<AuthenticatedRequest> = { headers: { authorization: 'Bearer ' } };
     const res = createMockResponse();
     const next = jest.fn();
 
-    await protect(req, res, next);
+    await protect(req as AuthenticatedRequest, res as unknown as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not authorized, no token' });
@@ -55,11 +61,11 @@ describe('protect middleware', () => {
   });
 
   it('returns 401 when token verification fails', async () => {
-    const req: any = { headers: { authorization: 'Bearer not-a-valid-token' } };
+    const req: Partial<AuthenticatedRequest> = { headers: { authorization: 'Bearer not-a-valid-token' } };
     const res = createMockResponse();
     const next = jest.fn();
 
-    await protect(req, res, next);
+    await protect(req as AuthenticatedRequest, res as unknown as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not authorized, token failed' });
@@ -70,13 +76,13 @@ describe('protect middleware', () => {
     const token = jwt.sign({ id: 1, username: 'tester' }, config.jwt.secret, {
       expiresIn: '1h',
     });
-    const req: any = { headers: { authorization: `Bearer ${token}` } };
+    const req: Partial<AuthenticatedRequest> = { headers: { authorization: `Bearer ${token}` } };
     const res = createMockResponse();
     const next = jest.fn();
 
-    await protect(req, res, next);
+    await protect(req as AuthenticatedRequest, res as unknown as Response, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    expect(req.user).toMatchObject({ id: 1, username: 'tester' });
+    expect((req as AuthenticatedRequest).user).toMatchObject({ id: 1, username: 'tester' });
   });
 });

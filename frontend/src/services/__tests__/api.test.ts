@@ -33,9 +33,16 @@ const createToken = (payload: object) =>
   `header.${encodeBase64Url(payload)}.signature`;
 
 describe('api interceptors', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
     localStorage.clear();
     window.location.href = 'http://localhost/';
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('adds Authorization header when token is valid', () => {
@@ -79,5 +86,6 @@ describe('api interceptors', () => {
 
     expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBeNull();
     expect(redirectToLogin).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Unauthorized! Redirecting to login.');
   });
 });

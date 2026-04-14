@@ -5,7 +5,7 @@ import logger from '../../utils/logger';
 // Import ProjectModel instance
 import ProjectModel from '../../models/Project'; // Import only the model instance
 // Correct import path for shared types
-import { Project as SharedProject, ProjectLink } from '../../../../types'; // Import types from shared location
+import { Project as SharedProject } from '../../../../types'; // Import types from shared location
 
 // --- CRUD Operations --- 
 

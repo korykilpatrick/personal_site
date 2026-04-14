@@ -1,4 +1,3 @@
-import { Client } from 'pg';
 import knex from 'knex';
 import dotenv from 'dotenv';
 import path from 'path';

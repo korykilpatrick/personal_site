@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SortDropdown from '../SortDropdown';
 
@@ -25,7 +25,9 @@ describe('SortDropdown', () => {
       <SortDropdown options={sortOptions} selected="recent" onChange={jest.fn()} />
     );
 
-    await user.click(screen.getByText('Recently Read'));
+    await act(async () => {
+      await user.click(screen.getByText('Recently Read'));
+    });
 
     for (const option of sortOptions) {
       expect(screen.getByRole('menuitem', { name: option.label })).toBeInTheDocument();
@@ -39,8 +41,12 @@ describe('SortDropdown', () => {
       <SortDropdown options={sortOptions} selected="recent" onChange={onChange} />
     );
 
-    await user.click(screen.getByText('Recently Read'));
-    await user.click(screen.getByRole('menuitem', { name: 'Title' }));
+    await act(async () => {
+      await user.click(screen.getByText('Recently Read'));
+    });
+    await act(async () => {
+      await user.click(screen.getByRole('menuitem', { name: 'Title' }));
+    });
 
     expect(onChange).toHaveBeenCalledWith('title');
   });
@@ -55,11 +61,15 @@ describe('SortDropdown', () => {
     );
 
     // Open dropdown
-    await user.click(screen.getByText('Recently Read'));
+    await act(async () => {
+      await user.click(screen.getByText('Recently Read'));
+    });
     expect(screen.getByRole('menuitem', { name: 'Title' })).toBeInTheDocument();
 
     // Click outside
-    await user.click(screen.getByTestId('outside'));
+    await act(async () => {
+      await user.click(screen.getByTestId('outside'));
+    });
 
     // Options should no longer be visible
     expect(screen.queryByRole('menuitem', { name: 'Title' })).not.toBeInTheDocument();

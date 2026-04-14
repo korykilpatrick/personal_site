@@ -12,6 +12,14 @@ export interface LibraryItem extends BaseRecord {
 }
 
 type LibraryItemCreationData = Omit<LibraryItem, 'id' | 'created_at' | 'updated_at'>;
+type LibraryItemUpdateData = Partial<Omit<LibraryItem, 'id' | 'created_at' | 'updated_at'>> & {
+  tags?: string[] | null;
+  creators?: string[] | null;
+};
+type LibraryItemDbRecord = Omit<LibraryItemCreationData, 'tags' | 'creators'> & {
+  tags?: string | null;
+  creators?: string | null;
+};
 
 class LibraryItemModelClass extends BaseModel<LibraryItem> {
   constructor() {
@@ -22,38 +30,44 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
    * Create a new library item, ensuring JSON fields are stringified.
    */
   async create(data: LibraryItemCreationData): Promise<LibraryItem> {
-    const dataForDb: Record<string, any> = { ...data };
+    const dataForDb: LibraryItemDbRecord = {
+      item_type_id: data.item_type_id,
+      link: data.link,
+      title: data.title,
+      blurb: data.blurb,
+      thumbnail_url: data.thumbnail_url,
+      ...(data.tags ? { tags: JSON.stringify(data.tags) } : {}),
+      ...(data.creators ? { creators: JSON.stringify(data.creators) } : {}),
+    };
 
-    if (data.tags) {
-      dataForDb.tags = JSON.stringify(data.tags);
-    }
-    if (data.creators) {
-      dataForDb.creators = JSON.stringify(data.creators);
-    }
+    const [newRecord] = await this.db(this.tableName)
+      .insert(dataForDb)
+      .returning('*');
 
-    return super.create(dataForDb as LibraryItemCreationData);
+    return newRecord;
   }
 
   /**
    * Update an existing library item, ensuring JSON fields are stringified.
    */
-  async update(id: number, data: Partial<LibraryItem>): Promise<LibraryItem | null> {
-    const dataForDb: Record<string, any> = { ...data };
+  async update(id: number, data: LibraryItemUpdateData): Promise<LibraryItem | null> {
+    const { tags, creators, ...rest } = data;
+    const dataForDb: Partial<LibraryItemDbRecord> = { ...rest };
 
     // Ensure that if tags/creators are present, they are stringified.
     // If they are intended to be cleared, they should be passed as null or an empty array 
     // and the controller/service layer should handle this logic if super.update doesn't.
     // For now, we only stringify if they are present and are arrays.
-    if (data.tags && Array.isArray(data.tags)) {
-      dataForDb.tags = JSON.stringify(data.tags);
-    } else if (data.hasOwnProperty('tags') && data.tags === null) {
+    if (Array.isArray(tags)) {
+      dataForDb.tags = JSON.stringify(tags);
+    } else if (tags === null) {
       dataForDb.tags = null; // Allow clearing the field
     }
 
 
-    if (data.creators && Array.isArray(data.creators)) {
-      dataForDb.creators = JSON.stringify(data.creators);
-    } else if (data.hasOwnProperty('creators') && data.creators === null) {
+    if (Array.isArray(creators)) {
+      dataForDb.creators = JSON.stringify(creators);
+    } else if (creators === null) {
       dataForDb.creators = null; // Allow clearing the field
     }
     
@@ -63,7 +77,15 @@ class LibraryItemModelClass extends BaseModel<LibraryItem> {
     // if it's coming from the client that way and not being parsed into an array of strings correctly.
     // However, the controller's Array.isArray(tags) check should prevent non-arrays from getting here.
 
-    return super.update(id, dataForDb);
+    const [updatedRecord] = await this.db(this.tableName)
+      .where({ id })
+      .update({
+        ...dataForDb,
+        updated_at: new Date(),
+      })
+      .returning('*');
+
+    return updatedRecord || null;
   }
 
   /**

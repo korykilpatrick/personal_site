@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Test frontend
+        run: npm test -- --runInBand
+
+      - name: Build frontend
+        run: npm run build
+
+  server:
+    name: Server
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3001
+      API_PREFIX: /api
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: personal_site
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: info
+      JWT_SECRET: test-secret
+      JWT_EXPIRES_IN: 1h
+      OPENAI_API_KEY: ''
+      OPENAI_MODEL: gpt-4o-mini
+      OPENAI_TEMPERATURE: 0.3
+      OPENAI_MAX_TOKENS: 1000
+      EXTRACTION_CACHE_TTL: 3600
+      EXTRACTION_RATE_LIMIT: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Lint server
+        working-directory: server
+        run: npm run lint
+
+      - name: Test server
+        working-directory: server
+        run: npm test -- --runInBand
+
+      - name: Build server
+        working-directory: server
+        run: npm run build

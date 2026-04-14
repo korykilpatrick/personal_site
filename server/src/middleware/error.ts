@@ -34,7 +34,7 @@ export const errorHandler = (
   err: ApiError | Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // If the error is a known API error, use its status code
   const statusCode = 'statusCode' in err 

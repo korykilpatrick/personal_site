@@ -2,24 +2,38 @@ import { BaseModel } from './BaseModel';
 import { Project as SharedProject, ProjectLink } from '../../../types'; 
 
 // Helper type for DB representation
-type ProjectDbRecord = Omit<SharedProject, 'links' | 'tags'> & {
-  project_links?: ProjectLink[]; // Use actual DB column name
-  project_tags?: string[];      // Use actual DB column name
+type ProjectDbRecord = Omit<SharedProject, 'links' | 'tags' | 'media_urls'> & {
+  media_urls: string[] | string;
+  project_links?: ProjectLink[] | string; // Use actual DB column name
+  project_tags?: string[] | string;      // Use actual DB column name
 };
+type ProjectDbWriteRecord = Omit<ProjectDbRecord, 'id' | 'created_at' | 'updated_at'>;
 
 // Helper function to map SharedProject to DB record structure
-const mapToDbRecord = (projectData: Partial<SharedProject>): Partial<ProjectDbRecord> => {
-  const dbRecord: Partial<ProjectDbRecord> = { ...projectData }; // Copy other fields
-  
-  if ('links' in projectData) {
-    dbRecord.project_links = projectData.links; // Map links to project_links
-    delete (dbRecord as Partial<SharedProject>).links; // Remove original key
+const mapToDbRecord = ({ links, tags, ...projectData }: Partial<SharedProject>): Partial<ProjectDbWriteRecord> => {
+  return {
+    ...projectData,
+    ...(links !== undefined ? { project_links: links } : {}),
+    ...(tags !== undefined ? { project_tags: tags } : {}),
+  };
+};
+
+const stringifyProjectJsonFields = (
+  projectData: Partial<ProjectDbWriteRecord>
+): Partial<ProjectDbWriteRecord> => {
+  const dbData = { ...projectData };
+
+  if (Array.isArray(dbData.project_links)) {
+    dbData.project_links = JSON.stringify(dbData.project_links);
   }
-  if ('tags' in projectData) {
-    dbRecord.project_tags = projectData.tags; // Map tags to project_tags
-    delete (dbRecord as Partial<SharedProject>).tags; // Remove original key
+  if (Array.isArray(dbData.project_tags)) {
+    dbData.project_tags = JSON.stringify(dbData.project_tags);
   }
-  return dbRecord;
+  if (Array.isArray(dbData.media_urls)) {
+    dbData.media_urls = JSON.stringify(dbData.media_urls);
+  }
+
+  return dbData;
 };
 
 /**
@@ -70,22 +84,17 @@ class ProjectModelClass extends BaseModel<SharedProject> { // Still uses SharedP
    * Create a new project, handling field mapping and JSON stringification.
    */
   async createFromApi(projectData: Omit<SharedProject, 'id' | 'created_at' | 'updated_at'>): Promise<SharedProject> {
-    const dbDataInput = mapToDbRecord(projectData);
-
-    // Explicitly stringify JSONB fields before passing to BaseModel.create
-    const dbDataForInsert = { ...dbDataInput };
-    if ('project_links' in dbDataForInsert && dbDataForInsert.project_links) {
-      dbDataForInsert.project_links = JSON.stringify(dbDataForInsert.project_links) as any; 
-    }
-    if ('project_tags' in dbDataForInsert && dbDataForInsert.project_tags) {
-      dbDataForInsert.project_tags = JSON.stringify(dbDataForInsert.project_tags) as any; 
-    }
-    
-    // Call base create with the mapped and explicitly stringified data
-    const createdDbRecord = await super.create(dbDataForInsert as any);
+    const dbDataForInsert = stringifyProjectJsonFields(mapToDbRecord(projectData));
+    const [createdDbRecord] = await this.db(this.tableName)
+      .insert(dbDataForInsert)
+      .returning('id');
+    const createdProjectId =
+      typeof createdDbRecord === 'object' && createdDbRecord !== null
+        ? createdDbRecord.id
+        : createdDbRecord;
     
     // Fetch the newly created record using getByIdApi to ensure correct mapping back
-    const newProject = await this.getByIdApi(createdDbRecord.id);
+    const newProject = await this.getByIdApi(Number(createdProjectId));
     if (!newProject) {
         throw new Error('Failed to fetch project immediately after creation.');
     }
@@ -101,22 +110,14 @@ class ProjectModelClass extends BaseModel<SharedProject> { // Still uses SharedP
     }
 
     const dbDataInput = mapToDbRecord(projectData);
-
-    // Explicitly stringify JSONB fields before passing to BaseModel.update
-    const dbDataForUpdate = { ...dbDataInput };
-     if ('project_links' in dbDataForUpdate && dbDataForUpdate.project_links) {
-      dbDataForUpdate.project_links = JSON.stringify(dbDataForUpdate.project_links) as any;
-    }
-    if ('project_tags' in dbDataForUpdate && dbDataForUpdate.project_tags) {
-      dbDataForUpdate.project_tags = JSON.stringify(dbDataForUpdate.project_tags) as any;
-    }
-    // Add stringification for media_urls
-    if ('media_urls' in dbDataForUpdate && dbDataForUpdate.media_urls) {
-      dbDataForUpdate.media_urls = JSON.stringify(dbDataForUpdate.media_urls) as any;
-    }
-
-    // Call base update with the mapped and explicitly stringified data
-    const updatedRecord = await super.update(id, dbDataForUpdate as any);
+    const dbDataForUpdate = stringifyProjectJsonFields(dbDataInput);
+    const [updatedRecord] = await this.db(this.tableName)
+      .where({ id })
+      .update({
+        ...dbDataForUpdate,
+        updated_at: new Date(),
+      })
+      .returning('id');
     
     if (!updatedRecord) return null;
     // Fetch the full record using getByIdApi to ensure correct field names are returned

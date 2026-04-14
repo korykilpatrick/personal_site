@@ -8,20 +8,22 @@ jest.mock('../../../utils/logger');
 
 describe('ContentExtractionService', () => {
   let service: ContentExtractionService;
-  let mockOpenAIService: jest.Mocked<OpenAIService>;
+  let mockExtractWebContent: jest.MockedFunction<OpenAIService['extractWebContent']>;
   let mockCache: jest.Mocked<ICache>;
 
   beforeEach(() => {
-    mockOpenAIService = {
-      extractWebContent: jest.fn(),
-    } as any;
+    mockExtractWebContent = jest.fn();
 
     mockCache = {
       get: jest.fn(),
       set: jest.fn(),
     };
 
-    service = new ContentExtractionService(mockOpenAIService, mockCache, 3600);
+    service = new ContentExtractionService(
+      { extractWebContent: mockExtractWebContent } as unknown as OpenAIService,
+      mockCache,
+      3600
+    );
   });
 
   afterEach(() => {
@@ -43,7 +45,7 @@ describe('ContentExtractionService', () => {
 
     it('should extract content from a valid URL', async () => {
       mockCache.get.mockResolvedValue(null);
-      mockOpenAIService.extractWebContent.mockResolvedValue(mockExtractedData);
+      mockExtractWebContent.mockResolvedValue(mockExtractedData);
 
       const result = await service.extractContent(validUrl);
 
@@ -91,17 +93,17 @@ describe('ContentExtractionService', () => {
       const result = await service.extractContent(validUrl);
 
       expect(result.title).toBe(cachedContent.title);
-      expect(mockOpenAIService.extractWebContent).not.toHaveBeenCalled();
+      expect(mockExtractWebContent).not.toHaveBeenCalled();
     });
 
     it('should bypass cache when forceRefresh is true', async () => {
       mockCache.get.mockResolvedValue(JSON.stringify({ title: 'Cached' }));
-      mockOpenAIService.extractWebContent.mockResolvedValue(mockExtractedData);
+      mockExtractWebContent.mockResolvedValue(mockExtractedData);
 
       await service.extractContent(validUrl, true);
 
       expect(mockCache.get).not.toHaveBeenCalled();
-      expect(mockOpenAIService.extractWebContent).toHaveBeenCalled();
+      expect(mockExtractWebContent).toHaveBeenCalled();
     });
 
     it('should throw ApiError for invalid URL', async () => {
@@ -113,7 +115,7 @@ describe('ContentExtractionService', () => {
 
     it('should handle extraction failures gracefully', async () => {
       mockCache.get.mockResolvedValue(null);
-      mockOpenAIService.extractWebContent.mockRejectedValue(new Error('OpenAI error'));
+      mockExtractWebContent.mockRejectedValue(new Error('OpenAI error'));
 
       await expect(service.extractContent(validUrl)).rejects.toThrow(ApiError);
       await expect(service.extractContent(validUrl)).rejects.toThrow('Failed to extract content');

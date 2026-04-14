@@ -33,17 +33,22 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   const positionClasses = align === 'right' ? 'right-0' : 'left-0';
+  const toggleDropdown = () => setIsOpen((open) => !open);
+  const triggerElement = React.isValidElement(trigger)
+    ? React.cloneElement(trigger as React.ReactElement<Record<string, unknown>>, {
+        'aria-haspopup': 'true',
+        'aria-expanded': isOpen,
+        onClick: toggleDropdown,
+      })
+    : (
+      <button type="button" onClick={toggleDropdown}>
+        {trigger}
+      </button>
+    );
 
   return (
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)}>
-        {React.isValidElement(trigger)
-          ? React.cloneElement(trigger as React.ReactElement<Record<string, unknown>>, {
-              'aria-haspopup': 'true',
-              'aria-expanded': isOpen,
-            })
-          : trigger}
-      </div>
+      {triggerElement}
 
       {isOpen && (
         <div

@@ -3,11 +3,8 @@ import config from '../config/config';
 import knexfileImport from './knexfile';
 import logger from '../utils/logger';
 
-// unwrap the CommonJS wrapper that tsc adds
-const knexConfigs = (knexfileImport as any).default ?? knexfileImport;
-
 const environment = config.env ?? 'development';
-const db = knex(knexConfigs[environment]);
+const db = knex(knexfileImport[environment]);
 
 export const testConnection = async (): Promise<void> => {
   await db.raw('select 1');
