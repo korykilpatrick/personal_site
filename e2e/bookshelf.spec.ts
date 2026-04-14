@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Bookshelf page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/bookshelf');
     // Wait for books to load
     await page.waitForSelector('.group\\/book', { timeout: 10_000 });
   });

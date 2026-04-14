@@ -15,8 +15,8 @@ const Navbar: React.FC = () => {
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Bookshelf', path: '/' },
-    { name: 'About', path: '/about' },
+    { name: 'About', path: '/' },
+    { name: 'Bookshelf', path: '/bookshelf' },
   ];
 
   const isActive = (path: string) => {

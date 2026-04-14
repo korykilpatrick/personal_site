@@ -50,7 +50,7 @@ describe('App component', () => {
     window.history.pushState({}, '', '/');
   });
 
-  test('renders the bookshelf home route and hides the footer', () => {
+  test('renders the about page on the home route and shows the footer', () => {
     render(
       <BrowserRouter>
         <App />
@@ -58,12 +58,12 @@ describe('App component', () => {
     );
 
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
-    expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
-    expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
+    expect(screen.getByText('About Page')).toBeInTheDocument();
+    expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 
-  test('renders the footer on non-home routes', () => {
-    window.history.pushState({}, '', '/about');
+  test('renders the bookshelf route and hides the footer', () => {
+    window.history.pushState({}, '', '/bookshelf');
 
     render(
       <BrowserRouter>
@@ -71,7 +71,7 @@ describe('App component', () => {
       </BrowserRouter>,
     );
 
-    expect(screen.getByText('About Page')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
+    expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
+    expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
   });
 });

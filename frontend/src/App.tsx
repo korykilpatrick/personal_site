@@ -26,8 +26,7 @@ const GlobalImageModal: React.FC = () => {
 
 const App: React.FC = () => {
   const location = useLocation();
-  const isBookshelfHome = location.pathname === '/';
-  const hideFooter = isBookshelfHome;
+  const hideFooter = location.pathname === '/bookshelf';
 
   return (
     <ModalProvider>
@@ -37,11 +36,11 @@ const App: React.FC = () => {
             <Navbar />
             <main className="flex-grow">
               <Routes>
-                <Route path="/" element={<Layout><BookshelfPage /></Layout>} />
+                <Route path="/" element={<Layout><AboutPage /></Layout>} />
                 <Route path="/about" element={<Layout><AboutPage /></Layout>} />
                 {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
                 {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
-                <Route path="/bookshelf" element={<Navigate to="/" replace />} />
+                <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
                 <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
 
                 {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
