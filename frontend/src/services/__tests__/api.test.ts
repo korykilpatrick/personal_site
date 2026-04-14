@@ -2,6 +2,23 @@ import api from '../api';
 import { AUTH_TOKEN_KEY } from '../../utils/authToken';
 import { redirectToLogin } from '../../utils/navigation';
 
+type RequestHandler = (config: { headers?: Record<string, string> }) => { headers?: Record<string, string> };
+type RequestErrorHandler = (error: Error) => Promise<never>;
+type ResponseErrorHandler = (error: { response?: { status?: number } }) => Promise<never>;
+
+type RequestInterceptorStore = {
+  handlers: Array<{
+    fulfilled: RequestHandler;
+    rejected: RequestErrorHandler;
+  }>;
+};
+
+type ResponseInterceptorStore = {
+  handlers: Array<{
+    rejected: ResponseErrorHandler;
+  }>;
+};
+
 jest.mock('../../utils/navigation', () => ({
   redirectToLogin: jest.fn(),
 }));
@@ -25,9 +42,9 @@ describe('api interceptors', () => {
     const token = createToken({ exp: Math.floor(Date.now() / 1000) + 3600 });
     localStorage.setItem(AUTH_TOKEN_KEY, token);
 
-    const requestHandlers = (api.interceptors.request as any).handlers;
+    const requestHandlers = (api.interceptors.request as unknown as RequestInterceptorStore).handlers;
     const handler = requestHandlers[0].fulfilled;
-    const config = handler({ headers: {} } as any);
+    const config = handler({ headers: {} });
 
     expect(config.headers.Authorization).toBe(`Bearer ${token}`);
   });
@@ -36,16 +53,16 @@ describe('api interceptors', () => {
     const token = createToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
     localStorage.setItem(AUTH_TOKEN_KEY, token);
 
-    const requestHandlers = (api.interceptors.request as any).handlers;
+    const requestHandlers = (api.interceptors.request as unknown as RequestInterceptorStore).handlers;
     const handler = requestHandlers[0].fulfilled;
-    const config = handler({ headers: {} } as any);
+    const config = handler({ headers: {} });
 
     expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBeNull();
     expect(config.headers.Authorization).toBeUndefined();
   });
 
   it('returns a rejected promise from request error handler', async () => {
-    const requestHandlers = (api.interceptors.request as any).handlers;
+    const requestHandlers = (api.interceptors.request as unknown as RequestInterceptorStore).handlers;
     const errorHandler = requestHandlers[0].rejected;
     await expect(errorHandler(new Error('boom'))).rejects.toThrow('boom');
   });
@@ -54,7 +71,7 @@ describe('api interceptors', () => {
     const token = createToken({ exp: Math.floor(Date.now() / 1000) + 3600 });
     localStorage.setItem(AUTH_TOKEN_KEY, token);
 
-    const responseHandlers = (api.interceptors.response as any).handlers;
+    const responseHandlers = (api.interceptors.response as unknown as ResponseInterceptorStore).handlers;
     const responseHandler = responseHandlers[0].rejected;
     const error = { response: { status: 401 } };
 

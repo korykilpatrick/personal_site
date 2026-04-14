@@ -44,7 +44,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                 type="checkbox"
                 checked={selectedItems.includes(item.id)}
                 onChange={() => toggleItem(item.id)}
-                className="h-4 w-4 rounded border-[rgba(76,67,56,0.28)] text-secondary focus:ring-secondary/25"
+                className="h-4 w-4 rounded border-primary/20 text-secondary focus:ring-secondary/25"
               />
               <span className="font-sans text-[0.8rem] uppercase tracking-[0.14em] text-textSecondary">
                 {item.label}

@@ -154,7 +154,6 @@ const QuoteCarousel: React.FC = () => {
   const current = quotes[idx];
   const currentPlainText = toPlainText(current.text);
   const previewText = truncateAtWordBoundary(currentPlainText, FEATURED_PREVIEW_CHAR_COUNT);
-  const isPreviewTruncated = previewText !== currentPlainText;
 
   const prevQuote = () => {
     if (timerRef.current) {
@@ -197,7 +196,7 @@ const QuoteCarousel: React.FC = () => {
               className="animate-fade-in mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-1.5 text-center opacity-0 transition-opacity duration-700 ease-in-out"
             >
               <p className="quote-preview mb-0 font-serif text-[1rem] leading-[1.48] text-primary transition group-hover:text-primary-dark sm:text-[1.06rem] sm:leading-[1.46]">
-                "{previewText}"
+                &ldquo;{previewText}&rdquo;
               </p>
 
               {(current.author || current.source) && (

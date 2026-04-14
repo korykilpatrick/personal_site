@@ -22,7 +22,7 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
       }}
     >
       <div
-        className="site-frame relative overflow-hidden rounded-[34px] p-4 sm:p-5"
+        className="site-frame relative overflow-hidden rounded-[34px] pt-6 p-4 sm:pt-7 sm:p-5"
         style={(() => {
           const rowHeight = bookSize.height + 12;
           const shelfColor = '#10203a';

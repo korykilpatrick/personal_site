@@ -50,31 +50,28 @@ describe('App component', () => {
     window.history.pushState({}, '', '/');
   });
 
-  test('renders the main layout components', () => {
+  test('renders the bookshelf home route and hides the footer', () => {
     render(
       <BrowserRouter>
         <App />
       </BrowserRouter>,
     );
 
-    // Check for navbar and footer
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
-
-    // Check that the home page is rendered by default
-    expect(screen.getByTestId('home-page')).toBeInTheDocument();
-  });
-
-  test('hides the footer on the bookshelf route', () => {
-    window.history.pushState({}, '', '/bookshelf');
-
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>,
-    );
-
     expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
     expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
+  });
+
+  test('renders the footer on non-home routes', () => {
+    window.history.pushState({}, '', '/about');
+
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>,
+    );
+
+    expect(screen.getByText('About Page')).toBeInTheDocument();
+    expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 });

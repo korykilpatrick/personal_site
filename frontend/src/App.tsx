@@ -14,7 +14,6 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { BooksProvider } from './context/BooksContext';
-import { LibraryProvider } from './context/LibraryContext';
 import { ToastProvider } from './contexts/ToastContext';
 // import LibraryPage from './pages/LibraryPage';  // Hidden for now
 
@@ -33,42 +32,40 @@ const App: React.FC = () => {
   return (
     <ModalProvider>
       <BooksProvider>
-        <LibraryProvider>
-          <ToastProvider>
-            <div className="flex flex-col min-h-screen bg-background">
-              <Navbar />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Layout><BookshelfPage /></Layout>} />
-                  <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-                  {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
-                  {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
-                  <Route path="/bookshelf" element={<Navigate to="/" replace />} />
-                  <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
+        <ToastProvider>
+          <div className="flex flex-col min-h-screen bg-background">
+            <Navbar />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Layout><BookshelfPage /></Layout>} />
+                <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+                {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
+                {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
+                <Route path="/bookshelf" element={<Navigate to="/" replace />} />
+                <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
 
-                  {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
+                {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
 
-                  <Route path="/login" element={<LoginPage />} />
+                <Route path="/login" element={<LoginPage />} />
 
-                  <Route element={<ProtectedRoute />}>
-                    <Route
-                      path="/admin/*"
-                      element={
-                        <Suspense fallback={<div>Loading Admin...</div>}>
-                          <AdminPage />
-                        </Suspense>
-                      }
-                    />
-                  </Route>
+                <Route element={<ProtectedRoute />}>
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <Suspense fallback={<div>Loading Admin...</div>}>
+                        <AdminPage />
+                      </Suspense>
+                    }
+                  />
+                </Route>
 
-                  <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-                </Routes>
+                <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
+              </Routes>
             </main>
             {!hideFooter && <Footer />}
             <GlobalImageModal />
           </div>
-          </ToastProvider>
-        </LibraryProvider>
+        </ToastProvider>
       </BooksProvider>
     </ModalProvider>
   );

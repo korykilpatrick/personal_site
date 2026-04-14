@@ -489,7 +489,7 @@ const BookshelfQuoteDock: React.FC = () => {
                     </button>
                   </>
                 ) : (
-                  <span>"</span>
+                  <span aria-hidden="true">&rdquo;</span>
                 )}
               </p>
             </div>

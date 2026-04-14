@@ -40,17 +40,17 @@ const Tooltip: React.FC<TooltipProps> = ({
             side={side}
             sideOffset={sideOffset}
             className={`
-              z-50 overflow-hidden rounded-[16px] border border-[rgba(215,184,135,0.18)] bg-[rgba(45,30,21,0.94)] px-3 py-2 text-xs
-              text-stone-100 shadow-[0_18px_36px_rgba(34,20,13,0.3)] backdrop-blur-md animate-in fade-in-0 zoom-in-95
+              z-50 max-w-[220px] overflow-hidden rounded-[14px] border border-white/10 bg-[rgba(15,27,44,0.94)] px-3.5 py-2.5 text-xs
+              text-stone-100 shadow-[0_18px_36px_rgba(9,18,31,0.4)] backdrop-blur-md animate-in fade-in-0 zoom-in-95
               data-[state=closed]:animate-out data-[state=closed]:fade-out-0
               data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2
               data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2
               data-[side=top]:slide-in-from-bottom-2
-              ${className} // Apply additional custom classes
+              ${className}
             `}
           >
             {content}
-            <RadixTooltip.Arrow className="fill-[rgba(45,30,21,0.94)]" />
+            <RadixTooltip.Arrow className="fill-[rgba(15,27,44,0.94)]" />
           </RadixTooltip.Content>
         </RadixTooltip.Portal>
       </RadixTooltip.Root>

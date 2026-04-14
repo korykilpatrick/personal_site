@@ -46,7 +46,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   );
 
   return (
-    <div className="site-card-soft mb-5 px-4 py-4 sm:px-5 sm:py-4.5">
+    <div className="site-card-soft relative z-20 mb-5 px-4 py-4 sm:px-5 sm:py-4.5">
       <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <div className="flex items-center gap-2">
           <span className="site-meta text-[0.68rem]">Sort</span>

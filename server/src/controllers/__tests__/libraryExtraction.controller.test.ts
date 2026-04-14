@@ -10,6 +10,7 @@ import { extractMetadata } from '../libraryExtraction.controller';
 import { ContentExtractionService } from '../../services/contentExtraction/ContentExtractionService';
 import { ApiError } from '../../middleware/error';
 import { StatusCodes } from 'http-status-codes';
+import type { ExtractedContent } from '@shared/contentExtraction';
 
 jest.mock('../../services/contentExtraction/ContentExtractionService');
 jest.mock('../../services/llm/OpenAIService');
@@ -54,7 +55,7 @@ describe('libraryExtraction.controller', () => {
   });
 
   describe('extractMetadata', () => {
-    const mockExtractedContent = {
+    const mockExtractedContent: ExtractedContent = {
       title: 'Test Article',
       author: 'John Doe',
       description: 'Test description',

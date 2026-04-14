@@ -4,7 +4,6 @@ import { FaXTwitter, FaGithub, FaLinkedinIn } from 'react-icons/fa6';
 import { MdEmail } from 'react-icons/md';
 
 // Icon size constants
-const DESKTOP_ICON_SIZE = 32;
 const MOBILE_ICON_SIZE = 18;
 
 // Icon style constants
