@@ -29,7 +29,7 @@ export const protect: RequestHandler = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as RequestWithUser;
   const authHeader = authReq.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
