@@ -7,6 +7,8 @@ const webpack = require('webpack');
 
 module.exports = (_env, argv) => {
   const isProduction = argv.mode === 'production';
+  const nodeMajorVersion = Number.parseInt(process.versions.node.split('.')[0], 10);
+  const canUseCssMinimizer = isProduction && nodeMajorVersion >= 20 && typeof globalThis.crypto !== 'undefined';
 
   return {
     entry: './frontend/src/index.tsx',
@@ -59,7 +61,11 @@ module.exports = (_env, argv) => {
         : []),
     ],
     optimization: {
-      minimizer: isProduction ? ['...', new CssMinimizerPlugin()] : undefined,
+      minimizer: isProduction
+        ? canUseCssMinimizer
+          ? ['...', new CssMinimizerPlugin()]
+          : ['...']
+        : undefined,
     },
     devServer: {
       historyApiFallback: true,
