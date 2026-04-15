@@ -4,6 +4,7 @@ import { useBooks } from '@/context/BooksContext';
 import { BookWithShelves } from 'types/index';
 import { BookCard } from '@/components/books';
 import EmptyState from '@/components/ui/EmptyState';
+import { getCurrentReadingBooks } from '@/components/bookshelf/bookshelfReadingState';
 
 /**
  * CurrentlyReading – lists in-progress books, horizontally centred.
@@ -11,15 +12,10 @@ import EmptyState from '@/components/ui/EmptyState';
 const CurrentlyReading: React.FC = () => {
   const { books, loading } = useBooks();
 
-  const reading: BookWithShelves[] = useMemo(() => {
-    const shelfMatch = (name?: string) =>
-      name && ['currently reading', 'currently-reading'].includes(name.toLowerCase());
-
-    const fromShelf = books.filter(
-      b => b.shelves && b.shelves.some(s => shelfMatch(s.name))
-    );
-    return (fromShelf.length > 0 ? fromShelf : books.filter(b => !b.date_read)) as BookWithShelves[];
-  }, [books]);
+  const reading: BookWithShelves[] = useMemo(
+    () => getCurrentReadingBooks(books, { fallbackToUnread: true }),
+    [books],
+  );
 
   if (loading) return null;
 
@@ -38,7 +34,7 @@ const CurrentlyReading: React.FC = () => {
   return (
     <Card padding="lg" className="w-full">
       <div className={containerClasses}>
-        {reading.map(book => (
+        {reading.map((book) => (
           <BookCard key={book.id} book={book} bookSize={{ width: 120, height: 180 }} />
         ))}
       </div>

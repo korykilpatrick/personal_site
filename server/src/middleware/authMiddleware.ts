@@ -16,7 +16,7 @@ type RequestWithUser = Request & { user?: JwtPayload };
 
 // Keep this alias so controllers can communicate auth intent without
 // narrowing the Express handler signature.
-export type AuthenticatedRequest = RequestWithUser;
+export type AuthenticatedRequest = Request;
 
 export const getAuthenticatedUser = (req: Request): JwtPayload | undefined =>
   (req as RequestWithUser).user;

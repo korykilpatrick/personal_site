@@ -4,8 +4,13 @@ import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
 import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
 import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
+import BookshelfReadingStack from '../components/bookshelf/BookshelfReadingStack';
 import useMultiSelect from '../hooks/useMultiSelect';
 import { BooksProvider, useBooks } from '../context/BooksContext';
+import {
+  compareReadingTimeline,
+  splitBooksByReadingState,
+} from '../components/bookshelf/bookshelfReadingState';
 
 const sortOptions: SortOption[] = [
   { label: 'Recently Read', value: 'date_read' },
@@ -15,50 +20,8 @@ const sortOptions: SortOption[] = [
   { label: 'Rating', value: 'rating' },
 ];
 
-const CURRENTLY_READING_SHELF_NAMES = new Set(['currently reading', 'currently-reading']);
-
-const getDateTimestamp = (value?: string | null): number => new Date(value || 0).getTime();
-
-const isCurrentlyReadingBook = (book: BookWithShelves): boolean =>
-  Boolean(
-    book.shelves?.some((shelf) => CURRENTLY_READING_SHELF_NAMES.has(shelf.name.toLowerCase())),
-  );
-
-const compareReadingTimeline = (a: BookWithShelves, b: BookWithShelves): number => {
-  const aIsCurrentlyReading = isCurrentlyReadingBook(a);
-  const bIsCurrentlyReading = isCurrentlyReadingBook(b);
-
-  if (aIsCurrentlyReading !== bIsCurrentlyReading) {
-    return aIsCurrentlyReading ? -1 : 1;
-  }
-
-  if (aIsCurrentlyReading && bIsCurrentlyReading) {
-    return (
-      getDateTimestamp(b.date_added) - getDateTimestamp(a.date_added) ||
-      a.title.localeCompare(b.title)
-    );
-  }
-
-  const aHasDateRead = Boolean(a.date_read);
-  const bHasDateRead = Boolean(b.date_read);
-
-  if (aHasDateRead !== bHasDateRead) {
-    return aHasDateRead ? -1 : 1;
-  }
-
-  if (aHasDateRead && bHasDateRead) {
-    return (
-      getDateTimestamp(b.date_read) - getDateTimestamp(a.date_read) ||
-      getDateTimestamp(b.date_added) - getDateTimestamp(a.date_added) ||
-      a.title.localeCompare(b.title)
-    );
-  }
-
-  return (
-    getDateTimestamp(b.date_added) - getDateTimestamp(a.date_added) ||
-    a.title.localeCompare(b.title)
-  );
-};
+const SHELF_BOOK_SIZE = { width: 120, height: 180 };
+const READING_STACK_BOOK_SIZE = { width: 114, height: 171 };
 
 const BookshelfPageContent: React.FC = () => {
   const { books: allBooks, loading: booksLoading, error: booksError } = useBooks();
@@ -126,6 +89,11 @@ const BookshelfPageContent: React.FC = () => {
     return result;
   }, [allBooks, selectedShelves, sortBy, searchQuery]);
 
+  const { currentBooks, shelvedBooks } = useMemo(
+    () => splitBooksByReadingState(filteredAndSortedBooks),
+    [filteredAndSortedBooks],
+  );
+
   if (booksLoading) {
     return <Loading className="h-64" />;
   }
@@ -153,7 +121,18 @@ const BookshelfPageContent: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
-      <BookshelfGrid books={filteredAndSortedBooks} bookSize={{ width: 120, height: 180 }} />
+      <BookshelfReadingStack books={currentBooks} bookSize={READING_STACK_BOOK_SIZE} />
+      {shelvedBooks.length > 0 ? (
+        <BookshelfGrid books={shelvedBooks} bookSize={SHELF_BOOK_SIZE} />
+      ) : filteredAndSortedBooks.length === 0 ? (
+        <div className="site-card-soft rounded-[24px] px-5 py-8 text-center">
+          <p className="mb-0 text-[0.98rem] text-textSecondary">
+            No books found with the current filters.
+          </p>
+        </div>
+      ) : (
+        <BookshelfGrid books={[]} bookSize={SHELF_BOOK_SIZE} showDecorativeFrameWhenEmpty />
+      )}
       <BookshelfQuoteDock />
     </div>
   );

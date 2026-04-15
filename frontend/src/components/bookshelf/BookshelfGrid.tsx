@@ -6,10 +6,41 @@ import { EmptyState } from '../ui';
 interface BookshelfGridProps {
   books: BookWithShelves[]; // Changed Book[] to BookWithShelves[]
   bookSize: { width: number; height: number };
+  showDecorativeFrameWhenEmpty?: boolean;
 }
 
-const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
-  if (books.length === 0) {
+const getBookshelfFrameStyle = (bookSize: { width: number; height: number }) => {
+  const rowHeight = bookSize.height + 12;
+  const shelfColor = '#10203a';
+
+  return {
+    backgroundImage: `
+      radial-gradient(circle at 50% 0%, rgba(132, 181, 255, 0.16), transparent 28%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.16)),
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.06) 0,
+        rgba(255,255,255,0.06) 2px,
+        rgba(8,15,27,0) 2px,
+        rgba(8,15,27,0) ${bookSize.height + 2}px,
+        rgba(132,181,255,0.2) ${bookSize.height + 2}px,
+        rgba(14,26,44,0.48) ${bookSize.height + 10}px,
+        ${shelfColor} ${rowHeight}px
+      ),
+      linear-gradient(135deg, #223652 0%, #17283f 38%, #0f1b2c 100%)
+    `,
+    backgroundSize: `100% 100%, 100% 100%, 100% ${rowHeight}px, 100% 100%`,
+    backgroundPosition: '0 0',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -14px 30px rgba(7,15,28,0.28)',
+  };
+};
+
+const BookshelfGrid: React.FC<BookshelfGridProps> = ({
+  books,
+  bookSize,
+  showDecorativeFrameWhenEmpty = false,
+}) => {
+  if (books.length === 0 && !showDecorativeFrameWhenEmpty) {
     return <EmptyState message="No books found with the current filters" />;
   }
 
@@ -23,32 +54,7 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
     >
       <div
         className="site-frame relative overflow-hidden rounded-[34px] pt-6 p-4 sm:pt-7 sm:p-5"
-        style={(() => {
-          const rowHeight = bookSize.height + 12;
-          const shelfColor = '#10203a';
-
-          return {
-            backgroundImage: `
-              radial-gradient(circle at 50% 0%, rgba(132, 181, 255, 0.16), transparent 28%),
-              linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.16)),
-              repeating-linear-gradient(
-                to bottom,
-                rgba(255,255,255,0.06) 0,
-                rgba(255,255,255,0.06) 2px,
-                rgba(8,15,27,0) 2px,
-                rgba(8,15,27,0) ${bookSize.height + 2}px,
-                rgba(132,181,255,0.2) ${bookSize.height + 2}px,
-                rgba(14,26,44,0.48) ${bookSize.height + 10}px,
-                ${shelfColor} ${rowHeight}px
-              ),
-              linear-gradient(135deg, #223652 0%, #17283f 38%, #0f1b2c 100%)
-            `,
-            backgroundSize: `100% 100%, 100% 100%, 100% ${rowHeight}px, 100% 100%`,
-            backgroundPosition: '0 0',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -14px 30px rgba(7,15,28,0.28)',
-          };
-        })()}
+        style={getBookshelfFrameStyle(bookSize)}
       >
         <div
           aria-hidden="true"
@@ -64,6 +70,7 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
           style={{
             gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
             perspective: '1000px',
+            minHeight: books.length === 0 ? `${bookSize.height + 24}px` : undefined,
           }}
         >
           {books.map((book) => (
@@ -75,4 +82,4 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize }) => {
   );
 };
 
-export default BookshelfGrid; 
+export default BookshelfGrid;
