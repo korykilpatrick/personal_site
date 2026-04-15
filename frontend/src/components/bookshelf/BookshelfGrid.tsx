@@ -6,7 +6,7 @@ import { EmptyState } from '../ui';
 interface BookshelfGridProps {
   books: BookWithShelves[]; // Changed Book[] to BookWithShelves[]
   bookSize: { width: number; height: number };
-  showDecorativeFrameWhenEmpty?: boolean;
+  currentBooks?: BookWithShelves[];
 }
 
 const getBookshelfFrameStyle = (bookSize: { width: number; height: number }) => {
@@ -35,14 +35,67 @@ const getBookshelfFrameStyle = (bookSize: { width: number; height: number }) => 
   };
 };
 
-const BookshelfGrid: React.FC<BookshelfGridProps> = ({
-  books,
-  bookSize,
-  showDecorativeFrameWhenEmpty = false,
-}) => {
-  if (books.length === 0 && !showDecorativeFrameWhenEmpty) {
+const CURRENT_BOOK_TRANSFORMS = [
+  {
+    restX: -4,
+    restY: 4,
+    restRotate: -8,
+    hoverX: -12,
+    hoverY: 11,
+    hoverRotate: -14,
+  },
+  {
+    restX: 2,
+    restY: -2,
+    restRotate: 5,
+    hoverX: 6,
+    hoverY: -8,
+    hoverRotate: 8,
+  },
+  {
+    restX: -2,
+    restY: 3,
+    restRotate: -4,
+    hoverX: -8,
+    hoverY: 7,
+    hoverRotate: -7,
+  },
+  {
+    restX: 3,
+    restY: -1,
+    restRotate: 7,
+    hoverX: 10,
+    hoverY: -6,
+    hoverRotate: 11,
+  },
+  {
+    restX: -3,
+    restY: 2,
+    restRotate: -6,
+    hoverX: -9,
+    hoverY: 6,
+    hoverRotate: -9,
+  },
+  {
+    restX: 2,
+    restY: -2,
+    restRotate: 4,
+    hoverX: 8,
+    hoverY: -5,
+    hoverRotate: 6,
+  },
+];
+
+const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize, currentBooks = [] }) => {
+  if (books.length === 0) {
     return <EmptyState message="No books found with the current filters" />;
   }
+
+  const currentBookPlacements = new Map(
+    currentBooks
+      .slice(0, CURRENT_BOOK_TRANSFORMS.length)
+      .map((book, index) => [book.id, { ...CURRENT_BOOK_TRANSFORMS[index], order: index }]),
+  );
 
   return (
     <div
@@ -70,12 +123,37 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
           style={{
             gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
             perspective: '1000px',
-            minHeight: books.length === 0 ? `${bookSize.height + 24}px` : undefined,
           }}
         >
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} bookSize={bookSize} />
-          ))}
+          {books.map((book) => {
+            const placement = currentBookPlacements.get(book.id);
+
+            return (
+              <div
+                key={book.id}
+                className={
+                  placement
+                    ? 'relative transition-transform duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] [transform:translate3d(var(--current-rest-x),var(--current-rest-y),0)_rotate(var(--current-rest-r))] hover:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))] focus-within:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))]'
+                    : 'relative'
+                }
+                style={
+                  placement
+                    ? ({
+                        '--current-rest-x': `${placement.restX}px`,
+                        '--current-rest-y': `${placement.restY}px`,
+                        '--current-rest-r': `${placement.restRotate}deg`,
+                        '--current-hover-x': `${placement.hoverX}px`,
+                        '--current-hover-y': `${placement.hoverY}px`,
+                        '--current-hover-r': `${placement.hoverRotate}deg`,
+                        zIndex: currentBooks.length - placement.order + 20,
+                      } as React.CSSProperties)
+                    : undefined
+                }
+              >
+                <BookCard book={book} bookSize={bookSize} />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

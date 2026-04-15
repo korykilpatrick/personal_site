@@ -96,4 +96,26 @@ describe('MultiSelectDropdown', () => {
     expect(checkboxes[1]).toBeChecked();      // Non-Fiction
     expect(checkboxes[2]).not.toBeChecked(); // Currently Reading
   });
+
+  it('highlights selected shelf rows for contrast', async () => {
+    const user = userEvent.setup();
+    render(
+      <MultiSelectDropdown
+        label="Select Shelves"
+        items={shelves}
+        selectedItems={[2]}
+        toggleItem={jest.fn()}
+      />
+    );
+
+    await act(async () => {
+      await user.click(screen.getByText('1 selected'));
+    });
+
+    const selectedRow = screen.getByText('Non-Fiction').closest('label');
+    const unselectedRow = screen.getByText('Fiction').closest('label');
+
+    expect(selectedRow).toHaveClass('bg-primary/[0.08]', 'text-primary');
+    expect(unselectedRow).toHaveClass('text-textSecondary');
+  });
 });
