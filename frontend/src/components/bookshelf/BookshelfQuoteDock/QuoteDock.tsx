@@ -85,12 +85,22 @@ const QuoteDock: React.FC<QuoteDockProps> = ({
         <div className="bookshelf-quote-dock__reading-mist absolute inset-0" />
       </div>
 
+      <div className="absolute inset-x-0 -top-0.5 z-10 flex justify-center">
+        <button
+          type="button"
+          onClick={onHideDock}
+          aria-label="Hide quote dock"
+          className="bookshelf-quote-dock__collapse-control bookshelf-quote-dock__collapse-handle"
+        >
+          <span aria-hidden="true" className="bookshelf-quote-dock__collapse-bar" />
+        </button>
+      </div>
+
       <div className="relative mx-auto max-w-5xl">
         <QuoteDockControls
           quoteCount={quotesLength}
           onPrevious={onPrevious}
           onNext={onNext}
-          onHideDock={onHideDock}
         />
 
         <QuoteDockContent

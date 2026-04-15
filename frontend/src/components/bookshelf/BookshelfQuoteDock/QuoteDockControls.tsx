@@ -5,25 +5,14 @@ interface QuoteDockControlsProps {
   quoteCount: number;
   onPrevious: () => void;
   onNext: () => void;
-  onHideDock: () => void;
 }
 
 const QuoteDockControls: React.FC<QuoteDockControlsProps> = ({
   quoteCount,
   onPrevious,
   onNext,
-  onHideDock,
 }) => (
   <>
-    <button
-      type="button"
-      onClick={onHideDock}
-      aria-label="Hide quote dock"
-      className="bookshelf-quote-dock__collapse-control absolute right-3 top-2 z-10 sm:right-4 sm:top-3"
-    >
-      <Icon name="chevron-down" className="h-3.5 w-3.5" />
-    </button>
-
     {quoteCount > 1 && (
       <>
         <button
