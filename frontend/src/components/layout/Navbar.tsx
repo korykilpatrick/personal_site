@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Icon, { IconName } from '@/components/common/Icon';
+import { warmBookshelfExperience } from '@/pages/bookshelfWarmup';
 
 // Icon size constants
 const MOBILE_ICON_CLASSNAME = 'h-[18px] w-[18px]';
@@ -70,6 +71,20 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    if (!['/', '/about'].includes(location.pathname)) {
+      return;
+    }
+
+    const warmupId = window.setTimeout(() => {
+      void warmBookshelfExperience();
+    }, 300);
+
+    return () => {
+      window.clearTimeout(warmupId);
+    };
+  }, [location.pathname]);
+
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
@@ -78,6 +93,9 @@ const Navbar: React.FC = () => {
   };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const handleBookshelfIntent = () => {
+    void warmBookshelfExperience();
+  };
 
   return (
     <header className="sticky top-0 z-40 mb-2 border-b border-[rgba(137,181,255,0.12)] bg-[linear-gradient(180deg,rgba(15,29,48,0.97),rgba(10,19,33,0.93))] text-white shadow-[0_16px_46px_rgba(10,19,33,0.24)] backdrop-blur-md">
@@ -106,6 +124,8 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.path}
+                onMouseEnter={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
+                onFocus={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
                 className={`rounded-[12px] px-4 py-2 font-mono text-[0.74rem] uppercase tracking-[0.12em] no-underline transition ${
                   isActive(link.path)
                     ? 'border border-secondary/40 bg-[rgba(63,127,216,0.26)] !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
@@ -178,6 +198,7 @@ const Navbar: React.FC = () => {
                 <Link
                   key={link.name}
                   to={link.path}
+                  onTouchStart={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
                   className={`block rounded-[12px] px-3 py-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] no-underline transition ${
                     isActive(link.path)
                       ? 'border border-secondary/40 bg-[rgba(63,127,216,0.26)] !text-white'

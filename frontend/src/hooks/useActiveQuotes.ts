@@ -10,29 +10,61 @@ interface UseActiveQuotesResult {
   error: string | null;
 }
 
+let activeQuotesCache: Quote[] | null = null;
+let activeQuotesRequest: Promise<Quote[]> | null = null;
+
+const loadActiveQuotes = async (): Promise<Quote[]> => {
+  if (activeQuotesCache !== null) {
+    return activeQuotesCache;
+  }
+
+  if (!activeQuotesRequest) {
+    activeQuotesRequest = apiService
+      .getActiveQuotes()
+      .then((quotes) => {
+        activeQuotesCache = Array.isArray(quotes) ? shuffleArray([...quotes]) : [];
+        return activeQuotesCache;
+      })
+      .finally(() => {
+        activeQuotesRequest = null;
+      });
+  }
+
+  return activeQuotesRequest;
+};
+
+export const resetActiveQuotesCache = (): void => {
+  activeQuotesCache = null;
+  activeQuotesRequest = null;
+};
+
 const useActiveQuotes = (): UseActiveQuotesResult => {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [quotes, setQuotes] = useState<Quote[]>(() => activeQuotesCache ?? []);
+  const [loading, setLoading] = useState(() => activeQuotesCache === null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
+
+    if (activeQuotesCache !== null) {
+      setQuotes(activeQuotesCache);
+      setLoading(false);
+      setError(null);
+      return () => {
+        isCancelled = true;
+      };
+    }
 
     const fetchQuotes = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const quotes = await apiService.getActiveQuotes();
+        const quotes = await loadActiveQuotes();
         if (isCancelled) {
           return;
         }
-
-        if (Array.isArray(quotes)) {
-          setQuotes(shuffleArray([...quotes]));
-        } else {
-          setQuotes([]);
-        }
+        setQuotes(quotes);
       } catch (err: unknown) {
         if (isCancelled) {
           return;
@@ -48,7 +80,7 @@ const useActiveQuotes = (): UseActiveQuotesResult => {
       }
     };
 
-    fetchQuotes();
+    void fetchQuotes();
 
     return () => {
       isCancelled = true;

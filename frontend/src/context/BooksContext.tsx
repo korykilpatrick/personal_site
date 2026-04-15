@@ -21,22 +21,62 @@ interface BooksProviderProps {
   children: ReactNode;
 }
 
+let booksCache: BookWithShelves[] | null = null;
+let booksRequest: Promise<BookWithShelves[]> | null = null;
+
+const loadBooks = async (): Promise<BookWithShelves[]> => {
+  if (booksCache) {
+    return booksCache;
+  }
+
+  if (!booksRequest) {
+    booksRequest = apiService
+      .getBooks(true)
+      .then((fetched) => {
+        booksCache = fetched as BookWithShelves[];
+        return booksCache;
+      })
+      .finally(() => {
+        booksRequest = null;
+      });
+  }
+
+  return booksRequest;
+};
+
+export const prefetchBooks = (): Promise<BookWithShelves[]> => loadBooks();
+
+export const resetBooksCache = (): void => {
+  booksCache = null;
+  booksRequest = null;
+};
+
 /**
  * BooksProvider fetches all BookWithShelves when a book-aware route mounts
  * and provides them to its subtree.
  */
 export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
-  const [books, setBooks] = useState<BookWithShelves[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [books, setBooks] = useState<BookWithShelves[]>(() => booksCache ?? []);
+  const [loading, setLoading] = useState(() => booksCache === null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let isMounted = true; // For safety if a user navigates away mid-fetch
+    let isMounted = true;
+
+    if (booksCache) {
+      setBooks(booksCache);
+      setLoading(false);
+      setError(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
     const fetchBooks = async () => {
       try {
-        const fetched = await apiService.getBooks(true);
+        const fetched = await loadBooks();
         if (isMounted) {
-          setBooks(fetched as BookWithShelves[]);
+          setBooks(fetched);
           setError(null);
         }
       } catch (err) {
@@ -50,7 +90,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
         }
       }
     };
-    fetchBooks();
+
+    void fetchBooks();
+
     return () => {
       isMounted = false;
     };

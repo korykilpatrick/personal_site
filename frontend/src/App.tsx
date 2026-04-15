@@ -4,12 +4,12 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
+import BookshelfPage from './pages/BookshelfPage';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { ToastProvider } from './context/ToastContext';
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-const BookshelfPage = lazy(() => import('./pages/BookshelfPage'));
 const QuotesPage = lazy(() => import('./pages/QuotesPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -48,9 +48,7 @@ const App: React.FC = () => {
                 path="/bookshelf"
                 element={
                   <Layout>
-                    <Suspense fallback={<RouteLoader label="Loading bookshelf" />}>
-                      <BookshelfPage />
-                    </Suspense>
+                    <BookshelfPage />
                   </Layout>
                 }
               />
