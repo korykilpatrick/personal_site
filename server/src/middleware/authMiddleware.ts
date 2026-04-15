@@ -12,13 +12,14 @@ export interface JwtPayload {
   // role?: string; // Add role if using role-based access control
 }
 
-// Request is already globally augmented in src/types/express.d.ts.
+type RequestWithUser = Request & { user?: JwtPayload };
+
 // Keep this alias so controllers can communicate auth intent without
 // narrowing the Express handler signature.
-export type AuthenticatedRequest = Request;
+export type AuthenticatedRequest = RequestWithUser;
 
 export const getAuthenticatedUser = (req: Request): JwtPayload | undefined =>
-  req.user as JwtPayload | undefined;
+  (req as RequestWithUser).user;
 
 export const getAuthenticatedUsername = (req: Request): string | undefined =>
   getAuthenticatedUser(req)?.username;
@@ -60,7 +61,7 @@ export const protect: RequestHandler = async (
     // if (!user) { return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'User not found' }); }
 
     // For now, trust the decoded payload (simpler for single-user scenario)
-    authReq.user = decoded as Express.User;
+    authReq.user = decoded;
 
     next();
   } catch (error) {
