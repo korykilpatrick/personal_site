@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../../middleware/authMiddleware'; // Import custom request type
+import { AuthenticatedRequest, getAuthenticatedUsername } from '../../middleware/authMiddleware'; // Import custom request type
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../utils/logger';
 // Import ProjectModel instance
@@ -15,7 +15,7 @@ import { Project as SharedProject } from '../../../../types'; // Import types fr
  */
 export const getProjects = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    logger.info('Admin fetching all projects', { user: req.user?.username });
+    logger.info('Admin fetching all projects', { user: getAuthenticatedUsername(req) });
     // Use the API-ready model method
     const projects = await ProjectModel.getAllApi(); 
     res.status(StatusCodes.OK).json(projects);
@@ -39,7 +39,7 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response, n
   // }
 
   try {
-    logger.info('Admin fetching project by ID', { user: req.user?.username, id });
+    logger.info('Admin fetching project by ID', { user: getAuthenticatedUsername(req), id });
     // Use the API-ready model method
     const project = await ProjectModel.getByIdApi(projectId);
     if (!project) {
@@ -72,7 +72,10 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
   // if (!Array.isArray(projectData.media_urls)) projectData.media_urls = [];
 
   try {
-    logger.info('Admin creating project', { user: req.user?.username, title: projectData.title });
+    logger.info('Admin creating project', {
+      user: getAuthenticatedUsername(req),
+      title: projectData.title,
+    });
     
     // Use the model's createFromApi method which expects the SharedProject type
     const newProject = await ProjectModel.createFromApi(projectData); 
@@ -119,7 +122,7 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response, ne
   // }
 
   try {
-    logger.info('Admin updating project', { user: req.user?.username, id });
+    logger.info('Admin updating project', { user: getAuthenticatedUsername(req), id });
     
     // Use the model's updateFromApi method which expects the SharedProject type
     const updatedProject = await ProjectModel.updateFromApi(projectId, projectData);
@@ -150,7 +153,7 @@ export const deleteProject = async (req: AuthenticatedRequest, res: Response, ne
   // }
 
   try {
-    logger.info('Admin deleting project', { user: req.user?.username, id });
+    logger.info('Admin deleting project', { user: getAuthenticatedUsername(req), id });
     // Use model method
     const deleted = await ProjectModel.delete(projectId);
 

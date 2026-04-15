@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../../middleware/authMiddleware';
+import { AuthenticatedRequest, getAuthenticatedUsername } from '../../middleware/authMiddleware';
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../utils/logger';
 import { WorkEntryModel } from '../../models/WorkEntry'; // Import the model
@@ -13,7 +13,7 @@ import { WorkEntry as SharedWorkEntry } from '../../../../types'; // Import shar
  */
 export const getWorkEntries = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    logger.info('Admin fetching all work entries', { user: req.user?.username });
+    logger.info('Admin fetching all work entries', { user: getAuthenticatedUsername(req) });
     const workEntries = await WorkEntryModel.getAllApi();
     res.status(StatusCodes.OK).json(workEntries);
   } catch (error) {
@@ -31,7 +31,7 @@ export const getWorkEntryById = async (req: AuthenticatedRequest, res: Response,
   const workEntryId = parseInt(id, 10);
 
   try {
-    logger.info('Admin fetching work entry by ID', { user: req.user?.username, id });
+    logger.info('Admin fetching work entry by ID', { user: getAuthenticatedUsername(req), id });
     const workEntry = await WorkEntryModel.getByIdApi(workEntryId);
     if (!workEntry) {
       logger.warn('Work entry not found for getById', { id });
@@ -52,7 +52,11 @@ export const createWorkEntry = async (req: AuthenticatedRequest, res: Response, 
   const workEntryData: Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'> = req.body; 
 
   try {
-    logger.info('Admin creating work entry', { user: req.user?.username, company: workEntryData.company, role: workEntryData.role });
+    logger.info('Admin creating work entry', {
+      user: getAuthenticatedUsername(req),
+      company: workEntryData.company,
+      role: workEntryData.role,
+    });
     
     // Use the model's createFromApi method
     const newWorkEntry = await WorkEntryModel.createFromApi(workEntryData);
@@ -75,7 +79,7 @@ export const updateWorkEntry = async (req: AuthenticatedRequest, res: Response, 
   const workEntryData: Partial<Omit<SharedWorkEntry, 'id' | 'created_at' | 'updated_at'>> = req.body;
 
   try {
-    logger.info('Admin updating work entry', { user: req.user?.username, id });
+    logger.info('Admin updating work entry', { user: getAuthenticatedUsername(req), id });
 
     // Use the model's updateFromApi method
     const updatedWorkEntry = await WorkEntryModel.updateFromApi(workEntryId, workEntryData);
@@ -101,7 +105,7 @@ export const deleteWorkEntry = async (req: AuthenticatedRequest, res: Response, 
   const workEntryId = parseInt(id, 10);
 
   try {
-    logger.info('Admin deleting work entry', { user: req.user?.username, id });
+    logger.info('Admin deleting work entry', { user: getAuthenticatedUsername(req), id });
     // Use the model's delete method (assuming it returns the count or similar)
     // Check BaseModel or WorkEntryModel for the exact return type of delete
     const deleted = await WorkEntryModel.delete(workEntryId);

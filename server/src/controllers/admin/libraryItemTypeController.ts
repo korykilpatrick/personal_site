@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { CRUDController } from '../base/CRUDController';
 import { LibraryItemTypeModel, LibraryItemType } from '../../models/LibraryItemType';
 import LibraryItemTypeService from '../../services/LibraryItemTypeService';
-import { AuthenticatedRequest } from '../../middleware/authMiddleware';
+import { AuthenticatedRequest, getAuthenticatedUsername } from '../../middleware/authMiddleware';
 import logger from '../../utils/logger';
 
 /**
@@ -25,7 +25,7 @@ class AdminLibraryItemTypeControllerClass extends CRUDController<LibraryItemType
       }
 
       logger.info(`Admin creating new ${this.resourceName}`, { 
-        user: req.user?.username,
+        user: getAuthenticatedUsername(req),
         data: req.body
       });
 
@@ -56,7 +56,7 @@ class AdminLibraryItemTypeControllerClass extends CRUDController<LibraryItemType
 
       logger.info(`Admin updating ${this.resourceName}`, { 
         id, 
-        user: req.user?.username,
+        user: getAuthenticatedUsername(req),
         data: req.body
       });
 

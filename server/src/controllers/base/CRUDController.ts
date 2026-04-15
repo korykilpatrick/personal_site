@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { BaseRecord } from '@shared/index';
 import { BaseModel } from '../../models/BaseModel';
 import { BaseService } from '../../services/BaseService';
-import { AuthenticatedRequest } from '../../middleware/authMiddleware';
+import { AuthenticatedRequest, getAuthenticatedUsername } from '../../middleware/authMiddleware';
 import logger from '../../utils/logger';
 
 /**
@@ -27,7 +27,7 @@ export class CRUDController<T extends BaseRecord> {
   getAll = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info(`Admin fetching all ${this.resourceName}`, { 
-        user: req.user?.username 
+        user: getAuthenticatedUsername(req)
       });
       const items = await this.service.getAll();
       res.status(StatusCodes.OK).json(items);
@@ -52,7 +52,7 @@ export class CRUDController<T extends BaseRecord> {
 
       logger.info(`Admin fetching ${this.resourceName} by ID`, { 
         id, 
-        user: req.user?.username 
+        user: getAuthenticatedUsername(req)
       });
 
       const item = await this.service.getById(id);
@@ -75,7 +75,7 @@ export class CRUDController<T extends BaseRecord> {
   create = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info(`Admin creating new ${this.resourceName}`, { 
-        user: req.user?.username,
+        user: getAuthenticatedUsername(req),
         data: req.body
       });
 
@@ -102,7 +102,7 @@ export class CRUDController<T extends BaseRecord> {
 
       logger.info(`Admin updating ${this.resourceName}`, { 
         id, 
-        user: req.user?.username,
+        user: getAuthenticatedUsername(req),
         data: req.body
       });
 
@@ -135,7 +135,7 @@ export class CRUDController<T extends BaseRecord> {
 
       logger.info(`Admin deleting ${this.resourceName}`, { 
         id, 
-        user: req.user?.username 
+        user: getAuthenticatedUsername(req)
       });
 
       const deleted = await this.service.delete(id);

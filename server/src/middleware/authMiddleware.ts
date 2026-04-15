@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config/config';
 import { StatusCodes } from 'http-status-codes';
@@ -12,23 +12,36 @@ export interface JwtPayload {
   // role?: string; // Add role if using role-based access control
 }
 
-// Define a custom request type that includes the user payload
-export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload; // Use the defined JwtPayload type
-}
+// Request is already globally augmented in src/types/express.d.ts.
+// Keep this alias so controllers can communicate auth intent without
+// narrowing the Express handler signature.
+export type AuthenticatedRequest = Request;
 
-export const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => { // Make async if adding DB check
-  const authHeader = req.headers.authorization;
+export const getAuthenticatedUser = (req: Request): JwtPayload | undefined =>
+  req.user as JwtPayload | undefined;
+
+export const getAuthenticatedUsername = (req: Request): string | undefined =>
+  getAuthenticatedUser(req)?.username;
+
+export const protect: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const authReq = req as AuthenticatedRequest;
+  const authHeader = authReq.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     logger.warn('Authorization attempt failed: No token provided');
-    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, no token' });
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, no token' });
+    return;
   }
 
   const token = authHeader.split(' ')[1];
   if (!token) {
     logger.warn('Authorization attempt failed: Empty token');
-    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, no token' });
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, no token' });
+    return;
   }
 
   try {
@@ -47,13 +60,13 @@ export const protect = async (req: AuthenticatedRequest, res: Response, next: Ne
     // if (!user) { return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'User not found' }); }
 
     // For now, trust the decoded payload (simpler for single-user scenario)
-    req.user = decoded;
+    authReq.user = decoded as Express.User;
 
-    return next(); // Proceed to the next middleware/route handler
+    next();
   } catch (error) {
     logger.error('JWT verification failed', { error });
     // Handle different JWT errors specifically if needed (e.g., TokenExpiredError)
-    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, token failed' });
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Not authorized, token failed' });
   }
 };
 
