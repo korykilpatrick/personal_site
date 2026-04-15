@@ -8,7 +8,9 @@ import {
   NavLink,
 } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
 import adminApi from '../api/adminApi';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import ProjectForm from '@/components/admin/ProjectForm';
 import ProjectList from '@/components/admin/ProjectList';
 import WorkForm from '@/components/admin/WorkForm';
@@ -175,7 +177,7 @@ const ManageSiteNotes: React.FC = () => <Outlet />;
 const ManageQuotes: React.FC = () => <Outlet />;
 const ManageLibraryItems: React.FC = () => <Outlet />;
 
-const AdminPage: React.FC = () => {
+const AdminPageContent: React.FC = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -276,5 +278,13 @@ const AdminPage: React.FC = () => {
     </div>
   );
 };
+
+const AdminPage: React.FC = () => (
+  <AuthProvider>
+    <ProtectedRoute>
+      <AdminPageContent />
+    </ProtectedRoute>
+  </AuthProvider>
+);
 
 export default AdminPage;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
 import { Quote } from 'types';
+import Icon from '@/components/common/Icon';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 import useActiveQuotes from '@/hooks/useActiveQuotes';
 import { calculateDisplayTime, toPlainText, truncateAtWordBoundary } from '@/utils/quoteUtils';
@@ -61,7 +61,7 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, quote, onClose }) => {
           className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-primary/12 bg-white/74 text-textSecondary transition hover:border-secondary/24 hover:text-primary"
           aria-label="Close quote viewer"
         >
-          <FaTimes className="h-4 w-4" />
+          <Icon name="close" className="h-4 w-4" />
         </button>
 
         <div className="max-h-[85vh] overflow-y-auto px-6 pb-8 pt-16 sm:px-10 sm:pb-10 sm:pt-20">
@@ -217,7 +217,7 @@ const QuoteCarousel: React.FC = () => {
                 aria-label="Previous quote"
                 className="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[12px] border border-primary/10 bg-white/54 text-textSecondary transition hover:border-secondary/24 hover:bg-white/72 hover:text-primary sm:left-4"
               >
-                <FaChevronLeft className="h-3 w-3" />
+                <Icon name="chevron-left" className="h-3 w-3" />
               </button>
 
               <button
@@ -226,7 +226,7 @@ const QuoteCarousel: React.FC = () => {
                 aria-label="Next quote"
                 className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[12px] border border-primary/10 bg-white/54 text-textSecondary transition hover:border-secondary/24 hover:bg-white/72 hover:text-primary sm:right-4"
               >
-                <FaChevronRight className="h-3 w-3" />
+                <Icon name="chevron-right" className="h-3 w-3" />
               </button>
             </>
           )}

@@ -22,8 +22,8 @@ interface BooksProviderProps {
 }
 
 /**
- * BooksProvider fetches all BookWithShelves once at app startup
- * and provides them to all children.
+ * BooksProvider fetches all BookWithShelves when a book-aware route mounts
+ * and provides them to its subtree.
  */
 export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
   const [books, setBooks] = useState<BookWithShelves[]>([]);

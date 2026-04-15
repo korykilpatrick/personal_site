@@ -5,7 +5,7 @@ import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
 import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
 import useMultiSelect from '../hooks/useMultiSelect';
-import { useBooks } from '../context/BooksContext';
+import { BooksProvider, useBooks } from '../context/BooksContext';
 
 const sortOptions: SortOption[] = [
   { label: 'Recently Read', value: 'date_read' },
@@ -60,7 +60,7 @@ const compareReadingTimeline = (a: BookWithShelves, b: BookWithShelves): number 
   );
 };
 
-const BookshelfPage: React.FC = () => {
+const BookshelfPageContent: React.FC = () => {
   const { books: allBooks, loading: booksLoading, error: booksError } = useBooks();
 
   const {
@@ -158,5 +158,11 @@ const BookshelfPage: React.FC = () => {
     </div>
   );
 };
+
+const BookshelfPage: React.FC = () => (
+  <BooksProvider>
+    <BookshelfPageContent />
+  </BooksProvider>
+);
 
 export default BookshelfPage;

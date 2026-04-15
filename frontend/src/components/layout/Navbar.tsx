@@ -1,24 +1,74 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaXTwitter, FaGithub, FaLinkedinIn } from 'react-icons/fa6';
-import { MdEmail } from 'react-icons/md';
+import Icon, { IconName } from '@/components/common/Icon';
 
 // Icon size constants
-const MOBILE_ICON_SIZE = 18;
+const MOBILE_ICON_CLASSNAME = 'h-[18px] w-[18px]';
+const DESKTOP_ICON_CLASSNAME = 'h-7 w-7';
 
 // Icon style constants
 const ICON_LINK_CLASSNAME =
   'text-slate-100 hover:text-secondary-light no-underline transition duration-300';
 const EMAIL_HREF = 'mailto:koryrkilpatrick@gmail.com';
 
+const NAV_LINKS = [
+  { name: 'About', path: '/' },
+  { name: 'Bookshelf', path: '/bookshelf' },
+] as const;
+
+const SOCIAL_LINKS: Array<{
+  href: string;
+  label: string;
+  icon: IconName;
+  external?: boolean;
+}> = [
+  {
+    href: 'https://x.com/kory_kilpatrick',
+    label: 'X (formerly Twitter)',
+    icon: 'twitter',
+  },
+  {
+    href: 'https://github.com/korykilpatrick',
+    label: 'GitHub',
+    icon: 'github',
+  },
+  {
+    href: 'https://www.linkedin.com/in/kory-kilpatrick-b60707243/',
+    label: 'LinkedIn',
+    icon: 'linkedin',
+  },
+  {
+    href: EMAIL_HREF,
+    label: 'Email Kory',
+    icon: 'email',
+    external: false,
+  },
+];
+
+interface SocialLinksProps {
+  iconClassName: string;
+}
+
+const SocialLinks: React.FC<SocialLinksProps> = ({ iconClassName }) => (
+  <>
+    {SOCIAL_LINKS.map((link) => (
+      <a
+        key={link.label}
+        href={link.href}
+        target={link.external === false ? undefined : '_blank'}
+        rel={link.external === false ? undefined : 'noopener noreferrer'}
+        className={ICON_LINK_CLASSNAME}
+        aria-label={link.label}
+      >
+        <Icon name={link.icon} className={iconClassName} />
+      </a>
+    ))}
+  </>
+);
+
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-
-  const navLinks = [
-    { name: 'About', path: '/' },
-    { name: 'Bookshelf', path: '/bookshelf' },
-  ];
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -52,7 +102,7 @@ const Navbar: React.FC = () => {
 
           {/* Links */}
           <div className="justify-self-center flex items-center gap-2 rounded-[16px] border border-white/22 bg-white/[0.08] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -78,44 +128,7 @@ const Navbar: React.FC = () => {
             >
               5HC
             </a>
-            {/* X (formerly Twitter) */}
-            <a
-              href="https://x.com/kory_kilpatrick"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={ICON_LINK_CLASSNAME}
-              aria-label="X (formerly Twitter)"
-            >
-              <FaXTwitter size={28} />
-            </a>
-            {/* GitHub */}
-            <a
-              href="https://github.com/korykilpatrick"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={ICON_LINK_CLASSNAME}
-              aria-label="GitHub"
-            >
-              <FaGithub size={28} />
-            </a>
-            {/* LinkedIn */}
-            <a
-              href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={ICON_LINK_CLASSNAME}
-              aria-label="LinkedIn"
-            >
-              <FaLinkedinIn size={28} />
-            </a>
-            {/* Email */}
-            <a
-              href={EMAIL_HREF}
-              className={ICON_LINK_CLASSNAME}
-              aria-label="Email Kory"
-            >
-              <MdEmail size={28} />
-            </a>
+            <SocialLinks iconClassName={DESKTOP_ICON_CLASSNAME} />
           </div>
         </div>
 
@@ -161,7 +174,7 @@ const Navbar: React.FC = () => {
 
           {isMenuOpen && (
             <div className="mt-3 w-full rounded-[20px] border border-white/16 bg-white/[0.08] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-              {navLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
@@ -186,40 +199,7 @@ const Navbar: React.FC = () => {
                 >
                   5HC
                 </a>
-                <a
-                  href="https://x.com/kory_kilpatrick"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_LINK_CLASSNAME}
-                  aria-label="X (formerly Twitter)"
-                >
-                  <FaXTwitter size={MOBILE_ICON_SIZE} />
-                </a>
-                <a
-                  href="https://github.com/korykilpatrick"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_LINK_CLASSNAME}
-                  aria-label="GitHub"
-                >
-                  <FaGithub size={MOBILE_ICON_SIZE} />
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/kory-kilpatrick-b60707243/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={ICON_LINK_CLASSNAME}
-                  aria-label="LinkedIn"
-                >
-                  <FaLinkedinIn size={MOBILE_ICON_SIZE} />
-                </a>
-                <a
-                  href={EMAIL_HREF}
-                  className={ICON_LINK_CLASSNAME}
-                  aria-label="Email Kory"
-                >
-                  <MdEmail size={MOBILE_ICON_SIZE} />
-                </a>
+                <SocialLinks iconClassName={MOBILE_ICON_CLASSNAME} />
               </div>
             </div>
           )}

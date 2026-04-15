@@ -1,5 +1,15 @@
 module.exports = {
-  content: ['./frontend/src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  content: [
+    './frontend/src/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/**/*.test.{js,jsx,ts,tsx}',
+    '!./frontend/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/pages/dormant/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/components/library/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/components/projects/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/components/work/**/*.{js,jsx,ts,tsx}',
+    '!./frontend/src/components/home/{CurrentlyReading,ExploreGrid,HomepageLibraryItem,NavCard,SiteNote,WelcomeBlurb}.tsx',
+    './public/index.html',
+  ],
   theme: {
     extend: {
       colors: {

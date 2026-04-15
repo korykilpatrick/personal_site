@@ -10,9 +10,13 @@ import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 
 interface ProtectedRouteProps {
   redirectPath?: string;
+  children?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ redirectPath = '/login' }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  redirectPath = '/login',
+  children,
+}) => {
   const { isAuthenticated, isLoading } = useAuth(); // Use context
   const location = useLocation();
 
@@ -29,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ redirectPath = '/login'
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
-  return <Outlet />; // Render child routes/components if authenticated
+  return children ? <>{children}</> : <Outlet />; // Render child routes/components if authenticated
 };
 
 export default ProtectedRoute; 

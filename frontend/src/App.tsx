@@ -4,22 +4,32 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
-import BookshelfPage from './pages/BookshelfPage';
-import QuotesPage from './pages/QuotesPage';
-import NotFoundPage from './pages/NotFoundPage';
-import LoginPage from './pages/LoginPage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
-import { BooksProvider } from './context/BooksContext';
 import { ToastProvider } from './context/ToastContext';
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const BookshelfPage = lazy(() => import('./pages/BookshelfPage'));
+const QuotesPage = lazy(() => import('./pages/QuotesPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 const GlobalImageModal: React.FC = () => {
   const { isOpen, imageUrl, altText, closeModal } = useModal();
   return <ImageModal isOpen={isOpen} imageUrl={imageUrl} altText={altText} onClose={closeModal} />;
 };
+
+interface RouteLoaderProps {
+  label: string;
+}
+
+const RouteLoader: React.FC<RouteLoaderProps> = ({ label }) => (
+  <div className="flex min-h-[40vh] items-center justify-center py-12">
+    <p className="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-textTertiary">
+      {label}
+    </p>
+  </div>
+);
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -27,38 +37,68 @@ const App: React.FC = () => {
 
   return (
     <ModalProvider>
-      <BooksProvider>
-        <ToastProvider>
-          <div className="flex flex-col min-h-screen bg-background">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Layout><AboutPage /></Layout>} />
-                <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-                <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
-                <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
+      <ToastProvider>
+        <div className="flex flex-col min-h-screen bg-background">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Layout><AboutPage /></Layout>} />
+              <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+              <Route
+                path="/bookshelf"
+                element={
+                  <Layout>
+                    <Suspense fallback={<RouteLoader label="Loading bookshelf" />}>
+                      <BookshelfPage />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/quotes"
+                element={
+                  <Layout>
+                    <Suspense fallback={<RouteLoader label="Loading quotes" />}>
+                      <QuotesPage />
+                    </Suspense>
+                  </Layout>
+                }
+              />
 
-                <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/login"
+                element={
+                  <Suspense fallback={<RouteLoader label="Loading login" />}>
+                    <LoginPage />
+                  </Suspense>
+                }
+              />
 
-                <Route element={<ProtectedRoute />}>
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <Suspense fallback={<div>Loading Admin...</div>}>
-                        <AdminPage />
-                      </Suspense>
-                    }
-                  />
-                </Route>
+              <Route
+                path="/admin/*"
+                element={
+                  <Suspense fallback={<RouteLoader label="Loading admin" />}>
+                    <AdminPage />
+                  </Suspense>
+                }
+              />
 
-                <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-              </Routes>
-            </main>
-            {!hideFooter && <Footer />}
-            <GlobalImageModal />
-          </div>
-        </ToastProvider>
-      </BooksProvider>
+              <Route
+                path="*"
+                element={
+                  <Layout>
+                    <Suspense fallback={<RouteLoader label="Loading page" />}>
+                      <NotFoundPage />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+            </Routes>
+          </main>
+          {!hideFooter && <Footer />}
+          <GlobalImageModal />
+        </div>
+      </ToastProvider>
     </ModalProvider>
   );
 };

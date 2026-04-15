@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaChevronDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Icon from '@/components/common/Icon';
 
 interface QuoteDockControlsProps {
   quoteCount: number;
@@ -21,7 +21,7 @@ const QuoteDockControls: React.FC<QuoteDockControlsProps> = ({
       aria-label="Hide quote dock"
       className="bookshelf-quote-dock__collapse-control absolute right-3 top-2 z-10 sm:right-4 sm:top-3"
     >
-      <FaChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
+      <Icon name="chevron-down" className="h-3.5 w-3.5" />
     </button>
 
     {quoteCount > 1 && (
@@ -32,7 +32,7 @@ const QuoteDockControls: React.FC<QuoteDockControlsProps> = ({
           aria-label="Previous quote"
           className="bookshelf-quote-dock__edge-control absolute left-1 top-1/2 z-10 -translate-y-1/2 sm:left-3"
         >
-          <FaChevronLeft className="h-3.5 w-3.5" />
+          <Icon name="chevron-left" className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
@@ -40,7 +40,7 @@ const QuoteDockControls: React.FC<QuoteDockControlsProps> = ({
           aria-label="Next quote"
           className="bookshelf-quote-dock__edge-control absolute right-10 top-1/2 z-10 -translate-y-1/2 sm:right-12"
         >
-          <FaChevronRight className="h-3.5 w-3.5" />
+          <Icon name="chevron-right" className="h-3.5 w-3.5" />
         </button>
       </>
     )}

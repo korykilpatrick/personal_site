@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  FaGithub,
-  FaLinkedin,
-  FaYoutube,
-  FaTwitter,
-  FaExternalLinkAlt,
-  FaLink, // Keep as a potential fallback/error icon
-} from 'react-icons/fa';
 import { LinkIconName } from 'types'; // Import from the central types repository
+import Icon, { IconName } from './Icon';
 
 interface LinkIconProps {
   /** The pre-determined icon name (e.g., 'github', 'website'). Takes precedence over URL. */
@@ -30,8 +23,8 @@ const LinkIcon: React.FC<LinkIconProps> = ({
   className = '',
   ariaLabel,
 }) => {
-  let DeterminedIcon: React.ComponentType<{ className?: string; 'aria-label'?: string }> | null = null;
-  let determinedLabel: string = ariaLabel || 'Link'; // Default label
+  let determinedIconName: IconName = 'external-link';
+  let determinedLabel = 'Link';
 
   let effectiveIconName = iconName;
 
@@ -54,35 +47,32 @@ const LinkIcon: React.FC<LinkIconProps> = ({
   // 2. Map the effectiveIconName (or lack thereof) to the component and default label
   switch (effectiveIconName) {
     case 'github':
-      DeterminedIcon = FaGithub;
-      determinedLabel = ariaLabel || 'GitHub Icon';
+      determinedIconName = 'github';
+      determinedLabel = 'GitHub Icon';
       break;
     case 'linkedin':
-      DeterminedIcon = FaLinkedin;
-      determinedLabel = ariaLabel || 'LinkedIn Icon';
+      determinedIconName = 'linkedin';
+      determinedLabel = 'LinkedIn Icon';
       break;
     case 'youtube':
-      DeterminedIcon = FaYoutube;
-      determinedLabel = ariaLabel || 'YouTube Icon';
+      determinedIconName = 'youtube';
+      determinedLabel = 'YouTube Icon';
       break;
     case 'twitter':
-      DeterminedIcon = FaTwitter;
-      determinedLabel = ariaLabel || 'Twitter Icon';
+      determinedIconName = 'twitter';
+      determinedLabel = 'X Icon';
       break;
     case 'website':
     case 'other': // Treat 'other' explicitly as external link
     default: // Default case if iconName is undefined and URL didn't match known sites
-      DeterminedIcon = FaExternalLinkAlt;
-      determinedLabel = ariaLabel || 'External Link Icon';
+      determinedIconName = 'external-link';
+      determinedLabel = 'External Link Icon';
       break;
   }
 
-  if (!DeterminedIcon) {
-     // Should ideally not happen with the default case, but as a safety net
-     return <FaLink className={className} aria-label={ariaLabel || 'Generic Link Icon'} />;
-  }
+  const iconTitle = ariaLabel === '' ? undefined : ariaLabel || determinedLabel;
 
-  return <DeterminedIcon className={className} aria-label={determinedLabel} />;
+  return <Icon name={determinedIconName} className={className} title={iconTitle} />;
 };
 
 export default LinkIcon; 

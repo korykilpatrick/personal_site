@@ -53,12 +53,12 @@ describe('App component', () => {
     expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 
-  test('renders the bookshelf route and hides the footer', () => {
+  test('renders the bookshelf route and hides the footer', async () => {
     window.history.pushState({}, '', '/bookshelf');
 
     renderApp(['/bookshelf']);
 
-    expect(screen.getByText('Bookshelf Page')).toBeInTheDocument();
+    expect(await screen.findByText('Bookshelf Page')).toBeInTheDocument();
     expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
   });
 });

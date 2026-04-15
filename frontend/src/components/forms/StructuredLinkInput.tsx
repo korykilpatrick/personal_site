@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { ProjectLink, WorkEntryLink, LinkIconName } from 'types';
 import { FormInput } from './';
-import { Button } from '../common';
-import { FaTrashAlt, FaPlus } from 'react-icons/fa';
+import { Button, Icon } from '../common';
 import { isRequired, isUrl } from '../../utils/validation';
 import LinkIcon from '../common/LinkIcon';
 
@@ -192,7 +191,7 @@ const StructuredLinkInput = <T extends AnyLink>({
               className="mt-1 flex-shrink-0 text-red-600 hover:text-red-800 p-1"
               aria-label="Remove Link"
             >
-              <FaTrashAlt />
+              <Icon name="trash" size="sm" />
             </Button>
           </div>
         );
@@ -204,7 +203,7 @@ const StructuredLinkInput = <T extends AnyLink>({
         disabled={disabled}
         className="mt-2"
       >
-        <FaPlus className="mr-1 inline" /> Add Link
+        <Icon name="plus" size="sm" className="mr-1 inline-block align-[-0.125em]" /> Add Link
       </Button>
     </div>
   );
