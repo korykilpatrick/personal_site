@@ -44,12 +44,12 @@ const HomepageLibraryItem: React.FC<HomepageLibraryItemProps> = ({ item }) => {
   const needsTruncation = item.blurb && item.blurb.length > blurbPreviewLength;
 
   // The root element here is the div that originally had p-4/p-5 in LibraryItemCard.
-  // The parent Card in HomePage.tsx will provide the actual padding for the section.
+  // The parent Card in the dormant HomePage module provides the section padding.
   // So, this component should NOT add its own p-4/p-5.
   // However, LibraryItemCard's structure was <Card padding="none"><div className="p-4 md:p-5">...</div></Card>
   // This means the p-4/p-5 IS part of the content's own spacing within its immediate container.
   // Let's keep this inner div with its padding, as it defines the content's internal layout.
-  // The parent Card on HomePage with padding="lg" will then act as the outer frame.
+  // The parent Card in the dormant HomePage module acts as the outer frame.
   return (
     <>
       <div className="flex flex-col md:flex-row gap-4 flex-grow min-h-[200px]">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import apiService from '../api/apiService';
-import { Loading, ErrorDisplay, FilterButton, EmptyState } from '../components/ui';
-import useApi from '../hooks/useApi';
+import apiService from '../../api/apiService';
+import { Loading, ErrorDisplay, FilterButton, EmptyState } from '../../components/ui';
+import useApi from '../../hooks/useApi';
 import { Project } from 'types/index';
 import ProjectCard from '@/components/projects/ProjectCard';
 

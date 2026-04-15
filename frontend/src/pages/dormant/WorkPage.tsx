@@ -1,10 +1,10 @@
 import React from 'react';
-import useApi from '../hooks/useApi';
-import apiService from '../api/apiService';
+import useApi from '../../hooks/useApi';
+import apiService from '../../api/apiService';
 // Import shared types
 import { WorkEntry } from 'types/index';
 // Import standard UI components
-import { Loading, ErrorDisplay, EmptyState } from '../components/ui';
+import { Loading, ErrorDisplay, EmptyState } from '../../components/ui';
 // Import the new WorkCard component
 import WorkCard from '@/components/work/WorkCard';
 

@@ -1,168 +1,79 @@
 # API Documentation
 
-## Overview
-
-The Personal Portfolio API provides read-only public endpoints for published content and authenticated admin endpoints for private content management.
-
 ## Base URL
 
-```
+```text
 http://localhost:3001/api
 ```
 
-## Authentication
+## Access Model
 
-Protected routes require a JWT token in the Authorization header:
+- Public routes are read-only.
+- Authentication happens through `POST /api/auth/login`.
+- Content mutations live under authenticated `/api/admin/*`.
+- Library metadata extraction is authenticated admin tooling.
 
-```
+Protected requests use:
+
+```text
 Authorization: Bearer <token>
 ```
 
-## Endpoints
+## Public Routes
 
-Public content routes are read-only. Content mutations happen only through authenticated admin routes.
+Health:
+- `GET /api/health`
 
-### Library
+Books:
+- `GET /api/books`
+- `GET /api/books/:id`
 
-#### Extract Metadata from URL
+Bookshelves:
+- `GET /api/bookshelves`
+- `GET /api/bookshelves/:id`
+- `GET /api/bookshelves/:id/books`
 
-Automatically extracts metadata from a provided URL using AI.
+Projects:
+- `GET /api/projects`
+- `GET /api/projects?tag=react`
+- `GET /api/projects/summary/count`
+- `GET /api/projects/:id`
 
-```
-POST /api/library/extract-metadata
-```
+Work:
+- `GET /api/work`
+- `GET /api/work/summary/count`
+- `GET /api/work/:id`
 
-**Request Body:**
-```json
-{
-  "url": "https://example.com/article",
-  "forceRefresh": false  // Optional: bypass cache
-}
-```
+Quotes:
+- `GET /api/quotes`
+- `GET /api/quotes?active=true`
+- `GET /api/quotes/summary/count`
+- `GET /api/quotes/summary/count?active=true`
 
-**Response (200 OK):**
-```json
-{
-  "title": "Article Title",
-  "author": "Author Name",
-  "description": "Article description...",
-  "imageUrl": "https://example.com/image.jpg",
-  "suggestedCategory": "article",
-  "tags": ["technology", "programming"],
-  "publicationDate": "2024-01-01T00:00:00Z",
-  "contentType": "article",
-  "extractionMetadata": {
-    "confidence": 0.95,
-    "extractedAt": "2024-01-01T12:00:00Z",
-    "llmModel": "gpt-4-turbo-preview",
-    "version": "1.0.0"
-  }
-}
-```
+Site notes:
+- `GET /api/site_notes`
+- `GET /api/site_notes?active=true`
+- `GET /api/site_notes/active`
+- `GET /api/site_notes/summary/count`
 
-**Error Responses:**
-- `400 Bad Request` - Invalid URL format
-- `401 Unauthorized` - Missing or invalid authentication
-- `422 Unprocessable Entity` - Unable to extract metadata from URL
-- `429 Too Many Requests` - Rate limit exceeded (10 requests per 15 minutes)
-- `500 Internal Server Error` - Server error
+Library:
+- `GET /api/library-item-types`
+- `GET /api/library-item-types/:id`
+- `GET /api/library-items`
+- `GET /api/library-items?item_type_id=1&tag=programming`
+- `GET /api/library-items/summary/count`
+- `GET /api/library-items/:id`
 
-**Rate Limiting:**
-- 10 requests per 15-minute window per IP address
-- Admin users bypass rate limiting
+## Authentication
 
-**Caching:**
-- Results are cached for 1 hour by default
-- Use `forceRefresh: true` to bypass cache
+Login:
 
-### Library Items
-
-#### Get Library Items
-
-```
-GET /api/library-items?item_type_id=1&tag=programming
-```
-
-**Query Parameters:**
-- `item_type_id` (optional) - Filter by item type
-- `tag` (optional) - Filter by tag
-
-**Response (200 OK):**
-```json
-[
-  {
-    "id": 1,
-    "item_type_id": 1,
-    "link": "https://example.com",
-    "title": "Example Article",
-    "blurb": "Description...",
-    "thumbnail_url": "https://example.com/thumb.jpg",
-    "tags": ["programming", "web"],
-    "creators": ["John Doe"],
-    "type_name": "article",
-    "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
-  }
-]
-```
-
-### Books
-
-#### Get Books
-
-```
-GET /api/books?includeShelves=true
-```
-
-**Query Parameters:**
-- `includeShelves` (optional) - Include bookshelf associations
-
-#### Get Book by ID
-
-```
-GET /api/books/:id
-```
-
-### Projects
-
-#### Get Projects
-
-```
-GET /api/projects?tag=react
-```
-
-**Query Parameters:**
-- `tag` (optional) - Filter by tag
-
-#### Get Project by ID
-
-```
-GET /api/projects/:id
-```
-
-### Work Experience
-
-#### Get Work Entries
-
-```
-GET /api/work
-```
-
-#### Get Work Entry by ID
-
-```
-GET /api/work/:id
-```
-
-### Authentication
-
-#### Login
-
-```
+```text
 POST /api/auth/login
 ```
 
-**Request Body:**
+Example request body:
+
 ```json
 {
   "username": "admin",
@@ -170,83 +81,75 @@ POST /api/auth/login
 }
 ```
 
-**Response (200 OK):**
+Example response:
+
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "jwt-token",
   "user": {
     "username": "admin"
   }
 }
 ```
 
-### Admin Routes
+## Admin Routes
 
-All admin routes require authentication.
+Projects:
+- `GET /api/admin/projects`
+- `GET /api/admin/projects/:id`
+- `POST /api/admin/projects`
+- `PUT /api/admin/projects/:id`
+- `DELETE /api/admin/projects/:id`
 
-#### Projects Management
+Work:
+- `GET /api/admin/work`
+- `GET /api/admin/work/:id`
+- `POST /api/admin/work`
+- `PUT /api/admin/work/:id`
+- `DELETE /api/admin/work/:id`
 
-```
-GET    /api/admin/projects
-GET    /api/admin/projects/:id
-POST   /api/admin/projects
-PUT    /api/admin/projects/:id
-DELETE /api/admin/projects/:id
-```
+Quotes:
+- `GET /api/admin/quotes`
+- `GET /api/admin/quotes/:id`
+- `POST /api/admin/quotes`
+- `PUT /api/admin/quotes/:id`
+- `DELETE /api/admin/quotes/:id`
 
-#### Work Management
+Site notes:
+- `GET /api/admin/site_notes`
+- `GET /api/admin/site_notes/:id`
+- `POST /api/admin/site_notes`
+- `PUT /api/admin/site_notes/:id`
+- `DELETE /api/admin/site_notes/:id`
 
-```
-GET    /api/admin/work
-GET    /api/admin/work/:id
-POST   /api/admin/work
-PUT    /api/admin/work/:id
-DELETE /api/admin/work/:id
-```
+Library items:
+- `GET /api/admin/library-items`
+- `GET /api/admin/library-items/:id`
+- `POST /api/admin/library-items`
+- `PUT /api/admin/library-items/:id`
+- `DELETE /api/admin/library-items/:id`
 
-#### Library Items Management
+Library item types:
+- `GET /api/admin/library-item-types`
+- `GET /api/admin/library-item-types/:id`
+- `POST /api/admin/library-item-types`
+- `PUT /api/admin/library-item-types/:id`
+- `DELETE /api/admin/library-item-types/:id`
 
-```
-GET    /api/admin/library-items
-GET    /api/admin/library-items/:id
-POST   /api/admin/library-items
-PUT    /api/admin/library-items/:id
-DELETE /api/admin/library-items/:id
-```
+Library extraction:
+- `POST /api/library/extract-metadata`
 
-#### Library Item Types
-
-```
-GET    /api/admin/library-item-types
-POST   /api/admin/library-item-types
-PUT    /api/admin/library-item-types/:id
-DELETE /api/admin/library-item-types/:id
-```
-
-## Error Handling
-
-All endpoints follow a consistent error response format:
+Example extraction request:
 
 ```json
 {
-  "message": "Human-readable error message",
-  "error": "ERROR_CODE",
-  "details": {}  // Optional additional information
+  "url": "https://example.com/article",
+  "forceRefresh": false
 }
 ```
 
-## Rate Limiting
+## Notes
 
-- Public endpoints: 100 requests per 15 minutes per IP
-- Metadata extraction: 10 requests per 15 minutes per IP
-- Admin endpoints: No rate limiting
-
-## Access Model
-
-- Public routes expose only published, user-facing content.
-- Admin and curation routes require authentication.
-- Books and bookshelves are not writable through the public API.
-
-## CORS
-
-CORS is enabled for all origins in development. In production, configure allowed origins in environment variables.
+- Public write routes for books, bookshelves, projects, and work do not exist.
+- Books and bookshelves are currently updated outside the public site through the Goodreads sync/script path and database operations.
+- Not every public API surface is currently linked from the live navbar, but the API contract above reflects what the backend serves today.

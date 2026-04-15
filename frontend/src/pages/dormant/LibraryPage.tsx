@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Loading, ErrorDisplay, EmptyState } from '@/components/ui';
 import LibraryItemCard from '@/components/library/LibraryItemCard';
 import LibraryControls from '@/components/library/LibraryControls';
-import { useLibrary } from '@/context/LibraryContext';
+import { useLibrary } from '../../context/LibraryContext';
 
 /**
  * LibraryPage – uses global library items, provides multi-select filter for item types & tags,

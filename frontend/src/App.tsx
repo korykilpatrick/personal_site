@@ -4,8 +4,6 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
-// import ProjectsPage from './pages/ProjectsPage';  // Hidden for now
-// import WorkPage from './pages/WorkPage';  // Hidden for now
 import BookshelfPage from './pages/BookshelfPage';
 import QuotesPage from './pages/QuotesPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -15,7 +13,6 @@ import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { BooksProvider } from './context/BooksContext';
 import { ToastProvider } from './context/ToastContext';
-// import LibraryPage from './pages/LibraryPage';  // Hidden for now
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 
@@ -38,12 +35,8 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Layout><AboutPage /></Layout>} />
                 <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-                {/* <Route path="/projects" element={<Layout><ProjectsPage /></Layout>} /> */}
-                {/* <Route path="/work" element={<Layout><WorkPage /></Layout>} /> */}
                 <Route path="/bookshelf" element={<Layout><BookshelfPage /></Layout>} />
                 <Route path="/quotes" element={<Layout><QuotesPage /></Layout>} />
-
-                {/* <Route path="/library" element={<Layout><LibraryPage /></Layout>} /> */}
 
                 <Route path="/login" element={<LoginPage />} />
 
