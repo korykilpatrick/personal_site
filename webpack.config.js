@@ -69,7 +69,7 @@ module.exports = (_env, argv) => {
     },
     devServer: {
       historyApiFallback: true,
-      port: 3000,
+      port: process.env.PORT ? Number(process.env.PORT) : 3000,
       hot: true,
       proxy: {
         '/api': {

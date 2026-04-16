@@ -86,37 +86,27 @@ const Popover: React.FC<{
   );
 };
 
-// ─── Sort anchor ("[sort-icon] Recent") ────────────────────────────────────
-interface SortAnchorProps {
+// ─── Text anchor — a clickable underlined value that opens a popover ───────
+interface TextAnchorProps {
   value: string;
   ariaLabel: string;
   open: boolean;
   onToggle: () => void;
+  popoverWidth?: number;
   renderPopover: (ctx: { close: () => void }) => React.ReactNode;
 }
 
-const SortAnchor: React.FC<SortAnchorProps> = ({
+const TextAnchor: React.FC<TextAnchorProps> = ({
   value,
   ariaLabel,
   open,
   onToggle,
+  popoverWidth = 240,
   renderPopover,
 }) => {
   const ref = useRef<HTMLButtonElement>(null);
   return (
-    <span className="relative inline-flex items-center gap-2">
-      <span
-        aria-hidden="true"
-        style={{
-          color: INK_NAVY_DIM,
-          display: 'inline-flex',
-          alignItems: 'center',
-          width: 18,
-          height: 18,
-        }}
-      >
-        <Icon name="sort" size="md" />
-      </span>
+    <span className="relative inline-flex items-center">
       <button
         ref={ref}
         type="button"
@@ -143,80 +133,120 @@ const SortAnchor: React.FC<SortAnchorProps> = ({
       >
         {value}
       </button>
-      <Popover open={open} onClose={onToggle} width={220} anchorRef={ref}>
+      <Popover open={open} onClose={onToggle} width={popoverWidth} anchorRef={ref}>
         {renderPopover({ close: onToggle })}
       </Popover>
     </span>
   );
 };
 
-// ─── Icon button (shelf, search) ───────────────────────────────────────────
-interface IconButtonProps {
-  icon: 'shelf' | 'search';
-  ariaLabel: string;
-  active: boolean;
-  open: boolean;
-  onToggle: () => void;
-  popoverWidth?: number;
-  popoverAlign?: 'left' | 'center' | 'right';
-  renderPopover: (ctx: { close: () => void }) => React.ReactNode;
+// ─── Inline search — icon expands to input on the same row, no popover ─────
+interface InlineSearchProps {
+  searchQuery: string;
+  searchDraft: string;
+  setSearchDraft: (val: string) => void;
+  onSearchChange: (val: string) => void;
 }
 
-const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  (
-    { icon, ariaLabel, active, open, onToggle, popoverWidth, popoverAlign, renderPopover },
-    ref,
-  ) => {
-    const localRef = useRef<HTMLButtonElement>(null);
-    React.useImperativeHandle(ref, () => localRef.current as HTMLButtonElement);
+const InlineSearch: React.FC<InlineSearchProps> = ({
+  searchQuery,
+  searchDraft,
+  setSearchDraft,
+  onSearchChange,
+}) => {
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchActive = searchQuery.trim().length > 0;
+  const showInput = open || searchActive;
 
-    const color = active || open ? INK_NAVY : INK_NAVY_DIM;
+  const openSearch = () => {
+    setOpen(true);
+    // Focus the input once it renders
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  };
 
-    return (
-      <span className="relative inline-flex items-center">
-        <button
-          ref={localRef}
-          type="button"
-          onClick={onToggle}
-          aria-label={ariaLabel}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          className="inline-flex items-center justify-center transition focus:outline-none"
-          style={{
-            color,
-            width: 24,
-            height: 24,
-            padding: 0,
-            backgroundColor: 'transparent',
-            borderBottom: `1px solid ${open ? INK_NAVY : 'transparent'}`,
-            paddingBottom: 2,
-            marginBottom: -3,
-          }}
-          onMouseEnter={(e) => {
-            if (!open && !active) e.currentTarget.style.color = INK_NAVY;
-          }}
-          onMouseLeave={(e) => {
-            if (!open && !active) e.currentTarget.style.color = INK_NAVY_DIM;
-          }}
-        >
-          <Icon name={icon} size="md" />
-        </button>
-        <Popover
-          open={open}
-          onClose={onToggle}
-          width={popoverWidth}
-          anchorRef={localRef}
-          align={popoverAlign}
-        >
-          {renderPopover({ close: onToggle })}
-        </Popover>
-      </span>
-    );
-  },
-);
-IconButton.displayName = 'IconButton';
+  const clearAndClose = () => {
+    setSearchDraft('');
+    onSearchChange('');
+    setOpen(false);
+  };
 
-// ─── Active-filter chip ─────────────────────────────────────────────────────
+  return (
+    <span className="relative inline-flex items-center gap-2">
+      <button
+        type="button"
+        onClick={openSearch}
+        aria-label={searchActive ? `Search: ${searchQuery}` : 'Search books'}
+        className="inline-flex items-center justify-center transition focus:outline-none"
+        style={{
+          color: showInput ? INK_NAVY : INK_NAVY_DIM,
+          width: 24,
+          height: 24,
+          padding: 0,
+          backgroundColor: 'transparent',
+        }}
+        onMouseEnter={(e) => {
+          if (!showInput) e.currentTarget.style.color = INK_NAVY;
+        }}
+        onMouseLeave={(e) => {
+          if (!showInput) e.currentTarget.style.color = INK_NAVY_DIM;
+        }}
+      >
+        <Icon name="search" size="md" />
+      </button>
+      {showInput && (
+        <>
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            onBlur={() => {
+              if (!searchDraft.trim()) setOpen(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') clearAndClose();
+              if (e.key === 'Enter') e.currentTarget.blur();
+            }}
+            placeholder="title, author"
+            className="bg-transparent font-mono uppercase outline-none placeholder:normal-case"
+            style={{
+              color: INK_NAVY,
+              fontSize: '0.7rem',
+              letterSpacing: '0.12em',
+              fontWeight: 600,
+              width: 160,
+              borderBottom: `1px solid ${INK_NAVY_QUIET}`,
+              paddingBottom: 2,
+            }}
+          />
+          {searchActive && (
+            <button
+              type="button"
+              onClick={clearAndClose}
+              aria-label="Clear search"
+              className="transition"
+              style={{
+                color: INK_NAVY_DIM,
+                fontSize: '0.9rem',
+                lineHeight: 1,
+                background: 'transparent',
+                padding: '0 2px',
+                marginLeft: -4,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = INK_NAVY)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = INK_NAVY_DIM)}
+            >
+              ×
+            </button>
+          )}
+        </>
+      )}
+    </span>
+  );
+};
+
+// ─── Active-filter chip (for selected shelves) ─────────────────────────────
 const FilterChip: React.FC<{ label: string; onRemove: () => void; title?: string }> = ({
   label,
   onRemove,
@@ -266,7 +296,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   searchQuery,
   onSearchChange,
 }) => {
-  const [openSegment, setOpenSegment] = useState<null | 'sort' | 'shelves' | 'search'>(null);
+  const [openSegment, setOpenSegment] = useState<null | 'sort' | 'shelves'>(null);
   const [searchDraft, setSearchDraft] = useState(searchQuery);
 
   useEffect(() => {
@@ -284,21 +314,28 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   const sortLabel =
     sortOptions.find((o) => o.value === selectedSortBy)?.label.toUpperCase() ?? '—';
 
-  const handleToggle = (which: 'sort' | 'shelves' | 'search') =>
+  const shelvesLabel =
+    selectedShelfIds.length === 0
+      ? 'ALL'
+      : selectedShelfIds.length === 1
+      ? (allBookshelves.find((s) => s.id === selectedShelfIds[0])?.name ?? '1').toUpperCase()
+      : `${selectedShelfIds.length} SELECTED`;
+
+  const handleToggle = (which: 'sort' | 'shelves') =>
     setOpenSegment((cur) => (cur === which ? null : which));
 
-  const searchActive = searchQuery.trim().length > 0;
   const selectedShelves = allBookshelves.filter((s) => selectedShelfIds.includes(s.id));
 
   return (
     <div className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {/* [sort-icon] · Recent */}
-        <SortAnchor
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {/* Sort — clickable value ("RECENT") */}
+        <TextAnchor
           value={sortLabel}
           ariaLabel={`Sort by ${sortLabel.toLowerCase()}`}
           open={openSegment === 'sort'}
           onToggle={() => handleToggle('sort')}
+          popoverWidth={220}
           renderPopover={({ close }) => (
             <ul className="py-1.5" role="menu">
               {sortOptions.map((opt) => {
@@ -341,15 +378,14 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           )}
         />
 
-        {/* Shelf icon button */}
-        <IconButton
-          icon="shelf"
+        {/* Shelf — clickable value ("ALL" by default) */}
+        <TextAnchor
+          value={shelvesLabel}
           ariaLabel={
             selectedShelves.length > 0
               ? `Filter by shelf (${selectedShelves.length} selected)`
               : 'Filter by shelf'
           }
-          active={selectedShelves.length > 0}
           open={openSegment === 'shelves'}
           onToggle={() => handleToggle('shelves')}
           popoverWidth={260}
@@ -415,74 +451,15 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           )}
         />
 
-        {/* Search icon button */}
-        <IconButton
-          icon="search"
-          ariaLabel={searchActive ? `Search: ${searchQuery}` : 'Search books'}
-          active={searchActive}
-          open={openSegment === 'search'}
-          onToggle={() => handleToggle('search')}
-          popoverWidth={300}
-          renderPopover={({ close }) => (
-            <div className="px-3 py-2">
-              <label
-                className="mb-1 block font-mono text-[0.6rem] uppercase tracking-[0.18em]"
-                style={{ color: INK_DIM }}
-              >
-                Title or author
-              </label>
-              <input
-                autoFocus
-                type="text"
-                value={searchDraft}
-                onChange={(e) => setSearchDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    onSearchChange(searchDraft);
-                    close();
-                  }
-                }}
-                placeholder="e.g. Camus"
-                className="w-full bg-transparent font-mono text-[0.82rem] outline-none"
-                style={{
-                  color: INK,
-                  borderBottom: `1px solid ${INK_RULE}`,
-                  paddingBottom: 4,
-                }}
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchDraft('');
-                    onSearchChange('');
-                  }}
-                  className="font-mono text-[0.6rem] uppercase tracking-[0.18em]"
-                  style={{ color: INK_DIM }}
-                >
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="font-mono text-[0.6rem] uppercase tracking-[0.18em]"
-                  style={{ color: INK }}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Search — inline expand, no popover */}
+        <InlineSearch
+          searchQuery={searchQuery}
+          searchDraft={searchDraft}
+          setSearchDraft={setSearchDraft}
+          onSearchChange={onSearchChange}
         />
 
-        {/* Inline active-filter chips — sit on the same horizontal plane */}
-        {searchActive && (
-          <FilterChip
-            label={`"${searchQuery.trim()}"`}
-            onRemove={() => onSearchChange('')}
-            title="Clear search"
-          />
-        )}
+        {/* Active-shelf chips — sit on the same horizontal plane */}
         {selectedShelves.map((shelf) => (
           <FilterChip
             key={shelf.id}
