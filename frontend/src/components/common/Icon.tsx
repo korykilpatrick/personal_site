@@ -17,6 +17,7 @@ export type IconName =
   | 'quote-left'
   | 'search'
   | 'shelf'
+  | 'sort'
   | 'star'
   | 'star-empty'
   | 'trash'
@@ -173,10 +174,25 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
     fill: 'none',
     stroke: 'currentColor',
     children: (
+      <g strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5">
+        {/* three book spines of varying height, standing on a shelf */}
+        <rect x="5" y="6" width="3" height="11" rx="0.5" />
+        <rect x="9.5" y="4" width="3" height="13" rx="0.5" />
+        <rect x="14" y="7" width="3" height="10" rx="0.5" />
+        <line x1="3" y1="19" x2="21" y2="19" />
+      </g>
+    ),
+  },
+  sort: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    children: (
       <g strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75">
+        {/* decreasing-width horizontal lines: classic A→Z sort glyph */}
         <line x1="4" y1="7" x2="20" y2="7" />
-        <line x1="4" y1="12" x2="20" y2="12" />
-        <line x1="4" y1="17" x2="20" y2="17" />
+        <line x1="4" y1="12" x2="15" y2="12" />
+        <line x1="4" y1="17" x2="10" y2="17" />
       </g>
     ),
   },

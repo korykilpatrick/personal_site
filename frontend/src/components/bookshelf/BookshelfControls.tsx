@@ -86,40 +86,42 @@ const Popover: React.FC<{
   );
 };
 
-// ─── Sort anchor ("SORT · Recent") ─────────────────────────────────────────
+// ─── Sort anchor ("[sort-icon] Recent") ────────────────────────────────────
 interface SortAnchorProps {
-  label: string;
   value: string;
+  ariaLabel: string;
   open: boolean;
   onToggle: () => void;
   renderPopover: (ctx: { close: () => void }) => React.ReactNode;
 }
 
 const SortAnchor: React.FC<SortAnchorProps> = ({
-  label,
   value,
+  ariaLabel,
   open,
   onToggle,
   renderPopover,
 }) => {
   const ref = useRef<HTMLButtonElement>(null);
   return (
-    <span className="relative inline-flex items-baseline gap-2">
+    <span className="relative inline-flex items-center gap-2">
       <span
-        className="font-mono uppercase"
+        aria-hidden="true"
         style={{
           color: INK_NAVY_DIM,
-          fontSize: '0.62rem',
-          letterSpacing: '0.22em',
-          fontWeight: 500,
+          display: 'inline-flex',
+          alignItems: 'center',
+          width: 18,
+          height: 18,
         }}
       >
-        {label}
+        <Icon name="sort" size="md" />
       </span>
       <button
         ref={ref}
         type="button"
         onClick={onToggle}
+        aria-label={ariaLabel}
         aria-haspopup="menu"
         aria-expanded={open}
         className="inline-flex items-center font-mono uppercase transition focus:outline-none"
@@ -182,8 +184,8 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
           className="inline-flex items-center justify-center transition focus:outline-none"
           style={{
             color,
-            width: 22,
-            height: 22,
+            width: 24,
+            height: 24,
             padding: 0,
             backgroundColor: 'transparent',
             borderBottom: `1px solid ${open ? INK_NAVY : 'transparent'}`,
@@ -197,7 +199,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
             if (!open && !active) e.currentTarget.style.color = INK_NAVY_DIM;
           }}
         >
-          <Icon name={icon} size="sm" />
+          <Icon name={icon} size="md" />
         </button>
         <Popover
           open={open}
@@ -291,10 +293,10 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   return (
     <div className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {/* SORT · Recent */}
+        {/* [sort-icon] · Recent */}
         <SortAnchor
-          label="Sort"
           value={sortLabel}
+          ariaLabel={`Sort by ${sortLabel.toLowerCase()}`}
           open={openSegment === 'sort'}
           onToggle={() => handleToggle('sort')}
           renderPopover={({ close }) => (
