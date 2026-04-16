@@ -26,7 +26,7 @@ This is the aesthetic contract for the personal site. `/design-loop` measures ev
 
 Names for patterns as they emerge and get validated. New additions require earning their keep — reach for existing ones first.
 
-- **Ribbon-card.** Used on the bookshelf filter/sort/search controls. A flat muted-cloth tab (burgundy, moss, indigo — Everyman's Library register) with a darker selvedge hairline and a V-notched tail hangs from the top of the shelf frame. Clicking extends the ribbon into a library-card panel: cream paper, ruled horizontal underlines between rows, UPPERCASE mono labels in warm ink-brown, V-notched bottom. Evocative of silk bookmarks and card catalogs without any satin sheen, dashed stitching, or photographic textures. See [BookshelfControls.tsx](frontend/src/components/bookshelf/BookshelfControls.tsx).
+- _(empty — to be filled in as `/design-loop` surfaces patterns worth naming)_
 
 ## Notes
 
