@@ -390,31 +390,8 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           onToggle={() => handleToggle('shelves')}
           popoverWidth={260}
           renderPopover={() => (
-            <div>
-              <div
-                className="flex items-center justify-between px-3 pt-2 pb-1 font-mono text-[0.6rem] uppercase tracking-[0.18em]"
-                style={{ color: INK_DIM }}
-              >
-                <span>Select shelves</span>
-                {selectedShelfIds.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={onClearShelves}
-                    className="transition"
-                    style={{ color: INK_DIM }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = INK)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = INK_DIM)}
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-              <ul
-                className="max-h-64 overflow-y-auto py-1"
-                role="menu"
-                style={{ borderTop: `1px solid ${INK_RULE}` }}
-              >
-                {allBookshelves.map((shelf) => {
+            <ul className="max-h-72 overflow-y-auto py-1.5" role="menu">
+              {allBookshelves.map((shelf) => {
                   const selected = selectedShelfIds.includes(shelf.id);
                   return (
                     <li key={shelf.id}>
@@ -447,7 +424,6 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
                   );
                 })}
               </ul>
-            </div>
           )}
         />
 
