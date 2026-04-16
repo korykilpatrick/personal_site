@@ -10,6 +10,9 @@ interface SearchInputProps {
   debounceMs?: number;
   disabled?: boolean;
   className?: string;
+  inputClassName?: string;
+  iconClassName?: string;
+  clearButtonClassName?: string;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
@@ -19,6 +22,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
   debounceMs = 300,
   disabled = false,
   className = '',
+  inputClassName = '',
+  iconClassName = '',
+  clearButtonClassName = '',
 }) => {
   const [rawValue, setRawValue] = useState(value);
   const debouncedValue = useDebouncedValue(rawValue, debounceMs);
@@ -38,7 +44,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-textTertiary">
+      <span
+        className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-textTertiary ${iconClassName}`}
+      >
         <Icon name="search" size="sm" />
       </span>
 
@@ -48,14 +56,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={(e) => setRawValue(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`rounded-[16px] py-2.5 pl-9 text-sm ${rawValue ? 'pr-10' : 'pr-7'}`}
+        className={`rounded-[16px] py-2.5 pl-9 text-sm ${rawValue ? 'pr-10' : 'pr-7'} ${inputClassName}`}
       />
 
       {rawValue && !disabled && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-textTertiary transition hover:text-primary focus:outline-none"
+          className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs text-textTertiary transition hover:text-primary focus:outline-none ${clearButtonClassName}`}
           aria-label="Clear search"
         >
           ✕

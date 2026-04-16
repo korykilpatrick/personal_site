@@ -11,6 +11,10 @@ interface SortDropdownProps {
   selected: string;
   onChange: (value: string) => void;
   className?: string;
+  buttonSize?: 'sm' | 'md' | 'lg';
+  buttonClassName?: string;
+  iconClassName?: string;
+  displayLabelPrefix?: string;
 }
 
 const SortDropdown: React.FC<SortDropdownProps> = ({
@@ -18,16 +22,24 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   selected,
   onChange,
   className = '',
+  buttonSize = 'md',
+  buttonClassName = '',
+  iconClassName = '',
+  displayLabelPrefix,
 }) => {
   const selectedLabel = options.find((opt) => opt.value === selected)?.label || 'Select...';
+  const displayLabel = displayLabelPrefix
+    ? `${displayLabelPrefix} ${selectedLabel}`
+    : selectedLabel;
 
   const trigger = (
     <Button
       variant="outline"
-      className="w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem]"
+      size={buttonSize}
+      className={`w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem] ${buttonClassName}`}
     >
-      <span className="mr-1">{selectedLabel}</span>
-      <Icon name="chevron-down" className="ml-auto text-textTertiary" />
+      <span className="mr-1">{displayLabel}</span>
+      <Icon name="chevron-down" className={`ml-auto text-textTertiary ${iconClassName}`} />
     </Button>
   );
 

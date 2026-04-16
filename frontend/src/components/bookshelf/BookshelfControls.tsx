@@ -23,47 +23,46 @@ const DEFAULT_SORT = 'date_read';
 interface RibbonTheme {
   key: ControlType;
   label: string;
-  gradient: string;
-  accent: string;
-  sheenColor: string;
-  edgeDark: string;
+  /** Flat cloth tone — single solid, no gradient. */
+  cloth: string;
+  /** Darker selvedge (hem) color along the ribbon edges. */
+  selvedge: string;
 }
 
+// Muted silk-ribbon palette — aged brick, moss, faded indigo.
+// Pigments chosen from Everyman's Library / Fitzcarraldo bookcloth register:
+// dense enough to read against the pale sky (page background), quiet enough
+// not to compete with the books.
 const RIBBONS: RibbonTheme[] = [
   {
     key: 'sort',
     label: 'Sort',
-    gradient: 'linear-gradient(180deg, #c0606e 0%, #a84858 40%, #8e3848 70%, #783040 100%)',
-    accent: '#a84858',
-    sheenColor: 'rgba(255,200,210,0.18)',
-    edgeDark: '#6a2838',
+    cloth: '#8a3e44',
+    selvedge: '#54242a',
   },
   {
     key: 'shelves',
     label: 'Shelves',
-    gradient: 'linear-gradient(180deg, #6e9872 0%, #5e8862 40%, #4e7652 70%, #3e6444 100%)',
-    accent: '#5e8862',
-    sheenColor: 'rgba(200,255,210,0.14)',
-    edgeDark: '#345a3a',
+    cloth: '#5d6d3e',
+    selvedge: '#3a4627',
   },
   {
     key: 'search',
     label: 'Search',
-    gradient: 'linear-gradient(180deg, #7a9ebe 0%, #6a8eae 40%, #5a7e9e 70%, #4a6e8e 100%)',
-    accent: '#6a8eae',
-    sheenColor: 'rgba(200,220,255,0.16)',
-    edgeDark: '#40607a',
+    cloth: '#3f5876',
+    selvedge: '#263b53',
   },
 ];
 
-const TAB_WIDTH = 62;
-const TAB_HEIGHT = 32;
-const V_CUT = 9;
+const TAB_WIDTH = 64;
+const TAB_HEIGHT = 34;
+const V_CUT = 11;
 
-const ribbonSatin = (gradient: string, sheenColor: string) => `
-  linear-gradient(115deg, transparent 28%, ${sheenColor} 46%, transparent 64%),
-  repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(255,255,255,0.04) 1px, rgba(255,255,255,0.04) 2px),
-  ${gradient}
+// A cloth-ribbon surface: flat color + near-invisible horizontal weave.
+// No satin sheen, no diagonal highlight — silk ribbon, not plastic ribbon.
+const ribbonCloth = (cloth: string) => `
+  repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(0,0,0,0.045) 1px, rgba(0,0,0,0.045) 2px),
+  ${cloth}
 `;
 
 const tabClip = `polygon(0 0, 100% 0, 100% calc(100% - ${V_CUT}px), 50% 100%, 0 calc(100% - ${V_CUT}px))`;
@@ -127,7 +126,10 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   return (
     <div
       ref={controlsRef}
-      className="pointer-events-none absolute -top-[22px] left-0 right-0 z-30 flex items-start justify-center gap-5"
+      // Ribbons hang from the top edge of the shelf: most of the tab sits
+      // ABOVE the frame on the pale sky, with the V-notched tail dipping into
+      // the dark navy. This gives them a clean silhouette and a clear anchor.
+      className="pointer-events-none absolute -top-[20px] left-0 right-0 z-30 flex items-start justify-center gap-7"
     >
       {RIBBONS.map((ribbon) => {
         const isActive = activeRibbon === ribbon.key;
@@ -144,142 +146,196 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
               aria-label={`${ribbon.label} controls`}
               onClick={() => toggleRibbon(ribbon.key)}
               className={[
-                'relative z-10 flex cursor-pointer items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.19,1,0.22,1)]',
-                isActive
-                  ? 'translate-y-[3px] scale-[1.06] brightness-[1.12]'
-                  : 'hover:translate-y-[3px] hover:brightness-105',
+                'relative z-10 flex cursor-pointer items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]',
+                isActive ? 'translate-y-[3px]' : 'hover:translate-y-[2px]',
               ].join(' ')}
               style={{
                 width: TAB_WIDTH,
                 height: TAB_HEIGHT,
-                background: ribbonSatin(ribbon.gradient, ribbon.sheenColor),
+                background: ribbonCloth(ribbon.cloth),
                 clipPath: tabClip,
-                filter: `drop-shadow(0 ${isActive ? 4 : 2}px ${isActive ? 8 : 5}px rgba(0,0,0,${isActive ? 0.35 : 0.22}))`,
+                filter: `drop-shadow(0 ${isActive ? 3 : 1.5}px ${isActive ? 4 : 2.5}px rgba(0,0,0,0.4))`,
               }}
             >
-              {/* Stitched edges */}
+              {/* Selvedge — a darker hemmed edge along the ribbon outline, like a real silk bookmark */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-[4px] inset-y-[3px]"
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  border: '1px dashed rgba(255,255,255,0.18)',
+                  boxShadow: `inset 0 0 0 1px ${ribbon.selvedge}`,
                   clipPath: tabClip,
                 }}
               />
-              {/* Label */}
-              <span className="relative z-10 -mt-[3px] font-mono text-[0.44rem] font-medium uppercase tracking-[0.18em] text-white/80">
+              {/* Label — stamped ink on silk */}
+              <span
+                className="relative z-10 -mt-[3px] font-mono uppercase"
+                style={{
+                  fontSize: '0.58rem',
+                  letterSpacing: '0.2em',
+                  color: 'rgba(250,244,232,0.96)',
+                }}
+              >
                 {ribbon.label}
               </span>
               {/* Filter active dot */}
               {hasIndicator && !isActive && (
-                <div className="absolute right-[10px] top-[6px] h-[5px] w-[5px] rounded-full bg-white/60 shadow-[0_0_4px_rgba(255,255,255,0.3)]" />
+                <div
+                  className="absolute right-[7px] top-[5px] h-[4px] w-[4px] rounded-full"
+                  style={{ background: 'rgba(250,244,232,0.9)' }}
+                />
               )}
             </button>
 
             {/* === Pulled Ribbon + Panel === */}
             {isActive && (
               <div className="relative -mt-[1px] flex flex-col items-center">
-                {/* Connector strip */}
+                {/* Connector strip — continuation of ribbon with selvedge */}
                 <div
+                  className="relative"
                   style={{
                     width: TAB_WIDTH,
-                    height: 12,
-                    background: ribbonSatin(ribbon.gradient, ribbon.sheenColor),
+                    height: 10,
+                    background: ribbonCloth(ribbon.cloth),
+                    boxShadow: `inset 1px 0 0 ${ribbon.selvedge}, inset -1px 0 0 ${ribbon.selvedge}`,
                   }}
                 />
 
-                {/* Fold crease where ribbon bends over frame edge */}
-                <div
-                  aria-hidden="true"
-                  className="absolute top-[8px]"
-                  style={{
-                    width: TAB_WIDTH + 4,
-                    left: -2,
-                    height: '3px',
-                    background: `linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.22) 50%, rgba(0,0,0,0.18) 70%, transparent 95%)`,
-                    borderRadius: '50%',
-                  }}
-                />
-
-                {/* Tag panel */}
-                <div className="animate-in fade-in-0 slide-in-from-top-3 relative overflow-visible duration-350 ease-[cubic-bezier(0.19,1,0.22,1)]">
-                  {/* Ribbon header */}
+                {/* Tag panel — library-card feel: flat cream, ruled rows, quiet shadow */}
+                <div className="animate-in fade-in-0 slide-in-from-top-2 relative overflow-visible duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]">
+                  {/* Ribbon header — the "tag" stamped on the ribbon's end */}
                   <div
-                    className="relative overflow-hidden rounded-t-[4px] px-4 py-2.5 text-center"
-                    style={{ background: ribbonSatin(ribbon.gradient, ribbon.sheenColor) }}
+                    className="relative overflow-hidden px-5 py-2.5 text-center"
+                    style={{
+                      background: ribbonCloth(ribbon.cloth),
+                      boxShadow: `inset 1px 0 0 ${ribbon.selvedge}, inset -1px 0 0 ${ribbon.selvedge}, inset 0 1px 0 ${ribbon.selvedge}`,
+                    }}
                   >
-                    {/* Stitched edges on header */}
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-[4px] inset-y-[3px] border border-dashed border-white/[0.18]"
-                    />
-                    <span className="relative font-mono text-[0.54rem] font-medium uppercase tracking-[0.24em] text-white/90">
+                    <span
+                      className="relative font-mono uppercase"
+                      style={{
+                        fontSize: '0.62rem',
+                        letterSpacing: '0.3em',
+                        color: 'rgba(250,244,232,0.98)',
+                      }}
+                    >
                       {ribbon.label}
                     </span>
                   </div>
 
-                  {/* Cream body */}
-                  <div className="border-x border-[rgba(180,160,120,0.15)] bg-[linear-gradient(180deg,rgba(253,249,240,0.99),rgba(244,235,216,0.99))] p-3 shadow-[0_18px_40px_rgba(8,15,27,0.22),0_6px_14px_rgba(8,15,27,0.1)]">
+                  {/* Library-card body */}
+                  <div
+                    className="border-x p-3"
+                    style={{
+                      borderColor: 'rgba(120,98,64,0.18)',
+                      background: '#f4ecd8',
+                      boxShadow: '0 10px 22px rgba(8,15,27,0.14), 0 2px 6px rgba(8,15,27,0.06)',
+                    }}
+                  >
                     {activeRibbon === 'sort' && (
-                      <div className="w-52 space-y-1">
-                        {sortOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => {
-                              onSortChange(option.value);
-                              setActiveRibbon(null);
-                            }}
-                            className={`flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left font-mono text-[0.56rem] uppercase tracking-[0.15em] transition ${
-                              selectedSortBy === option.value
-                                ? 'bg-[rgba(77,104,145,0.12)] text-[#30496d]'
-                                : 'text-[#5f7286] hover:bg-[rgba(77,104,145,0.07)] hover:text-[#223248]'
-                            }`}
-                          >
-                            <span>{option.label}</span>
-                            {selectedSortBy === option.value && (
-                              <Icon name="chevron-right" size="sm" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                      <ul className="w-52">
+                        {sortOptions.map((option, idx) => {
+                          const selected = selectedSortBy === option.value;
+                          return (
+                            <li
+                              key={option.value}
+                              style={{
+                                borderTop:
+                                  idx === 0 ? 'none' : '1px solid rgba(120,98,64,0.14)',
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onSortChange(option.value);
+                                  setActiveRibbon(null);
+                                }}
+                                className="group flex w-full items-center justify-between px-2 py-[0.45rem] text-left font-mono uppercase transition-colors"
+                                style={{
+                                  fontSize: '0.55rem',
+                                  letterSpacing: '0.16em',
+                                  color: selected ? '#3a3226' : '#6d6046',
+                                }}
+                              >
+                                <span>{option.label}</span>
+                                {selected && (
+                                  <span
+                                    aria-hidden="true"
+                                    style={{
+                                      fontSize: '0.55rem',
+                                      color: ribbon.selvedge,
+                                    }}
+                                  >
+                                    ◆
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     )}
 
                     {activeRibbon === 'shelves' && (
                       <div className="w-56">
-                        <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
-                          {allBookshelves.map((shelf) => (
-                            <label
-                              key={shelf.id}
-                              className={`flex cursor-pointer items-center gap-2.5 rounded-[10px] px-3 py-2 transition ${
-                                selectedShelfSet.has(shelf.id)
-                                  ? 'bg-[rgba(77,104,145,0.12)] text-[#30496d]'
-                                  : 'text-[#5f7286] hover:bg-[rgba(77,104,145,0.07)] hover:text-[#223248]'
-                              }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedShelfSet.has(shelf.id)}
-                                onChange={() => onToggleShelf(shelf.id)}
-                                className="h-3.5 w-3.5 rounded border-[#b6c4d8] bg-transparent text-secondary focus:ring-secondary/16"
-                              />
-                              <span className="font-mono text-[0.54rem] uppercase tracking-[0.14em]">
-                                {shelf.name}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
+                        <ul className="max-h-56 overflow-y-auto pr-1">
+                          {allBookshelves.map((shelf, idx) => {
+                            const selected = selectedShelfSet.has(shelf.id);
+                            return (
+                              <li
+                                key={shelf.id}
+                                style={{
+                                  borderTop:
+                                    idx === 0 ? 'none' : '1px solid rgba(120,98,64,0.14)',
+                                }}
+                              >
+                                <label
+                                  className="flex cursor-pointer items-center gap-2.5 px-2 py-[0.42rem]"
+                                  style={{
+                                    color: selected ? '#3a3226' : '#6d6046',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selected}
+                                    onChange={() => onToggleShelf(shelf.id)}
+                                    className="h-3 w-3"
+                                    style={{
+                                      accentColor: ribbon.selvedge,
+                                    }}
+                                  />
+                                  <span
+                                    className="font-mono uppercase"
+                                    style={{
+                                      fontSize: '0.53rem',
+                                      letterSpacing: '0.14em',
+                                    }}
+                                  >
+                                    {shelf.name}
+                                  </span>
+                                </label>
+                              </li>
+                            );
+                          })}
+                        </ul>
                         {hasAnyFilters && (
-                          <div className="mt-2 border-t border-[rgba(77,104,145,0.1)] pt-2">
+                          <div
+                            className="mt-2 pt-2"
+                            style={{ borderTop: '1px solid rgba(120,98,64,0.2)' }}
+                          >
                             <button
                               type="button"
                               onClick={() => {
                                 handleReset();
                                 setActiveRibbon(null);
                               }}
-                              className="w-full rounded-[10px] border border-[rgba(77,104,145,0.12)] bg-white/[0.48] px-3 py-2 font-mono text-[0.52rem] uppercase tracking-[0.14em] text-[#5f7286] transition hover:border-secondary/18 hover:text-[#223248]"
+                              className="w-full px-2 py-[0.4rem] font-mono uppercase transition-colors"
+                              style={{
+                                fontSize: '0.52rem',
+                                letterSpacing: '0.16em',
+                                color: '#8a7858',
+                              }}
                             >
-                              Reset Filters
+                              Reset
                             </button>
                           </div>
                         )}
@@ -287,29 +343,32 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
                     )}
 
                     {activeRibbon === 'search' && (
-                      <div className="w-60">
+                      <div
+                        className="w-60"
+                        style={{ ['--search-underline' as string]: ribbon.selvedge }}
+                      >
                         <SearchInput
                           value={searchQuery}
                           onChange={onSearchChange}
-                          placeholder="Search title or author..."
+                          placeholder="title or author..."
                           debounceMs={300}
                           className="w-full"
-                          inputClassName="rounded-[10px] border-[rgba(77,104,145,0.12)] bg-white/[0.52] py-[0.42rem] pl-8 text-[0.84rem] text-[#223248] shadow-none placeholder:text-[#7a8ca2] focus:ring-secondary/16"
-                          iconClassName="text-[#7a8ca2]"
-                          clearButtonClassName="text-[#7a8ca2] hover:text-[#223248]"
+                          inputClassName="border-0 border-b-2 rounded-none bg-transparent py-[0.4rem] pl-7 text-[0.85rem] text-[#3a3226] placeholder:text-[#a89776] shadow-none focus:ring-0 focus:outline-none [border-bottom-color:var(--search-underline)]"
+                          iconClassName="text-[#a89776]"
+                          clearButtonClassName="text-[#a89776] hover:text-[#3a3226]"
                         />
                       </div>
                     )}
                   </div>
 
-                  {/* V-cut bottom */}
+                  {/* V-cut bottom — continuation of the card, tapered */}
                   <div
                     className="relative"
                     style={{
-                      height: 14,
-                      background: 'linear-gradient(180deg, rgba(244,235,216,0.99), rgba(236,226,204,0.99))',
-                      clipPath: 'polygon(0 0, 100% 0, 100% 3px, 50% 100%, 0 3px)',
-                      filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))',
+                      height: 12,
+                      background: '#f4ecd8',
+                      clipPath: 'polygon(0 0, 100% 0, 100% 2px, 50% 100%, 0 2px)',
+                      filter: 'drop-shadow(0 4px 6px rgba(8,15,27,0.08))',
                     }}
                   />
                 </div>

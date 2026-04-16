@@ -47,7 +47,7 @@ const App: React.FC = () => {
               <Route
                 path="/bookshelf"
                 element={
-                  <Layout>
+                  <Layout density="compact">
                     <BookshelfPage />
                   </Layout>
                 }

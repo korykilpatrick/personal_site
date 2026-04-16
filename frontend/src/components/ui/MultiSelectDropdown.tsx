@@ -12,6 +12,10 @@ interface MultiSelectDropdownProps {
   selectedItems: number[];
   toggleItem: (id: number) => void;
   className?: string;
+  buttonSize?: 'sm' | 'md' | 'lg';
+  buttonClassName?: string;
+  iconClassName?: string;
+  formatDisplayLabel?: (items: DropdownItem[], selectedItems: number[]) => string;
 }
 
 const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
@@ -19,18 +23,27 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   selectedItems,
   toggleItem,
   className = '',
+  buttonSize = 'md',
+  buttonClassName = '',
+  iconClassName = '',
+  formatDisplayLabel,
 }) => {
   // Determine display label based on selection
-  const displayLabel = selectedItems.length === 0 ? 'All' : `${selectedItems.length} selected`;
+  const displayLabel = formatDisplayLabel
+    ? formatDisplayLabel(items, selectedItems)
+    : selectedItems.length === 0
+      ? 'All'
+      : `${selectedItems.length} selected`;
 
   // Create trigger button
   const trigger = (
     <Button
       variant="outline"
-      className="w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem]"
+      size={buttonSize}
+      className={`w-full justify-between gap-3 rounded-[16px] px-3 py-2.5 text-[0.68rem] ${buttonClassName}`}
     >
       <span className="mr-1">{displayLabel}</span>
-      <Icon name="chevron-down" className="ml-auto text-textTertiary" />
+      <Icon name="chevron-down" className={`ml-auto text-textTertiary ${iconClassName}`} />
     </Button>
   );
 
