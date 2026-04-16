@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Loading, ErrorDisplay } from '../components/ui';
 import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
-import BookshelfControls from '../components/bookshelf/BookshelfControls';
+import BookshelfControls, {
+  BookshelfSelectionChips,
+} from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
 import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
 import useMultiSelect from '../hooks/useMultiSelect';
@@ -107,22 +109,32 @@ const BookshelfPageContent: React.FC = () => {
           'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
       }}
     >
-      <BookshelfControls
-        sortOptions={sortOptions}
-        selectedSortBy={sortBy}
-        onSortChange={setSortBy}
-        allBookshelves={bookshelves}
-        selectedShelfIds={selectedShelves}
-        onToggleShelf={toggleShelfSelection}
-        onClearShelves={clearSelection}
-        bookCount={filteredAndSortedBooks.length}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
       <BookshelfGrid
         books={filteredAndSortedBooks}
         currentBooks={currentBooks}
         bookSize={SHELF_BOOK_SIZE}
+        controls={
+          <BookshelfControls
+            sortOptions={sortOptions}
+            selectedSortBy={sortBy}
+            onSortChange={setSortBy}
+            allBookshelves={bookshelves}
+            selectedShelfIds={selectedShelves}
+            onToggleShelf={toggleShelfSelection}
+            onClearShelves={clearSelection}
+            bookCount={filteredAndSortedBooks.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        }
+        chips={
+          <BookshelfSelectionChips
+            allBookshelves={bookshelves}
+            selectedShelfIds={selectedShelves}
+            onToggleShelf={toggleShelfSelection}
+            onClearShelves={clearSelection}
+          />
+        }
       />
       <BookshelfQuoteDock />
     </div>
