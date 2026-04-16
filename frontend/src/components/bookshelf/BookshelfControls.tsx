@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bookshelf, SortOption } from 'types/index';
+import Icon from '@/components/common/Icon';
 
 interface BookshelfControlsProps {
   sortOptions: SortOption[];
@@ -19,12 +20,11 @@ const INK_NAVY = '#15263f';
 const INK_NAVY_DIM = 'rgba(21, 38, 63, 0.55)';
 const INK_NAVY_QUIET = 'rgba(21, 38, 63, 0.35)';
 const CREAM = '#f4ecd8';
-const CREAM_DEEP = '#e4d7bc';
 const INK = '#2a1f14';
 const INK_DIM = '#6d6046';
 const INK_RULE = 'rgba(58, 42, 30, 0.18)';
 
-// Cream popover card, same language as before — floats as a typed card
+// ─── Popover ────────────────────────────────────────────────────────────────
 const Popover: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -86,10 +86,73 @@ const Popover: React.FC<{
   );
 };
 
-// Filter value as a typographic anchor — navy on sky, with a subtle underline
-interface ValueProps {
+// ─── Sort anchor ("SORT · Recent") ─────────────────────────────────────────
+interface SortAnchorProps {
   label: string;
   value: string;
+  open: boolean;
+  onToggle: () => void;
+  renderPopover: (ctx: { close: () => void }) => React.ReactNode;
+}
+
+const SortAnchor: React.FC<SortAnchorProps> = ({
+  label,
+  value,
+  open,
+  onToggle,
+  renderPopover,
+}) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  return (
+    <span className="relative inline-flex items-baseline gap-2">
+      <span
+        className="font-mono uppercase"
+        style={{
+          color: INK_NAVY_DIM,
+          fontSize: '0.62rem',
+          letterSpacing: '0.22em',
+          fontWeight: 500,
+        }}
+      >
+        {label}
+      </span>
+      <button
+        ref={ref}
+        type="button"
+        onClick={onToggle}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="inline-flex items-center font-mono uppercase transition focus:outline-none"
+        style={{
+          color: INK_NAVY,
+          fontSize: '0.7rem',
+          letterSpacing: '0.14em',
+          fontWeight: 600,
+          borderBottom: `1px solid ${open ? INK_NAVY : INK_NAVY_QUIET}`,
+          paddingBottom: 2,
+          backgroundColor: 'transparent',
+        }}
+        onMouseEnter={(e) => {
+          if (!open) e.currentTarget.style.borderBottomColor = INK_NAVY_DIM;
+        }}
+        onMouseLeave={(e) => {
+          if (!open) e.currentTarget.style.borderBottomColor = INK_NAVY_QUIET;
+        }}
+      >
+        {value}
+      </button>
+      <Popover open={open} onClose={onToggle} width={220} anchorRef={ref}>
+        {renderPopover({ close: onToggle })}
+      </Popover>
+    </span>
+  );
+};
+
+// ─── Icon button (shelf, search) ───────────────────────────────────────────
+interface IconButtonProps {
+  icon: 'shelf' | 'search';
+  ariaLabel: string;
+  active: boolean;
   open: boolean;
   onToggle: () => void;
   popoverWidth?: number;
@@ -97,50 +160,44 @@ interface ValueProps {
   renderPopover: (ctx: { close: () => void }) => React.ReactNode;
 }
 
-const Value = React.forwardRef<HTMLButtonElement, ValueProps>(
-  ({ label, value, open, onToggle, popoverWidth, popoverAlign, renderPopover }, ref) => {
+const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  (
+    { icon, ariaLabel, active, open, onToggle, popoverWidth, popoverAlign, renderPopover },
+    ref,
+  ) => {
     const localRef = useRef<HTMLButtonElement>(null);
     React.useImperativeHandle(ref, () => localRef.current as HTMLButtonElement);
 
+    const color = active || open ? INK_NAVY : INK_NAVY_DIM;
+
     return (
-      <span className="relative inline-flex items-baseline gap-2">
-        <span
-          className="font-mono uppercase"
-          style={{
-            color: INK_NAVY_DIM,
-            fontSize: '0.62rem',
-            letterSpacing: '0.22em',
-            fontWeight: 500,
-          }}
-        >
-          {label}
-        </span>
+      <span className="relative inline-flex items-center">
         <button
           ref={localRef}
           type="button"
           onClick={onToggle}
+          aria-label={ariaLabel}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="inline-flex items-center font-mono uppercase transition focus:outline-none"
+          className="inline-flex items-center justify-center transition focus:outline-none"
           style={{
-            color: INK_NAVY,
-            fontSize: '0.7rem',
-            letterSpacing: '0.14em',
-            fontWeight: 600,
-            borderBottom: `1px solid ${open ? INK_NAVY : INK_NAVY_QUIET}`,
-            paddingBottom: 2,
-            paddingLeft: 0,
-            paddingRight: 0,
+            color,
+            width: 22,
+            height: 22,
+            padding: 0,
             backgroundColor: 'transparent',
+            borderBottom: `1px solid ${open ? INK_NAVY : 'transparent'}`,
+            paddingBottom: 2,
+            marginBottom: -3,
           }}
           onMouseEnter={(e) => {
-            if (!open) e.currentTarget.style.borderBottomColor = INK_NAVY_DIM;
+            if (!open && !active) e.currentTarget.style.color = INK_NAVY;
           }}
           onMouseLeave={(e) => {
-            if (!open) e.currentTarget.style.borderBottomColor = INK_NAVY_QUIET;
+            if (!open && !active) e.currentTarget.style.color = INK_NAVY_DIM;
           }}
         >
-          {value}
+          <Icon name={icon} size="sm" />
         </button>
         <Popover
           open={open}
@@ -155,8 +212,46 @@ const Value = React.forwardRef<HTMLButtonElement, ValueProps>(
     );
   },
 );
-Value.displayName = 'Value';
+IconButton.displayName = 'IconButton';
 
+// ─── Active-filter chip ─────────────────────────────────────────────────────
+const FilterChip: React.FC<{ label: string; onRemove: () => void; title?: string }> = ({
+  label,
+  onRemove,
+  title,
+}) => (
+  <button
+    type="button"
+    onClick={onRemove}
+    className="inline-flex items-center gap-1.5 font-mono uppercase transition"
+    style={{
+      color: INK_NAVY,
+      fontSize: '0.6rem',
+      letterSpacing: '0.16em',
+      backgroundColor: 'transparent',
+      padding: '2px 8px',
+      border: `1px solid ${INK_NAVY_QUIET}`,
+      borderRadius: 2,
+      whiteSpace: 'nowrap',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = 'rgba(21, 38, 63, 0.05)';
+      e.currentTarget.style.borderColor = INK_NAVY_DIM;
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = 'transparent';
+      e.currentTarget.style.borderColor = INK_NAVY_QUIET;
+    }}
+    title={title}
+  >
+    {label}
+    <span aria-hidden="true" style={{ color: INK_NAVY_DIM, fontSize: '0.72rem', lineHeight: 1 }}>
+      ×
+    </span>
+  </button>
+);
+
+// ─── Main component ─────────────────────────────────────────────────────────
 const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   sortOptions,
   selectedSortBy,
@@ -187,27 +282,21 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   const sortLabel =
     sortOptions.find((o) => o.value === selectedSortBy)?.label.toUpperCase() ?? '—';
 
-  const shelvesLabel =
-    selectedShelfIds.length === 0
-      ? 'ALL'
-      : selectedShelfIds.length === 1
-      ? (allBookshelves.find((s) => s.id === selectedShelfIds[0])?.name ?? '1').toUpperCase()
-      : `${selectedShelfIds.length} SELECTED`;
-
-  const searchLabel = searchQuery.trim() ? `"${searchQuery.trim().toUpperCase()}"` : 'ALL';
-
   const handleToggle = (which: 'sort' | 'shelves' | 'search') =>
     setOpenSegment((cur) => (cur === which ? null : which));
 
+  const searchActive = searchQuery.trim().length > 0;
+  const selectedShelves = allBookshelves.filter((s) => selectedShelfIds.includes(s.id));
+
   return (
-    <div className="relative flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
-      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
-        <Value
+    <div className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/* SORT · Recent */}
+        <SortAnchor
           label="Sort"
           value={sortLabel}
           open={openSegment === 'sort'}
           onToggle={() => handleToggle('sort')}
-          popoverWidth={220}
           renderPopover={({ close }) => (
             <ul className="py-1.5" role="menu">
               {sortOptions.map((opt) => {
@@ -250,9 +339,15 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           )}
         />
 
-        <Value
-          label="Shelf"
-          value={shelvesLabel}
+        {/* Shelf icon button */}
+        <IconButton
+          icon="shelf"
+          ariaLabel={
+            selectedShelves.length > 0
+              ? `Filter by shelf (${selectedShelves.length} selected)`
+              : 'Filter by shelf'
+          }
+          active={selectedShelves.length > 0}
           open={openSegment === 'shelves'}
           onToggle={() => handleToggle('shelves')}
           popoverWidth={260}
@@ -318,9 +413,11 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
           )}
         />
 
-        <Value
-          label="Search"
-          value={searchLabel}
+        {/* Search icon button */}
+        <IconButton
+          icon="search"
+          ariaLabel={searchActive ? `Search: ${searchQuery}` : 'Search books'}
+          active={searchActive}
           open={openSegment === 'search'}
           onToggle={() => handleToggle('search')}
           popoverWidth={300}
@@ -375,6 +472,23 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             </div>
           )}
         />
+
+        {/* Inline active-filter chips — sit on the same horizontal plane */}
+        {searchActive && (
+          <FilterChip
+            label={`"${searchQuery.trim()}"`}
+            onRemove={() => onSearchChange('')}
+            title="Clear search"
+          />
+        )}
+        {selectedShelves.map((shelf) => (
+          <FilterChip
+            key={shelf.id}
+            label={shelf.name}
+            onRemove={() => onToggleShelf(shelf.id)}
+            title="Remove shelf filter"
+          />
+        ))}
       </div>
 
       {/* Volume count — trailing colophon */}
@@ -395,74 +509,3 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
 };
 
 export default BookshelfControls;
-
-// Sidecar: active-shelves chip rail
-export const BookshelfSelectionChips: React.FC<{
-  allBookshelves: Bookshelf[];
-  selectedShelfIds: number[];
-  onToggleShelf: (id: number) => void;
-  onClearShelves: () => void;
-}> = ({ allBookshelves, selectedShelfIds, onToggleShelf, onClearShelves }) => {
-  if (selectedShelfIds.length === 0) return null;
-  const selected = allBookshelves.filter((s) => selectedShelfIds.includes(s.id));
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span
-        className="font-mono uppercase"
-        style={{
-          color: INK_NAVY_DIM,
-          fontSize: '0.56rem',
-          letterSpacing: '0.22em',
-        }}
-      >
-        On shelf
-      </span>
-      {selected.map((shelf) => (
-        <button
-          key={shelf.id}
-          type="button"
-          onClick={() => onToggleShelf(shelf.id)}
-          className="inline-flex items-center gap-1.5 font-mono uppercase transition"
-          style={{
-            color: INK_NAVY,
-            fontSize: '0.6rem',
-            letterSpacing: '0.16em',
-            backgroundColor: 'transparent',
-            padding: '2px 8px',
-            border: `1px solid ${INK_NAVY_QUIET}`,
-            borderRadius: 2,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(21, 38, 63, 0.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-          title="Remove shelf filter"
-        >
-          {shelf.name}
-          <span aria-hidden="true" style={{ color: INK_NAVY_DIM, fontSize: '0.7rem' }}>
-            ×
-          </span>
-        </button>
-      ))}
-      {selected.length > 1 && (
-        <button
-          type="button"
-          onClick={onClearShelves}
-          className="font-mono uppercase"
-          style={{
-            color: INK_NAVY_DIM,
-            fontSize: '0.56rem',
-            letterSpacing: '0.22em',
-          }}
-        >
-          Clear all
-        </button>
-      )}
-      {/* touch exports so lint doesn't flag */}
-      <span style={{ display: 'none' }}>{CREAM_DEEP}</span>
-    </div>
-  );
-};

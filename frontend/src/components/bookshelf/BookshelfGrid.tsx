@@ -8,7 +8,6 @@ interface BookshelfGridProps {
   bookSize: { width: number; height: number };
   currentBooks?: BookWithShelves[];
   controls?: React.ReactNode;
-  chips?: React.ReactNode;
 }
 
 // Chromeless shelves — the page IS the reading room. No frame, no case.
@@ -61,11 +60,8 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
   bookSize,
   currentBooks = [],
   controls,
-  chips,
 }) => {
-  if (books.length === 0) {
-    return <EmptyState message="No books found with the current filters" />;
-  }
+  const isEmpty = books.length === 0;
 
   const currentBookPlacements = new Map(
     currentBooks
@@ -75,20 +71,14 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
 
   return (
     <div className="relative">
-      {/* Filter line — sits on the page as typographic navigation, no chrome */}
-      {controls ? (
-        <div className="mb-5 px-1 sm:px-2">
-          {controls}
-        </div>
-      ) : null}
+      {/* Filter line — sits on the page as typographic navigation, no chrome.
+          Active-filter chips live inline on this same row (see BookshelfControls). */}
+      {controls ? <div className="mb-5 px-1 sm:px-2">{controls}</div> : null}
 
-      {/* Active-shelves chip rail */}
-      {chips ? (
-        <div className="mb-4 px-1 sm:px-2">
-          {chips}
-        </div>
-      ) : null}
-
+      {isEmpty ? (
+        <EmptyState message="No books found with the current filters" />
+      ) : (
+      <>
       {/* Shelves — a series of walnut planks with books resting on top.
           Overflow is visible so hover/rest transforms, drop shadows, and the
           splayed current-reading rotations don't get clipped at the edges. */}
@@ -147,6 +137,8 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
           })}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

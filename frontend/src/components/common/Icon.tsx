@@ -16,6 +16,7 @@ export type IconName =
   | 'plus'
   | 'quote-left'
   | 'search'
+  | 'shelf'
   | 'star'
   | 'star-empty'
   | 'trash'
@@ -165,6 +166,18 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
         strokeWidth="2"
         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
       />
+    ),
+  },
+  shelf: {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    children: (
+      <g strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75">
+        <line x1="4" y1="7" x2="20" y2="7" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="17" x2="20" y2="17" />
+      </g>
     ),
   },
   star: {

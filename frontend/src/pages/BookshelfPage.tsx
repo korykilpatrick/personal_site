@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Loading, ErrorDisplay } from '../components/ui';
 import { Bookshelf, BookWithShelves, SortOption } from 'types/index';
-import BookshelfControls, {
-  BookshelfSelectionChips,
-} from '../components/bookshelf/BookshelfControls';
+import BookshelfControls from '../components/bookshelf/BookshelfControls';
 import BookshelfGrid from '../components/bookshelf/BookshelfGrid';
 import BookshelfQuoteDock from '../components/bookshelf/BookshelfQuoteDock';
 import useMultiSelect from '../hooks/useMultiSelect';
@@ -14,7 +12,7 @@ import {
 } from '../components/bookshelf/bookshelfReadingState';
 
 const sortOptions: SortOption[] = [
-  { label: 'Recently Read', value: 'date_read' },
+  { label: 'Recent', value: 'date_read' },
   { label: 'Title', value: 'title' },
   { label: 'Author', value: 'author' },
   { label: 'Published Date', value: 'date_pub' },
@@ -125,14 +123,6 @@ const BookshelfPageContent: React.FC = () => {
             bookCount={filteredAndSortedBooks.length}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-          />
-        }
-        chips={
-          <BookshelfSelectionChips
-            allBookshelves={bookshelves}
-            selectedShelfIds={selectedShelves}
-            onToggleShelf={toggleShelfSelection}
-            onClearShelves={clearSelection}
           />
         }
       />
