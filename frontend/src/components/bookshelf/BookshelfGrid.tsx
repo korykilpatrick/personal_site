@@ -4,9 +4,10 @@ import { BookCard } from '../books';
 import { EmptyState } from '../ui';
 
 interface BookshelfGridProps {
-  books: BookWithShelves[]; // Changed Book[] to BookWithShelves[]
+  books: BookWithShelves[];
   bookSize: { width: number; height: number };
   currentBooks?: BookWithShelves[];
+  controls?: React.ReactNode;
 }
 
 const getBookshelfFrameStyle = (bookSize: { width: number; height: number }) => {
@@ -86,7 +87,7 @@ const CURRENT_BOOK_TRANSFORMS = [
   },
 ];
 
-const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize, currentBooks = [] }) => {
+const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize, currentBooks = [], controls }) => {
   if (books.length === 0) {
     return <EmptyState message="No books found with the current filters" />;
   }
@@ -98,17 +99,19 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize, currentB
   );
 
   return (
-    <div
-      className="overflow-x-auto pb-4"
-      style={{
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#6f8196 #edf2f7',
-      }}
-    >
+    <div className="relative">
+      {controls}
       <div
-        className="site-frame relative overflow-hidden rounded-[34px] pt-6 p-4 sm:pt-7 sm:p-5"
-        style={getBookshelfFrameStyle(bookSize)}
+        className="overflow-x-auto pb-4"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#6f8196 #edf2f7',
+        }}
       >
+        <div
+          className="site-frame relative overflow-hidden rounded-[34px] pt-6 p-4 sm:pt-7 sm:p-5"
+          style={getBookshelfFrameStyle(bookSize)}
+        >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/[0.07] via-white/[0.02] to-transparent"
@@ -154,6 +157,7 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({ books, bookSize, currentB
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </div>

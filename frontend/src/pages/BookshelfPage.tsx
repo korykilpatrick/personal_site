@@ -101,28 +101,30 @@ const BookshelfPageContent: React.FC = () => {
 
   return (
     <div
-      className="space-y-4"
+      className="space-y-0"
       style={{
         paddingBottom:
           'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
       }}
     >
-      <BookshelfControls
-        sortOptions={sortOptions}
-        selectedSortBy={sortBy}
-        onSortChange={setSortBy}
-        allBookshelves={bookshelves}
-        selectedShelfIds={selectedShelves}
-        onToggleShelf={toggleShelfSelection}
-        onClearShelves={clearSelection}
-        bookCount={filteredAndSortedBooks.length}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
       <BookshelfGrid
         books={filteredAndSortedBooks}
         currentBooks={currentBooks}
         bookSize={SHELF_BOOK_SIZE}
+        controls={
+          <BookshelfControls
+            sortOptions={sortOptions}
+            selectedSortBy={sortBy}
+            onSortChange={setSortBy}
+            allBookshelves={bookshelves}
+            selectedShelfIds={selectedShelves}
+            onToggleShelf={toggleShelfSelection}
+            onClearShelves={clearSelection}
+            bookCount={filteredAndSortedBooks.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        }
       />
       <BookshelfQuoteDock />
     </div>
