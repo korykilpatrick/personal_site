@@ -42,14 +42,16 @@ const AboutPage: React.FC = () => {
               </a>{' '}
               and became convinced AI was going to be the most important
               technology in history, so I taught myself to code and built a
-              fintech business to get up to speed on software. These days
-              I&rsquo;m building in the AI space and helping executives figure
-              out how to use and think about it.
+              SaaS business to get up to speed. I&rsquo;m now working
+              in AI, taking entrepreneurial swings at products while
+              also advising executives on how to use it for themselves
+              and across their companies.
             </p>
             <p className="text-textSecondary">
-              When I&rsquo;m not building or reading, I&rsquo;m doing physical
-              activities (&#127934; being the current favorite), trying to be a good
-              role model, or enjoying the company of people and animals I love.
+              When I&rsquo;m not working, I&rsquo;m doing physical
+              activities (&#127934; being the current favorite), reading,
+              trying to be a good role model, or enjoying the company of
+              people and animals I love.
             </p>
           </div>
         </div>
