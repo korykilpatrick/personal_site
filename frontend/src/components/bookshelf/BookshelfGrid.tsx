@@ -122,12 +122,16 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
                         '--current-hover-y': `${placement.hoverY}px`,
                         '--current-hover-r': `${placement.hoverRotate}deg`,
                         zIndex: currentBooks.length - placement.order + 20,
+                        // Currently-reading books get a warm walnut shadow plus a
+                        // faint oxblood glow — the book is being read, an ember
+                        // under the spine. The glow is small so it doesn't shout.
                         filter:
-                          'drop-shadow(0 4px 3px rgba(15, 29, 48, 0.20)) drop-shadow(0 1px 0 rgba(15, 29, 48, 0.30))',
+                          'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32)) drop-shadow(0 0 6px rgba(158, 58, 42, 0.18))',
                       } as React.CSSProperties)
                     : ({
+                        // Rested books get a plain warm walnut shadow — wood on paper.
                         filter:
-                          'drop-shadow(0 4px 3px rgba(15, 29, 48, 0.20)) drop-shadow(0 1px 0 rgba(15, 29, 48, 0.30))',
+                          'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32))',
                       } as React.CSSProperties)
                 }
               >

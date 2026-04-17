@@ -15,18 +15,30 @@ const AboutPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="group block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25"
+            className="group block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood/30"
             aria-label={`View larger image: ${altText}`}
           >
+            {/* Cream-paper frame around the photo — like a mounted print on a library wall.
+                Walnut hairline border + warm shadow sits the photo on the page rather than
+                floating it in a cool-glass vignette. */}
             <img
               src={imageUrl}
               alt={altText}
-              className="aspect-[4/5] w-full rounded-[28px] border border-white/70 object-cover shadow-[0_24px_52px_rgba(15,28,46,0.16)] transition duration-700 group-hover:scale-[1.01]"
+              className="aspect-[4/5] w-full rounded-[28px] border border-[rgba(74,52,35,0.22)] object-cover shadow-[0_24px_52px_rgba(74,52,35,0.18)] transition duration-700 group-hover:scale-[1.01]"
             />
           </button>
         </div>
 
         <div className="max-w-[36rem]">
+          {/* Signature eyebrow — the house mark ◆ between walnut hairlines.
+              Same mark appears under the navbar wordmark and as the selection
+              marker in the bookshelf's filter popover. The repetition is the point;
+              it says "this site has a hand" without having to announce it in words. */}
+          <div aria-hidden="true" className="mb-7 flex items-center gap-3">
+            <span className="h-px flex-1 bg-[rgba(74,52,35,0.22)]" />
+            <span className="text-[0.65rem] leading-none text-oxblood/85">◆</span>
+            <span className="h-px flex-1 bg-[rgba(74,52,35,0.22)]" />
+          </div>
           <div className="space-y-5 text-[1.04rem] leading-[1.88] sm:text-[1.1rem] sm:leading-[1.92]">
             <p className="text-textPrimary">
               I like solving problems, helping people, and cleaning the lens
@@ -36,7 +48,7 @@ const AboutPage: React.FC = () => {
                 href="https://waitbutwhy.com/2015/01/artificial-intelligence-revolution-1.html"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-secondary underline decoration-secondary/30 underline-offset-2 transition hover:decoration-secondary/60"
+                className="text-primary underline decoration-walnut/40 underline-offset-2 transition hover:text-oxblood hover:decoration-oxblood/60"
               >
                 this article
               </a>{' '}

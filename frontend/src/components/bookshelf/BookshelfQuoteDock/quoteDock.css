@@ -40,32 +40,35 @@
   animation: driftInBookshelfDockVeil 1.38s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
+/* Cream paper cloud — the quote reads off a lit page, not a cool sky. */
 .bookshelf-quote-dock__reading-cloud {
   background: radial-gradient(
     ellipse at center,
-    rgba(247, 250, 255, 0.82) 0%,
-    rgba(247, 250, 255, 0.64) 18%,
-    rgba(247, 250, 255, 0.28) 42%,
-    rgba(247, 250, 255, 0.08) 62%,
+    rgba(250, 245, 234, 0.88) 0%,
+    rgba(250, 245, 234, 0.70) 18%,
+    rgba(244, 236, 216, 0.32) 42%,
+    rgba(244, 236, 216, 0.10) 62%,
     transparent 100%
   );
 }
 
+/* Warm reading-lamp glow — amber/oxblood rather than cool sky-blue. */
 .bookshelf-quote-dock__reading-glow {
   background: radial-gradient(
     ellipse at center,
-    rgba(132, 181, 255, 0.18),
-    rgba(247, 250, 255, 0.08) 42%,
+    rgba(158, 58, 42, 0.10),
+    rgba(250, 245, 234, 0.10) 42%,
     transparent 76%
   );
   filter: blur(26px);
 }
 
+/* Walnut-ink mist — the faint warmth behind the paper. */
 .bookshelf-quote-dock__reading-mist {
   background: radial-gradient(
     ellipse at center,
-    rgba(233, 242, 255, 0.12) 0%,
-    rgba(233, 242, 255, 0.06) 22%,
+    rgba(74, 52, 35, 0.06) 0%,
+    rgba(74, 52, 35, 0.03) 22%,
     transparent 66%
   );
   filter: blur(44px);
@@ -73,8 +76,8 @@
 
 .bookshelf-quote-dock__preview {
   text-wrap: pretty;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 0 18px rgba(233, 242, 255, 0.32);
+  text-shadow: 0 1px 0 rgba(255, 253, 244, 0.58),
+    0 0 18px rgba(244, 236, 216, 0.34);
 }
 
 .bookshelf-quote-dock__inline-toggle {
@@ -84,7 +87,7 @@
   background: transparent;
   padding: 0;
   margin: 0;
-  color: rgba(48, 90, 154, 0.92);
+  color: rgba(74, 52, 35, 0.72);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 0.64rem;
   font-weight: 600;
@@ -98,7 +101,7 @@
 
 .bookshelf-quote-dock__inline-toggle:hover,
 .bookshelf-quote-dock__inline-toggle:focus-visible {
-  color: #2d63af;
+  color: #9e3a2a; /* oxblood */
   opacity: 1;
   outline: none;
 }
@@ -109,8 +112,8 @@
   justify-content: center;
   border: 0;
   background: transparent;
-  color: rgba(62, 84, 112, 0.22);
-  opacity: 0.18;
+  color: rgba(74, 52, 35, 0.32);
+  opacity: 0.22;
   transition: opacity 620ms cubic-bezier(0.19, 1, 0.22, 1),
     color 620ms cubic-bezier(0.19, 1, 0.22, 1),
     transform 620ms cubic-bezier(0.19, 1, 0.22, 1);
@@ -120,8 +123,8 @@
 .group\/bookshelf-dock:focus-within .bookshelf-quote-dock__edge-control,
 .bookshelf-quote-dock__edge-control:hover,
 .bookshelf-quote-dock__edge-control:focus-visible {
-  opacity: 0.72;
-  color: rgba(42, 73, 120, 0.84);
+  opacity: 0.78;
+  color: rgba(74, 52, 35, 0.86);
   transform: translateY(-50%) scale(1.02);
   outline: none;
 }
@@ -171,11 +174,11 @@
   width: 2.3rem;
   height: 0.24rem;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(195, 209, 228, 0.96));
+  background: linear-gradient(180deg, rgba(255, 253, 244, 0.82), rgba(213, 199, 168, 0.92));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 5px 14px rgba(12, 23, 39, 0.12),
-    0 0 0 1px rgba(197, 211, 230, 0.36);
+    inset 0 1px 0 rgba(255, 253, 244, 0.65),
+    0 5px 14px rgba(74, 52, 35, 0.14),
+    0 0 0 1px rgba(213, 199, 168, 0.42);
   transition: width 420ms cubic-bezier(0.19, 1, 0.22, 1),
     background 420ms cubic-bezier(0.19, 1, 0.22, 1),
     box-shadow 420ms cubic-bezier(0.19, 1, 0.22, 1),
@@ -187,11 +190,11 @@
 .bookshelf-quote-dock__collapse-control:hover .bookshelf-quote-dock__collapse-bar,
 .bookshelf-quote-dock__collapse-control:focus-visible .bookshelf-quote-dock__collapse-bar {
   width: 2.55rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(175, 195, 220, 0.98));
+  background: linear-gradient(180deg, rgba(255, 253, 244, 0.94), rgba(191, 172, 135, 0.96));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 8px 18px rgba(12, 23, 39, 0.14),
-    0 0 0 1px rgba(165, 188, 216, 0.48);
+    inset 0 1px 0 rgba(255, 253, 244, 0.76),
+    0 8px 18px rgba(74, 52, 35, 0.16),
+    0 0 0 1px rgba(191, 172, 135, 0.54);
 }
 
 .bookshelf-quote-dock__markdown {
@@ -203,10 +206,10 @@
   font-size: 0.95rem;
   line-height: 1.62;
   margin-bottom: 0.75rem;
-  color: #223248;
+  color: #2a1f14; /* deep warm ink */
   text-align: center;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 0 18px rgba(233, 242, 255, 0.28);
+  text-shadow: 0 1px 0 rgba(255, 253, 244, 0.58),
+    0 0 18px rgba(244, 236, 216, 0.30);
 }
 
 .bookshelf-quote-dock__markdown p:last-child {
@@ -214,11 +217,11 @@
 }
 
 .bookshelf-quote-dock__markdown strong {
-  color: #15263f;
+  color: #15263f; /* navy ink for emphasis */
 }
 
 .bookshelf-quote-dock__markdown em {
-  color: #5f7286;
+  color: #6b4f35; /* walnut-mid for italic asides */
 }
 
 @media (min-width: 640px) {

@@ -16,16 +16,20 @@
 
   body {
     @apply min-h-screen bg-background font-sans text-[15px] leading-[1.68] text-textPrimary antialiased md:text-base;
+    /* Warm cream paper ground.
+       Walnut radial at the top gives the page a gentle "aged at the top" gradient
+       without announcing itself; oxblood radial at the upper right is the whisper
+       of the stamp accent threaded through the page. */
     background-image:
-      radial-gradient(circle at top, rgba(63, 127, 216, 0.18), transparent 28%),
-      radial-gradient(circle at 16% 10%, rgba(21, 38, 63, 0.12), transparent 30%),
-      radial-gradient(circle at 82% 10%, rgba(74, 128, 208, 0.08), transparent 24%),
-      linear-gradient(180deg, #f6f9fc 0%, #eff4f9 34%, #eaf0f7 70%, #e6edf5 100%);
+      radial-gradient(circle at 50% -10%, rgba(74, 52, 35, 0.06), transparent 32%),
+      radial-gradient(circle at 85% 8%, rgba(158, 58, 42, 0.04), transparent 28%),
+      radial-gradient(circle at 10% 95%, rgba(74, 52, 35, 0.05), transparent 26%),
+      linear-gradient(180deg, #faf3df 0%, #f4ecd8 38%, #efe5c9 74%, #ebe0be 100%);
     background-attachment: fixed;
   }
 
   body::selection {
-    background: rgba(63, 127, 216, 0.18);
+    background: rgba(158, 58, 42, 0.18);
     color: #15263f;
   }
 
@@ -55,7 +59,11 @@
   }
 
   a {
-    @apply text-primary underline-offset-4 transition duration-300 hover:text-secondary-dark;
+    @apply text-primary underline-offset-4 transition duration-300 hover:text-oxblood;
+    text-decoration-color: rgba(74, 52, 35, 0.35);
+  }
+  a:hover {
+    text-decoration-color: rgba(158, 58, 42, 0.65);
   }
 
   button,
@@ -79,20 +87,24 @@
     @apply rounded-md my-4;
   }
 
+  /* Cards are cream-paper with walnut hairlines and warm shadows —
+     a book laid on a desk, not a glassy SaaS card. */
   .site-card {
-    @apply rounded-[24px] border border-[rgba(21,38,63,0.09)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,248,252,0.82))] shadow-[0_18px_44px_rgba(21,38,63,0.09)] backdrop-blur-[4px];
+    @apply rounded-[24px] border border-[rgba(74,52,35,0.14)] bg-[linear-gradient(180deg,rgba(250,245,234,0.94),rgba(244,236,216,0.88))] shadow-[0_18px_44px_rgba(74,52,35,0.10)] backdrop-blur-[4px];
   }
 
   .site-card-soft {
-    @apply rounded-[20px] border border-[rgba(255,255,255,0.68)] bg-[linear-gradient(180deg,rgba(255,255,255,0.74),rgba(240,245,250,0.56))] shadow-[0_12px_30px_rgba(21,38,63,0.06)] backdrop-blur-[8px];
+    @apply rounded-[20px] border border-[rgba(74,52,35,0.12)] bg-[linear-gradient(180deg,rgba(250,245,234,0.82),rgba(244,236,216,0.68))] shadow-[0_12px_30px_rgba(74,52,35,0.08)] backdrop-blur-[8px];
   }
 
+  /* Dark cloth binding — navy-glass frame for pull-quote cards / hover panels.
+     Reads as a navy-bound book on cream paper. */
   .site-frame {
-    @apply rounded-[28px] border border-[rgba(104,131,166,0.22)] bg-[linear-gradient(180deg,rgba(25,41,64,0.98),rgba(13,24,39,0.99))] shadow-[0_24px_72px_rgba(15,28,46,0.22)];
+    @apply rounded-[28px] border border-[rgba(137,181,255,0.18)] bg-[linear-gradient(180deg,rgba(25,41,64,0.98),rgba(13,24,39,0.99))] shadow-[0_24px_72px_rgba(15,28,46,0.22)];
   }
 
   .site-eyebrow {
-    @apply font-mono text-[0.7rem] font-medium uppercase tracking-[0.22em] text-secondary-dark;
+    @apply font-mono text-[0.7rem] font-medium uppercase tracking-[0.22em] text-oxblood;
   }
 
   .site-meta {
@@ -100,14 +112,14 @@
   }
 
   .site-field {
-    @apply rounded-[14px] border border-[rgba(21,38,63,0.12)] bg-[rgba(255,255,255,0.76)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-[4px];
+    @apply rounded-[14px] border border-[rgba(74,52,35,0.16)] bg-[rgba(250,245,234,0.78)] shadow-[inset_0_1px_0_rgba(255,253,244,0.8)] backdrop-blur-[4px];
   }
 
   .site-divider {
-    @apply h-px bg-gradient-to-r from-transparent via-[rgba(21,38,63,0.12)] to-transparent;
+    @apply h-px bg-gradient-to-r from-transparent via-[rgba(74,52,35,0.18)] to-transparent;
   }
 
   .site-link-chip {
-    @apply inline-flex items-center rounded-[12px] border border-[rgba(21,38,63,0.12)] bg-white/60 px-3 py-1.5 font-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-textSecondary no-underline transition duration-300 hover:border-secondary/30 hover:bg-white/80 hover:text-primary;
+    @apply inline-flex items-center rounded-[12px] border border-[rgba(74,52,35,0.18)] bg-[rgba(250,245,234,0.68)] px-3 py-1.5 font-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-textSecondary no-underline transition duration-300 hover:border-oxblood/40 hover:bg-[rgba(250,245,234,0.92)] hover:text-oxblood;
   }
 }
