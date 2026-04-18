@@ -12,7 +12,7 @@ import {
 } from '../components/bookshelf/bookshelfReadingState';
 
 const sortOptions: SortOption[] = [
-  { label: 'Recently Read', value: 'date_read' },
+  { label: 'Recent', value: 'date_read' },
   { label: 'Title', value: 'title' },
   { label: 'Author', value: 'author' },
   { label: 'Published Date', value: 'date_pub' },
@@ -27,7 +27,6 @@ const BookshelfPageContent: React.FC = () => {
   const {
     selectedItems: selectedShelves,
     toggleSelection: toggleShelfSelection,
-    clearSelection,
   } = useMultiSelect<number>([]);
 
   const [sortBy, setSortBy] = useState<string>('date_read');
@@ -107,22 +106,23 @@ const BookshelfPageContent: React.FC = () => {
           'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
       }}
     >
-      <BookshelfControls
-        sortOptions={sortOptions}
-        selectedSortBy={sortBy}
-        onSortChange={setSortBy}
-        allBookshelves={bookshelves}
-        selectedShelfIds={selectedShelves}
-        onToggleShelf={toggleShelfSelection}
-        onClearShelves={clearSelection}
-        bookCount={filteredAndSortedBooks.length}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
       <BookshelfGrid
         books={filteredAndSortedBooks}
         currentBooks={currentBooks}
         bookSize={SHELF_BOOK_SIZE}
+        controls={
+          <BookshelfControls
+            sortOptions={sortOptions}
+            selectedSortBy={sortBy}
+            onSortChange={setSortBy}
+            allBookshelves={bookshelves}
+            selectedShelfIds={selectedShelves}
+            onToggleShelf={toggleShelfSelection}
+            bookCount={filteredAndSortedBooks.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        }
       />
       <BookshelfQuoteDock />
     </div>

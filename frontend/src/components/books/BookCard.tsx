@@ -18,10 +18,10 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
 
   const tooltipContent = (
     <div className="flex flex-col gap-1 text-left">
-      <h3 className="font-serif text-sm font-semibold leading-snug text-stone-50">
+      <h3 className="font-serif text-sm font-semibold leading-snug text-cream">
         {book.title}
       </h3>
-      <p className="text-xs text-stone-300 leading-tight">{book.author}</p>
+      <p className="text-xs leading-tight text-cream/75">{book.author}</p>
       {book.rating !== null && book.rating !== undefined && (
         <div className="mt-0.5">
           <Rating value={book.rating} max={5} size="sm" />
@@ -32,7 +32,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
           {book.shelves.slice(0, 3).map((shelf: BookshelfSummary) => (
             <span
               key={shelf.id}
-              className="rounded-md bg-secondary/20 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.06em] text-secondary-light"
+              className="rounded-md border border-cream/20 bg-cream/10 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.06em] text-cream/85"
             >
               {shelf.name}
             </span>
@@ -44,23 +44,24 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
 
   return (
     <div
-      className="group/book flex justify-center last:border-r-0 rounded-[15px] transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] shadow-[0_12px_22px_rgba(9,18,31,0.24)] hover:-translate-y-3 hover:scale-[1.06] hover:shadow-[0_24px_48px_rgba(9,18,31,0.35),0_8px_16px_rgba(9,18,31,0.2)]"
+      className="group/book flex justify-center last:border-r-0 rounded-[15px] transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] shadow-[0_12px_22px_rgba(74,52,35,0.22)] hover:-translate-y-3 hover:scale-[1.06] hover:shadow-[0_24px_48px_rgba(74,52,35,0.32),0_8px_16px_rgba(74,52,35,0.18)]"
       style={{
         width: `${bookSize.width}px`,
         height: `${bookSize.height}px`,
       }}
     >
       <div className="relative h-full w-full overflow-hidden rounded-[15px]">
+        {/* Hover glow — warm amber/oxblood, like a reading lamp passing over the spine */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-3 rounded-[22px] bg-[radial-gradient(circle_at_50%_18%,rgba(132,181,255,0.32),transparent_56%)] opacity-0 blur-xl transition duration-[900ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover/book:opacity-100"
+          className="pointer-events-none absolute -inset-3 rounded-[22px] bg-[radial-gradient(circle_at_50%_18%,rgba(158,58,42,0.22),transparent_56%)] opacity-0 blur-xl transition duration-[900ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover/book:opacity-100"
         />
         <Tooltip content={tooltipContent} side="right" sideOffset={12} delayDuration={150}>
           <a
             href={book.book_link || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="group block h-full w-full rounded-[15px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-dark focus:ring-secondary/70"
+            className="group block h-full w-full rounded-[15px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-cream focus:ring-oxblood/60"
             aria-label={`${book.title} by ${book.author}${book.rating ? `, rated ${book.rating} of 5` : ''}`}
           >
             <img
@@ -70,7 +71,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, bookSize }) => {
               onError={handleImageError}
               loading="lazy"
             />
-            <div className="pointer-events-none absolute inset-0 rounded-[15px] border border-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]" />
+            <div className="pointer-events-none absolute inset-0 rounded-[15px] border border-white/8 shadow-[inset_0_1px_0_rgba(255,253,244,0.18)]" />
           </a>
         </Tooltip>
       </div>

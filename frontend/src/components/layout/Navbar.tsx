@@ -9,7 +9,7 @@ const DESKTOP_ICON_CLASSNAME = 'h-7 w-7';
 
 // Icon style constants
 const ICON_LINK_CLASSNAME =
-  'text-slate-100 hover:text-secondary-light no-underline transition duration-300';
+  'text-slate-100 hover:text-oxblood-light no-underline transition duration-300';
 const EMAIL_HREF = 'mailto:koryrkilpatrick@gmail.com';
 
 const NAV_LINKS = [
@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
           <div className="justify-self-start">
             <Link
               to="/"
-              className="flex items-center gap-3 text-white no-underline transition hover:text-secondary-light"
+              className="flex items-center gap-3 text-white no-underline transition hover:text-oxblood-light"
               aria-label="Homepage"
             >
               <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
@@ -128,7 +128,7 @@ const Navbar: React.FC = () => {
                 onFocus={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
                 className={`rounded-[12px] px-4 py-2 font-mono text-[0.74rem] uppercase tracking-[0.12em] no-underline transition ${
                   isActive(link.path)
-                    ? 'border border-secondary/40 bg-[rgba(63,127,216,0.26)] !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+                    ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
                     : '!text-slate-100 hover:bg-white/[0.12] hover:!text-white'
                 }`}
               >
@@ -143,7 +143,7 @@ const Navbar: React.FC = () => {
               href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.64rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-secondary/40 hover:bg-white/[0.12] hover:text-secondary-light"
+              className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.64rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-oxblood/50 hover:bg-white/[0.12] hover:text-oxblood-light"
               aria-label="Five Hour Consulting profile"
             >
               5HC
@@ -201,7 +201,7 @@ const Navbar: React.FC = () => {
                   onTouchStart={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
                   className={`block rounded-[12px] px-3 py-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] no-underline transition ${
                     isActive(link.path)
-                      ? 'border border-secondary/40 bg-[rgba(63,127,216,0.26)] !text-white'
+                      ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white'
                       : '!text-slate-100 hover:bg-white/[0.12] hover:!text-white'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
@@ -215,7 +215,7 @@ const Navbar: React.FC = () => {
                   href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-secondary/40 hover:bg-white/[0.12] hover:text-secondary-light"
+                  className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-oxblood/50 hover:bg-white/[0.12] hover:text-oxblood-light"
                   aria-label="Five Hour Consulting profile"
                 >
                   5HC
