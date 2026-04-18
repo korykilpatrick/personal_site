@@ -27,7 +27,6 @@ const BookshelfPageContent: React.FC = () => {
   const {
     selectedItems: selectedShelves,
     toggleSelection: toggleShelfSelection,
-    clearSelection,
   } = useMultiSelect<number>([]);
 
   const [sortBy, setSortBy] = useState<string>('date_read');
@@ -119,7 +118,6 @@ const BookshelfPageContent: React.FC = () => {
             allBookshelves={bookshelves}
             selectedShelfIds={selectedShelves}
             onToggleShelf={toggleShelfSelection}
-            onClearShelves={clearSelection}
             bookCount={filteredAndSortedBooks.length}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}

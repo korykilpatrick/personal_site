@@ -9,7 +9,6 @@ interface BookshelfControlsProps {
   allBookshelves: Bookshelf[];
   selectedShelfIds: number[];
   onToggleShelf: (id: number) => void;
-  onClearShelves: () => void;
   bookCount: number;
   searchQuery: string;
   onSearchChange: (val: string) => void;
@@ -319,7 +318,6 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   allBookshelves,
   selectedShelfIds,
   onToggleShelf,
-  onClearShelves,
   bookCount,
   searchQuery,
   onSearchChange,
@@ -336,7 +334,6 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
       if (searchDraft !== searchQuery) onSearchChange(searchDraft);
     }, 250);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchDraft]);
 
   const sortLabel =
