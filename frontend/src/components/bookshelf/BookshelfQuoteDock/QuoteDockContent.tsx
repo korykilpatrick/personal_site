@@ -79,7 +79,15 @@ const QuoteDockContent: React.FC<QuoteDockContentProps> = ({
     {(currentQuote.author || currentQuote.source || isExpanded) && (
       <p
         key={`meta-${currentIndex}-${isExpanded ? 'expanded' : 'collapsed'}`}
-        className="bookshelf-quote-dock__meta mb-0 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-mono text-[0.68rem] tracking-[0.08em] text-textSecondary sm:text-[0.72rem]"
+        /* Meta line wraps freely — long titles (e.g. "Pathways to
+           Bliss: Mythology and Personal Transformation") used to get
+           ellipsed to a single line, which hid the source. Dropping
+           the truncation classes lets the meta break onto a second
+           line when needed; useDockReservation re-measures and the
+           plate grows gracefully. `text-wrap: pretty` yields nicer
+           break points than browser default. */
+        className="bookshelf-quote-dock__meta mb-0 min-w-0 text-center font-mono text-[0.68rem] tracking-[0.08em] text-textSecondary sm:text-[0.72rem]"
+        style={{ textWrap: 'pretty' }}
       >
         {currentQuote.author && <span>{currentQuote.author}</span>}
         {currentQuote.author && currentQuote.source && <span aria-hidden="true"> · </span>}

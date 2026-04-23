@@ -66,20 +66,46 @@ describe('BookshelfQuoteDock', () => {
     jest.resetAllMocks();
   });
 
-  it('renders the current preview and updates when navigating to the next quote', () => {
+  it('renders the current preview and advances via keyboard arrow key', () => {
     render(<BookshelfQuoteDock />);
 
-    expect(screen.getByText(/Short visible preview/)).toBeInTheDocument();
+    // Commonplace variants render a ghost echo of the preview text in
+    // addition to the readable plate, so the text may appear twice.
+    expect(screen.getAllByText(/Short visible preview/).length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Next quote' }));
+    // Keyboard ArrowRight is a window-level listener that advances
+    // to the next quote.
+    act(() => {
+      fireEvent.keyDown(window, { key: 'ArrowRight' });
+    });
 
-    expect(screen.getByText(/Second visible preview/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Second visible preview/).length).toBeGreaterThan(0);
   });
 
-  it('keeps navigation controls inside the centered content rail', () => {
+  it('closes the dock when the × button is clicked and shows the torn-paper peek', () => {
     render(<BookshelfQuoteDock />);
 
-    const previousButton = screen.getByRole('button', { name: 'Previous quote' });
-    expect(previousButton.closest('.max-w-5xl')).not.toBeNull();
+    expect(screen.getAllByText(/Short visible preview/).length).toBeGreaterThan(0);
+
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'Hide quote dock' }));
+    });
+
+    expect(screen.getByRole('button', { name: 'Show quote dock' })).toBeInTheDocument();
+  });
+
+  it('dismisses the dock when Escape is pressed and shows the torn-paper peek', () => {
+    render(<BookshelfQuoteDock />);
+
+    // Dock is visible — the plate's content exists.
+    expect(screen.getAllByText(/Short visible preview/).length).toBeGreaterThan(0);
+
+    act(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
+
+    // After Escape, BookshelfQuoteDock renders the torn-paper peek
+    // re-open affordance instead of the full dock.
+    expect(screen.getByRole('button', { name: 'Show quote dock' })).toBeInTheDocument();
   });
 });
