@@ -1,105 +1,48 @@
 /* Commonplace paradigm — shared CSS for the torn-paper dock.
    Responsibilities:
      - Outer container (fixed, bottom-aligned, reserved height)
-     - Ghost echo (previous quote drifting behind the plate)
-     - Plate-frame wrapper (holds rotation; siblings of the plate
-       track it for gesture visuals like the peek slivers)
-     - Shared plate rules (paper grain, typography bloom)
-     - Peek slivers (prev/next paper hints during horizontal drag)
-     - First-visit hint (marginalia-style text in the bottom margin)
+     - Plate-frame wrapper (holds rotation)
+     - Shared plate rules (paper grain, typography bloom, fixed
+       JS-driven height, body-stack scrolling when expanded)
+     - Close × and prev/next nav marks
 
    Variant-specific rules (e.g. the torn clip-path polygon, the
    per-variant padding) live in tornPage.css. This file is the
    stable baseline every commonplace variant inherits.
 
-   Gesture interactions (drag, flick-to-close, key nav) are driven
-   from CommonplaceFrame.tsx via Framer Motion. This file only
-   styles the UI scaffolding; motion is JS-owned.
+   Keyboard nav (← / → cycle, ↑ / ↓ expand-collapse, Esc dismiss)
+   is driven from CommonplaceFrame.tsx. This file only styles the
+   UI scaffolding; motion is JS-owned.
 
    Structural contract:
-     .bookshelf-dock-cp-outer      (fixed bottom-0, z-30,
-                                    data-density=light|medium|dense)
-     .bookshelf-dock-cp-echo       (absolute, ghost echo layer)
-     .bookshelf-dock-cp-plate-frame (holds rotation + data-drag-axis)
-     .bookshelf-dock-cp-peek        (prev/next edge sliver, x2)
+     .bookshelf-dock-cp-outer       (fixed bottom-0, z-30,
+                                     data-density=light|medium|dense)
+     .bookshelf-dock-cp-plate-frame (holds rotation)
      .bookshelf-dock-cp-plate       (variant-specific class ON TOP
-                                     of this — see tornPage.css)
-     .bookshelf-dock-cp-hint        (first-visit marginalia text) */
-
-@keyframes bookshelfCpEchoEnter {
-  from {
-    opacity: 0;
-    filter: blur(18px);
-    letter-spacing: -0.02em;
-  }
-  to {
-    opacity: 1;
-    filter: blur(11px);
-    letter-spacing: -0.04em;
-  }
-}
+                                     of this — see tornPage.css) */
 
 .bookshelf-dock-cp-outer {
   position: fixed;
   inset-inline: 0;
   bottom: 0;
   z-index: 30;
-  overflow: hidden;
   pointer-events: none;
-  transition: height 1180ms cubic-bezier(0.19, 1, 0.22, 1);
+  /* No height / no overflow / no transition here: the plate below
+     is the single source of truth for the dock's visible size. Its
+     height is fixed per `data-expanded` state (see
+     .bookshelf-dock-cp-plate) and transitions smoothly only on
+     expand/collapse. Outer lets its natural (content-driven) height
+     follow the plate so there's no second, desynchronised
+     transition fighting for control. */
 }
 
-/* Ghost echo layer — the previous quote's text floating behind the
-   paper, drifting on scroll via useScrollEcho's --echo-offset. */
-.bookshelf-dock-cp-echo {
-  --echo-offset: 0px;
-  --echo-opacity: 0.16;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 32px);
-  mask-image: linear-gradient(to bottom, transparent 0px, black 32px);
-}
-
-.bookshelf-dock-cp-echo__text {
-  display: block;
-  max-width: 220%;
-  overflow: hidden;
-  white-space: nowrap;
-  font-family: 'Newsreader', 'IBM Plex Serif', Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(4.5rem, 13vw, 11rem);
-  line-height: 0.94;
-  letter-spacing: -0.04em;
-  color: rgba(74, 52, 35, var(--echo-opacity, 0.16));
-  text-align: center;
-  transform: translate3d(0, var(--echo-offset, 0px), 0);
-  filter: blur(11px);
-  transition: transform 820ms cubic-bezier(0.19, 1, 0.22, 1),
-    filter 820ms cubic-bezier(0.19, 1, 0.22, 1),
-    color 820ms cubic-bezier(0.19, 1, 0.22, 1);
-  animation: bookshelfCpEchoEnter 1.8s cubic-bezier(0.19, 1, 0.22, 1) both;
-}
-
-.bookshelf-dock-cp-echo[data-scrolling] .bookshelf-dock-cp-echo__text {
-  transition: transform 160ms linear, filter 320ms ease-out, color 320ms ease-out;
-  filter: blur(14px);
-  color: rgba(74, 52, 35, calc(var(--echo-opacity, 0.16) + 0.04));
-}
-
-[data-density='light'] .bookshelf-dock-cp-echo {
-  --echo-opacity: 0.2;
-}
-[data-density='medium'] .bookshelf-dock-cp-echo {
-  --echo-opacity: 0.16;
-}
-[data-density='dense'] .bookshelf-dock-cp-echo {
-  --echo-opacity: 0.12;
-}
+/* Ghost echo removed. It used to render the previous quote's first
+   few words as a big blurred typographic ghost behind the paper for
+   "atmospheric" effect, but `max-width: 220%` meant the text bled
+   past the paper's horizontal bounds and showed up in the bookshelf
+   background as hazy letters (most noticeably the first letter of
+   the current quote spelling itself out on the sides). Not worth
+   the visual cost — cleaner to just let the bookshelf breathe. */
 
 /* Paper grain — subtle SVG turbulence noise, tiled. Variants
    reference it via the CSS custom property; see --grain-strength
@@ -117,7 +60,39 @@
   transform-origin: 50% 50%;
 }
 
-/* Shared plate rules — the baseline every variant inherits. */
+/* Body-stack — single grid cell that holds the AnimatePresence
+   children. When the active quote-transition variant runs in
+   crossfade mode (both old and new bodies mounted simultaneously),
+   both motion.div children occupy the same grid cell so the two
+   quotes OVERLAP at the same position on the paper. When the
+   variant uses mode="wait" only one child is in the cell.
+
+   No min-height here — the plate itself is fixed-height per
+   `data-expanded` state, and flex-centers body-stack within it.
+   An earlier iteration used min-height here to keep the plate
+   stable, but that approach was leaky: a long preview + 2-line
+   meta could still push body-stack past the min, which pushed the
+   plate taller, which triggered a height transition on the outer,
+   which read as the paper jittering on every quote cycle. */
+.bookshelf-dock-cp-body-stack {
+  display: grid;
+  grid-template-areas: 'stack';
+  align-items: center;
+}
+.bookshelf-dock-cp-body-stack > .bookshelf-dock-cp-body-wrap {
+  grid-area: stack;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Shared plate rules — the baseline every variant inherits.
+   The plate is the single source of truth for the dock's visible
+   size. Its height is FIXED per `data-expanded` state; it changes
+   only when the user toggles more/less. On quote cycle (expand
+   state unchanged), the plate stays exactly the same size and only
+   the text inside swaps out. All variable-height content — preview
+   density, meta line-wrapping, ghost echo, etc. — is absorbed inside
+   this fixed box via flex-centered layout + `overflow: hidden`. */
 .bookshelf-dock-cp-plate {
   position: relative;
   margin-left: auto;
@@ -128,6 +103,54 @@
      drag gesture's continuous transform changes are much smoother
      on a promoted layer. */
   transform-style: flat;
+
+  /* Fixed geometry + flex-center so content sits in the middle of
+     the scrap rather than stretching it. Overflow hidden guards
+     against a rare long-meta-plus-long-preview combo pushing past
+     the content area; the torn clip-path polygon would clip it
+     anyway, this just makes layout explicit. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+
+  /* Plate height is JS-controlled via an inline `style.height`
+     pixel value — see CommonplaceFrame's useLayoutEffect. It's
+     the collapsed baseline (11rem mobile / 12rem desktop) when
+     data-expanded is false, and the measured content height
+     (capped at 75vh) when data-expanded is true. CSS contributes
+     only the transition that glides between those pixel values
+     smoothly on more/less. 2.4s is deliberately slow — "homey,
+     library, not enterprise tech" per the user's direction. The
+     page unfolds the way a cloth napkin would, not the way a
+     snappy accordion does. */
+  transition: height 2400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Body-stack — single grid cell that holds the AnimatePresence
+   children (see the comment earlier in this file for how
+   quote-transition variants use grid-stack for overlap).
+   Rules split by expand state:
+     - Collapsed: align-items: center so the preview text sits
+       centered on the scrap (no empty top/bottom).
+     - Expanded: align-items: start + flex: 1 1 auto + min-height: 0
+       + overflow-y: auto so the stack fills the plate's remaining
+       space, anchors content at the top, and scrolls internally
+       when the plate is capped at 75vh but the quote is even longer.
+       That way "the whole quote in view" is the default and the
+       scrollbar only appears when genuinely needed. */
+.bookshelf-dock-cp-plate[data-expanded='true']
+  .bookshelf-dock-cp-body-stack {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: start;
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookshelf-dock-cp-plate {
+    transition: none;
+  }
 }
 
 .bookshelf-dock-cp-plate::after {

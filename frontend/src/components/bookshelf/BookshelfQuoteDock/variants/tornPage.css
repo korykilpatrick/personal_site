@@ -1,7 +1,11 @@
-/* Torn page — ripped from a pocket notebook. Torn on all four
-   edges with fresh random geometry per quote, AND the tear
-   animates in smoothly on every quote change via clip-path
-   interpolation between a clean rectangle and the torn polygon.
+/* Torn page — a single ripped scrap of paper rendered once per
+   session, static across quote changes. The only motion on each
+   new quote is the BODY TEXT crossfading (handled by Framer Motion
+   in CommonplaceFrame); the paper itself is visually fixed.
+   Earlier iterations morphed the clip-path between quotes so each
+   card got a fresh silhouette, but that motion competed with the
+   text crossfade and pulled the eye to the paper edges rather
+   than the quote. See TornPageDock.tsx for the rationale.
 
    Layering:
      - The plate holds `clip-path` (so the torn shape clips the
@@ -10,26 +14,9 @@
        filter — drop-shadow on the same element as clip-path
        would be clipped too.
 
-   Tear-in animation (`bookshelfTornPaperTearIn`):
-     Interpolates clip-path between `--plate-clip-clean`
-     (rectangle, 44 pts on the border-box) and `--plate-clip-torn`
-     (the real torn polygon, 44 pts with random inward offsets).
-     Same point count on both polygons lets the browser
-     interpolate smoothly — each point travels from its on-border
-     start to its final torn position over 1.2s.
-
    Padding is sized generously so the maximum tear never reaches
    the quote text — the text safe zone is the intact region
    always inside the polygon. */
-
-@keyframes bookshelfTornPaperTearIn {
-  0% {
-    clip-path: var(--plate-clip-clean, polygon(0 0, 100% 0, 100% 100%, 0 100%));
-  }
-  100% {
-    clip-path: var(--plate-clip-torn, polygon(0 0, 100% 0, 100% 100%, 0 100%));
-  }
-}
 
 .bookshelf-dock-torn-page-plate-wrap {
   /* drop-shadow applies to the clipped child (the plate) since
@@ -47,7 +34,7 @@
   /* Generous padding — larger than the tear depths configured
      in tornPaperShape.ts so text stays safely inside the
      intact region. Horizontal padding is wider still (3.5rem)
-     to leave room for the in-plate prev/next chevrons without
+     to leave room for the in-plate prev/next nav marks without
      the text column running into them. */
   padding: 2rem 3.5rem 2rem;
   background: linear-gradient(180deg,
@@ -58,15 +45,14 @@
   border-radius: 0;
   /* Shadow lives on the wrapper; kill the shared plate shadow. */
   box-shadow: none;
-  /* At rest, the plate is in its torn state. The animation
-     starts from clean and ends at torn, so after the animation
-     completes this matches the final frame's clip-path. */
+  /* Static torn shape — the value of --plate-clip-torn is set
+     once by TornPageDock on mount and never changes. No
+     transition: the paper is a fixed element; only its contents
+     animate. */
   clip-path: var(
     --plate-clip-torn,
     polygon(0 0, 100% 0, 100% 100%, 0 100%)
   );
-  animation:
-    bookshelfTornPaperTearIn 1200ms cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 /* Wrinkle / crease — a faint diagonal band across the plate,
@@ -93,29 +79,24 @@
 }
 
 /* Max-width lives on the WRAPPER, not the plate, so the wrapper
-   shrinks to the plate's width and the dog-ear (pinned to
-   wrapper.top-right) lands at the plate's actual top-right
-   corner. If max-width lived on the plate, the wrapper would
-   stretch to the content rail (max-w-5xl) and the dog-ear would
-   float ~200px right of the paper. */
-[data-density='light'] .bookshelf-dock-torn-page-plate-wrap {
-  max-width: 32rem;
-}
-[data-density='medium'] .bookshelf-dock-torn-page-plate-wrap {
-  max-width: 38rem;
-}
-[data-density='dense'] .bookshelf-dock-torn-page-plate-wrap {
-  max-width: 44rem;
-}
+   shrinks to the plate's width and pinned elements (the close ×,
+   the nav marks) land at the paper's actual corners. If
+   max-width lived on the plate, the wrapper would stretch to the
+   content rail (max-w-5xl) and pinned elements would float far
+   off to the right of the paper.
 
-@media (prefers-reduced-motion: reduce) {
-  /* Skip the tear-in animation — render the torn state directly.
-     The clip-path: var(...) on the plate already points at the
-     torn polygon, so disabling the animation leaves the static
-     torn shape. */
-  .bookshelf-dock-torn-page-plate {
-    animation: none;
-  }
+   Width is UNIFORM across density buckets — short and long
+   quotes all live in a paper of the same footprint. Previous
+   iterations tightened the paper for short quotes and widened
+   for long ones, but the resulting width jump between quotes
+   (~96px in practice) read as the paper itself breathing on each
+   change, which the user explicitly called out as unstable.
+   We keep the density attribute so per-density styling (e.g.
+   ghost-echo opacity) still works, just unify max-width. */
+[data-density='light'] .bookshelf-dock-torn-page-plate-wrap,
+[data-density='medium'] .bookshelf-dock-torn-page-plate-wrap,
+[data-density='dense'] .bookshelf-dock-torn-page-plate-wrap {
+  max-width: 34rem;
 }
 
 @media (prefers-reduced-transparency: reduce) {

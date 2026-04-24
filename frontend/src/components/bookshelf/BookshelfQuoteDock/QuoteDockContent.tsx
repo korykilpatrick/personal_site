@@ -2,12 +2,7 @@ import React from 'react';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer';
 import type { Quote } from 'types';
 import type { MutableRefObject } from 'react';
-import {
-  COLLAPSE_LABEL,
-  DESKTOP_EXPANDED_BODY_MAX_HEIGHT,
-  EXPAND_LABEL,
-  MOBILE_EXPANDED_BODY_MAX_HEIGHT,
-} from './quoteDock.constants';
+import { COLLAPSE_LABEL, EXPAND_LABEL } from './quoteDock.constants';
 
 interface QuoteDockContentProps {
   currentIndex: number;
@@ -22,11 +17,19 @@ interface QuoteDockContentProps {
   onCollapse: () => void;
 }
 
+// No Framer Motion on the expand/collapse swap. The swap itself is
+// instant (preview ↔ full text); the visible "unfolding" is the
+// plate's `transition: height` animating between the collapsed
+// baseline and the JS-measured expanded height (see
+// CommonplaceFrame.tsx). Adding an inner crossfade with mode="wait"
+// creates a dead zone where no text is visible, which reads as lag.
+// `isDesktopPreview` is no longer destructured — the expanded body
+// used to pick between desktop/mobile maxHeight strings, but the
+// plate now owns sizing so that branch is gone.
 const QuoteDockContent: React.FC<QuoteDockContentProps> = ({
   currentIndex,
   currentQuote,
   isExpanded,
-  isDesktopPreview,
   previewText,
   previewMinHeight,
   canExpand,
@@ -36,15 +39,17 @@ const QuoteDockContent: React.FC<QuoteDockContentProps> = ({
 }) => (
   <div className="mx-auto min-w-0 max-w-[44rem] px-10 sm:px-14">
     {isExpanded ? (
+      /* Expanded body renders at its natural content height — no
+         maxHeight, no overflow-y here. The enclosing body-stack is
+         the scroll container (see .bookshelf-dock-cp-body-stack in
+         commonplaceBase.css), and CommonplaceFrame flex-sizes the
+         plate to fit the body's natural height up to a 75vh cap.
+         Result: whole quote in view whenever it fits, scrollbar on
+         the body-stack only when the quote genuinely exceeds the cap. */
       <div
         ref={expandedBodyRef}
         key={`expanded-${currentIndex}`}
-        className="bookshelf-quote-dock__body min-w-0 overflow-y-auto pr-1 text-center sm:pr-2"
-        style={{
-          maxHeight: isDesktopPreview
-            ? DESKTOP_EXPANDED_BODY_MAX_HEIGHT
-            : MOBILE_EXPANDED_BODY_MAX_HEIGHT,
-        }}
+        className="bookshelf-quote-dock__body min-w-0 text-center"
       >
         <MarkdownRenderer className="bookshelf-quote-dock__markdown text-textSecondary">
           {`"${currentQuote.text}"`}
@@ -56,7 +61,7 @@ const QuoteDockContent: React.FC<QuoteDockContentProps> = ({
         className="bookshelf-quote-dock__body flex min-w-0 items-center justify-center overflow-hidden text-center"
         style={{ minHeight: `${previewMinHeight}px` }}
       >
-        <p className="bookshelf-quote-dock__preview mb-0 max-w-[44rem] font-serif text-[0.93rem] leading-[1.5] text-primary sm:text-[0.98rem] sm:leading-[1.54]">
+        <p className="bookshelf-quote-dock__preview mb-0 max-w-[44rem]">
           <span>{`"${previewText}`}</span>
           {canExpand ? (
             <>

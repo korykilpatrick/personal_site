@@ -101,7 +101,8 @@ const BookshelfQuoteDock: React.FC = () => {
   }
 
   return (
-    <AnimatePresence initial={false}>
+    <>
+      <AnimatePresence initial={false}>
       {controller.isDockHidden ? (
         <motion.div
           key="peek"
@@ -143,7 +144,8 @@ const BookshelfQuoteDock: React.FC = () => {
           />
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 };
 

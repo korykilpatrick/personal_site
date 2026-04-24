@@ -74,12 +74,14 @@ describe('TornPageDock', () => {
     ).toBeInTheDocument();
   });
 
-  it('exposes both clean and torn clip-path polygons as CSS variables on the plate', () => {
+  it('exposes a single static torn clip-path polygon on the plate', () => {
     const { container } = render(<TornPageDock {...buildProps()} />);
     const plate = container.querySelector('.bookshelf-dock-cp-plate');
     expect(plate).not.toBeNull();
     const style = (plate as HTMLElement).getAttribute('style') ?? '';
-    expect(style).toContain('--plate-clip-clean');
+    // The torn shape is generated once per session (see
+    // TornPageDock.tsx) and never changes per quote — we only need
+    // the single --plate-clip-torn polygon, not a clean/torn pair.
     expect(style).toContain('--plate-clip-torn');
     expect(style).toContain('polygon(');
   });

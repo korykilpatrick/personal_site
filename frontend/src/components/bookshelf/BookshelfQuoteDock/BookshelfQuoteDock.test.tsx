@@ -74,9 +74,13 @@ describe('BookshelfQuoteDock', () => {
     expect(screen.getAllByText(/Short visible preview/).length).toBeGreaterThan(0);
 
     // Keyboard ArrowRight is a window-level listener that advances
-    // to the next quote.
+    // to the next quote. The body uses an AnimatePresence with
+    // mode="wait" for most variants, so we advance fake timers
+    // past any exit animation before asserting the new quote is
+    // mounted.
     act(() => {
       fireEvent.keyDown(window, { key: 'ArrowRight' });
+      jest.advanceTimersByTime(3000);
     });
 
     expect(screen.getAllByText(/Second visible preview/).length).toBeGreaterThan(0);
