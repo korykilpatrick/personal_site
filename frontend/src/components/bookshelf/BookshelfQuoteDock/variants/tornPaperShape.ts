@@ -41,7 +41,18 @@ export interface TornPaperConfig {
 }
 
 export const DEFAULT_TORN_CONFIG: TornPaperConfig = {
-  verticalTearPct: 8,
+  // Vertical tears scale with plate HEIGHT, which varies by an order
+  // of magnitude across states: collapsed plate is ~192px, expanded
+  // plate caps at 75vh (~600-900px depending on viewport). At an
+  // earlier 8% setting, the deepest top tear on a 900px plate was
+  // ~72px — well past the 32px (2rem) of plate padding-top, so the
+  // tear could clip the top of the very first text line in long
+  // quotes. The body-stack-scrolls-to-top fix made this visible
+  // because the top of the content now sits right where the tear
+  // can reach. 5% keeps the silhouette obviously torn but caps the
+  // worst-case tear at ~45px on a 900px plate, comfortably inside
+  // the 48px (3rem) of vertical padding configured in tornPage.css.
+  verticalTearPct: 5,
   // Horizontal tears are shallower than vertical because the plate is
   // wider than tall in most layouts AND the centered text content lives
   // close to the left/right edges. An earlier setting of 3.5% produced

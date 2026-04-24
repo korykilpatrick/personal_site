@@ -33,15 +33,19 @@
   --grain-strength: 0.62;
   /* Generous padding — larger than the tear depths configured
      in tornPaperShape.ts so text stays safely inside the
-     intact region. Horizontal padding is wider still (3.5rem)
-     to leave room for the in-plate prev/next nav marks without
-     the text column running into them.
-     The mobile media query below bumps horizontal padding to
-     4.5rem under 640px — when the plate is narrow, the same
-     percentage tear becomes proportionally closer to the
-     centered text line, so the larger gutter restores the
-     visual buffer without forcing a content rail change. */
-  padding: 2rem 3.5rem 2rem;
+     intact region.
+       Vertical (3rem = 48px): caps worst-case top/bottom tear
+         at 5% × ~900px expanded plate = 45px. The first text
+         line is always inside the intact zone — important now
+         that the body-stack starts at scrollTop=0 on expand,
+         exposing the very top of the content to whatever the
+         polygon's deepest top tear is.
+       Horizontal (3.5rem desktop, 4.5rem mobile per the
+         media query below): wider on the sides for the in-plate
+         prev/next nav marks; mobile gets extra gutter because
+         the percentage tear is proportionally closer to the
+         centered text line on a narrow plate. */
+  padding: 3rem 3.5rem 3rem;
   background: linear-gradient(180deg,
     rgba(249, 238, 199, 1) 0%,
     rgba(243, 230, 180, 1) 100%
@@ -122,8 +126,10 @@
      plate the polygon's 2.5% horizontal tear is ~9px deep; the
      extra 16px of plate padding (3.5rem -> 4.5rem) keeps a clean
      gap between the deepest tear and the leftmost/rightmost
-     character of any line. */
+     character of any line. Vertical padding stays at the desktop
+     3rem since the vertical tear depth is the same percentage
+     either way. */
   .bookshelf-dock-torn-page-plate {
-    padding: 2rem 4.5rem 2rem;
+    padding: 3rem 4.5rem 3rem;
   }
 }
