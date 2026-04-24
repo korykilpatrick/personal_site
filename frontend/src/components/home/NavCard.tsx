@@ -14,7 +14,7 @@ interface NavCardProps {
  */
 const NavCard: React.FC<NavCardProps> = ({ title, href, emoji }) => (
   <Link to={href} className="no-underline">
-    <Card variant="hover" padding="lg" className="h-full text-center cursor-pointer border-t-2 border-t-secondary-light/50">
+    <Card variant="hover" padding="lg" className="h-full text-center cursor-pointer border-t-2 border-t-walnut/40">
       <span className="text-4xl mb-2 block" role="img" aria-label="">
         {emoji}
       </span>

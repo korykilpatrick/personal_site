@@ -198,7 +198,7 @@ const StructuredLinkInput = <T extends AnyLink>({
       })}
       <Button
         type="button"
-        variant="secondary"
+        variant="outline"
         onClick={addLink}
         disabled={disabled}
         className="mt-2"

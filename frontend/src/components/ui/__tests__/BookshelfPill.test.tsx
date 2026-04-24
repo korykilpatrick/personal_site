@@ -10,7 +10,7 @@ describe('BookshelfPill', () => {
 
     expect(pill).toHaveClass(
       'bg-[linear-gradient(180deg,rgba(21,38,63,0.96),rgba(12,23,39,0.98))]',
-      'text-stone-50',
+      'text-cream-light',
     );
   });
 });

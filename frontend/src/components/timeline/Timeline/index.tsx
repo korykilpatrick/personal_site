@@ -83,9 +83,13 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
   return (
     <div className="timeline-root">
       <Card padding="lg" className="relative">
+        {/* Warm atmospheric radial — walnut + oxblood whispers mirror
+            the body-background's radial palette so the Timeline card
+            reads as part of the same paper world, not a distinct
+            cool-blue-tinted chrome. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_20%_80%,rgba(63,127,216,0.06),transparent_40%),radial-gradient(circle_at_85%_20%,rgba(21,38,63,0.05),transparent_35%)]"
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_20%_80%,rgba(74,52,35,0.05),transparent_40%),radial-gradient(circle_at_85%_20%,rgba(158,58,42,0.04),transparent_35%)]"
         />
 
         <div className="relative space-y-6">

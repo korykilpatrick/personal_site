@@ -65,7 +65,7 @@ const MediaEntriesInput: React.FC<MediaEntriesInputProps> = ({
       ))}
       <Button
         type="button"
-        variant="secondary"
+        variant="outline"
         onClick={onAdd}
         disabled={disabled}
         className="mt-2"

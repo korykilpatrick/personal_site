@@ -250,7 +250,7 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
             </select>
           )}
         </FormField>
-        <Button type="button" variant="secondary" onClick={handleCreateType}>
+        <Button type="button" variant="outline" onClick={handleCreateType}>
           + Type
         </Button>
       </div>
@@ -370,7 +370,7 @@ const LibraryItemForm: React.FC<{ mode: 'create' | 'edit' }> = ({ mode }) => {
           )}
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           type="button"
           onClick={() => navigate('/admin/library-items')}
           disabled={isLoading}
