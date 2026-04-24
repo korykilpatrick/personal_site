@@ -51,7 +51,20 @@ const QuoteDockContent: React.FC<QuoteDockContentProps> = ({
         key={`expanded-${currentIndex}`}
         className="bookshelf-quote-dock__body min-w-0 text-center"
       >
-        <MarkdownRenderer className="bookshelf-quote-dock__markdown text-textSecondary">
+        {/* `forceBlock` is required so single-line quote strings render
+            as `<p>` (not `<span>`). The plate-scoped typography rule in
+            quoteDock.css targets `.bookshelf-quote-dock__markdown p` —
+            without forceBlock, markdown-to-jsx emits a `<span>` for
+            bare text and the rule misses, falling back to the wrapper
+            div's inherited sans-serif font and wrong color. Caused a
+            visible "font changes on more/less" bug. We also drop the
+            `text-textSecondary` class from the wrapper — the plate
+            rule now owns color; the Tailwind color was only being
+            consulted when the <span> fall-through bug was active. */}
+        <MarkdownRenderer
+          className="bookshelf-quote-dock__markdown"
+          forceBlock
+        >
           {`"${currentQuote.text}"`}
         </MarkdownRenderer>
       </div>
