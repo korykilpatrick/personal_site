@@ -26,8 +26,33 @@ const CURRENT_BOOK_TRANSFORMS = [
   { restX: 2, restY: -2, restRotate: 4, hoverX: 8, hoverY: -5, hoverRotate: 6 },
 ];
 
+// Wood-grain noise SVG, sized to match rowHeight so it tiles in
+// perfect register with the plank gradient. Only the plank Y-range
+// is filled — above and below the plank the SVG is transparent so
+// the page background shows through unchanged.
+//
+// feTurbulence parameters tuned for "wood": low fX (0.018) gives
+// long horizontal features; high fY (0.45) gives thin vertical
+// variation — the streaky read of grain running along the board.
+// numOctaves=2 adds a touch of natural irregularity. Color matrix
+// outputs constant walnut-dark at variable alpha (peaks ~0.45),
+// so the grain reads as subtle dark streaks on top of the WALNUT
+// plank color rather than recoloring it.
+//
+// The SVG width is fixed at 240px and tiles horizontally; at this
+// alpha and frequency the seam between tiles is visually quiet.
+// Encoded inline so there's no extra HTTP request.
+const buildWoodGrainSvg = (rowHeight: number, plankTop: number) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="${rowHeight}" preserveAspectRatio="none"><filter id="w"><feTurbulence type="fractalNoise" baseFrequency="0.018 0.45" numOctaves="2" seed="5"/><feColorMatrix type="matrix" values="0 0 0 0 0.10  0 0 0 0 0.06  0 0 0 0 0.03  0 0 0 0.45 0"/></filter><rect x="0" y="${plankTop}" width="100%" height="${SHELF_PLANK_HEIGHT}" filter="url(#w)"/></svg>`;
+  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+};
+
 // Per-row: book sits on top of a walnut plank directly below it.
 // Below the plank is a hairline shadow, then breathing room before the next row.
+// The plank gets a faint wood-grain noise overlay so it reads as a
+// textured wooden surface rather than a flat color band — visually
+// consistent with the dock's paper-grain treatment, where both
+// "physical" surfaces (paper and wood) have a real-material grain.
 const getShelvesStyle = (bookSize: { width: number; height: number }) => {
   const rowHeight = bookSize.height + SHELF_PLANK_HEIGHT + SHELF_GAP_BELOW;
   const plankTop = bookSize.height;
@@ -36,6 +61,7 @@ const getShelvesStyle = (bookSize: { width: number; height: number }) => {
   const shadowEnd = plankTop + SHELF_PLANK_HEIGHT;
   return {
     backgroundImage: `
+      ${buildWoodGrainSvg(rowHeight, plankTop)},
       repeating-linear-gradient(
         to bottom,
         transparent 0,
@@ -50,8 +76,9 @@ const getShelvesStyle = (bookSize: { width: number; height: number }) => {
         transparent ${rowHeight}px
       )
     `,
-    backgroundSize: `100% ${rowHeight}px`,
-    backgroundPosition: '0 0',
+    backgroundSize: `100% ${rowHeight}px, 100% ${rowHeight}px`,
+    backgroundPosition: '0 0, 0 0',
+    backgroundRepeat: 'repeat, repeat',
   };
 };
 

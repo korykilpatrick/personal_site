@@ -352,8 +352,18 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   const selectedShelves = allBookshelves.filter((s) => selectedShelfIds.includes(s.id));
 
   return (
-    <div className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+    /* Single flex row for the whole filter line. The volume count used
+       to live in a separate right-aligned div pinned to the far edge,
+       which read as orphaned chrome — visitors couldn't tell whether
+       "235 VOLS" was related to the filters or the page in general.
+       Now it sits inline at the end of the same row, prefixed with a
+       `·` separator so it reads as "result of the filters above":
+         RECENT  ALL  🔍  · 235 vols
+         RECENT  BIO-NEURO  🔍  Bio-Neuro✕  · 12 vols
+       The count value (`bookCount`) is already filter-scoped via
+       `filteredAndSortedBooks.length`, so the contextual placement
+       matches the data semantics. */
+    <div className="relative flex flex-wrap items-center gap-x-5 gap-y-2">
         {/* Sort — clickable value ("RECENT") */}
         <TextAnchor
           value={sortLabel}
@@ -465,21 +475,26 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             title="Remove shelf filter"
           />
         ))}
-      </div>
 
-      {/* Volume count — trailing colophon */}
-      <div
-        className="hidden font-mono uppercase sm:block"
-        style={{
-          color: WALNUT_MUTED,
-          fontSize: '0.58rem',
-          letterSpacing: '0.24em',
-          whiteSpace: 'nowrap',
-          fontWeight: 500,
-        }}
-      >
-        {bookCount} {bookCount === 1 ? 'vol' : 'vols'}
-      </div>
+        {/* Volume count — inline trailing colophon. Hidden on mobile to
+            preserve filter-row breathing room on narrow viewports; on
+            tablet and up it sits as the last item in the row, reading
+            as the result of all the filters that precede it. The `·`
+            mid-dot is a typographic separator borrowed from the meta
+            register used elsewhere on the site. */}
+        <span
+          className="hidden font-mono uppercase sm:inline-flex sm:items-center"
+          style={{
+            color: WALNUT_MUTED,
+            fontSize: '0.58rem',
+            letterSpacing: '0.24em',
+            whiteSpace: 'nowrap',
+            fontWeight: 500,
+          }}
+        >
+          <span aria-hidden="true" style={{ marginRight: '0.5rem' }}>·</span>
+          {bookCount} {bookCount === 1 ? 'vol' : 'vols'}
+        </span>
     </div>
   );
 };
