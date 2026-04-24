@@ -35,7 +35,12 @@
      in tornPaperShape.ts so text stays safely inside the
      intact region. Horizontal padding is wider still (3.5rem)
      to leave room for the in-plate prev/next nav marks without
-     the text column running into them. */
+     the text column running into them.
+     The mobile media query below bumps horizontal padding to
+     4.5rem under 640px — when the plate is narrow, the same
+     percentage tear becomes proportionally closer to the
+     centered text line, so the larger gutter restores the
+     visual buffer without forcing a content rail change. */
   padding: 2rem 3.5rem 2rem;
   background: linear-gradient(180deg,
     rgba(249, 238, 199, 1) 0%,
@@ -110,5 +115,15 @@
   [data-density='medium'] .bookshelf-dock-torn-page-plate-wrap,
   [data-density='dense'] .bookshelf-dock-torn-page-plate-wrap {
     max-width: calc(100vw - 1.75rem);
+  }
+
+  /* Wider horizontal gutter on mobile so a deep tear at any Y
+     never visually crowds the centered text line. On a 360px-wide
+     plate the polygon's 2.5% horizontal tear is ~9px deep; the
+     extra 16px of plate padding (3.5rem -> 4.5rem) keeps a clean
+     gap between the deepest tear and the leftmost/rightmost
+     character of any line. */
+  .bookshelf-dock-torn-page-plate {
+    padding: 2rem 4.5rem 2rem;
   }
 }

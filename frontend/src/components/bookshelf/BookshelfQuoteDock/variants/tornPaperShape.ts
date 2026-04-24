@@ -42,7 +42,15 @@ export interface TornPaperConfig {
 
 export const DEFAULT_TORN_CONFIG: TornPaperConfig = {
   verticalTearPct: 8,
-  horizontalTearPct: 3.5,
+  // Horizontal tears are shallower than vertical because the plate is
+  // wider than tall in most layouts AND the centered text content lives
+  // close to the left/right edges. An earlier setting of 3.5% produced
+  // occasional deep bites at the same Y as a text line, which on mobile
+  // (where the plate narrows) read as the torn edge "kissing" letters
+  // — visually cramped even when no character was technically clipped.
+  // 2.5% keeps the silhouette unmistakably torn while preserving a
+  // safe visual gutter at every Y position.
+  horizontalTearPct: 2.5,
   topPoints: 14,
   rightPoints: 8,
   bottomPoints: 14,
