@@ -211,6 +211,26 @@ const CommonplaceFrame: React.FC<CommonplaceFrameProps> = ({
     }),
     [plateStyleVars, plateHeightPx],
   );
+
+  // Reset the body-stack scroll position to the top whenever the user
+  // expands (isExpanded false → true) or cycles to a new quote while
+  // already expanded. Without this, the body-stack's `overflow-y: auto`
+  // can settle at the bottom — the user clicks "more" and is dropped
+  // at the END of the long quote rather than the beginning.
+  //
+  // The scroll container is `.bookshelf-dock-cp-body-stack`, not the
+  // body-element ref that the upstream `expandedBodyRef` points at —
+  // overflow-y lives on the body-stack (see commonplaceBase.css's
+  // [data-expanded='true'] rule), so resetting scrollTop on any inner
+  // child is a no-op. We use the local bodyStackRef which already
+  // points at the right element. useLayoutEffect so the reset lands
+  // synchronously after DOM updates, before paint — the user never
+  // sees a flash of bottom-aligned content during expansion.
+  useLayoutEffect(() => {
+    if (isExpanded && bodyStackRef.current) {
+      bodyStackRef.current.scrollTop = 0;
+    }
+  }, [isExpanded, currentIndex]);
   // Keyboard: ← / → nav, ↑ / ↓ expand / collapse, Esc dismiss.
   // Skipped when typing in an input/textarea/contenteditable
   // elsewhere on the page.
