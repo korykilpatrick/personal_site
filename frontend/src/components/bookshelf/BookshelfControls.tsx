@@ -180,12 +180,31 @@ const InlineSearch: React.FC<InlineSearchProps> = ({
     setOpen(false);
   };
 
+  // Icon toggles the search affordance: opens the input when closed,
+  // dismisses it (clearing any draft or committed query) when open.
+  // Matches the × button's clear+close semantics so the icon and ×
+  // are interchangeable "dismiss search" affordances rather than the
+  // icon being a one-way "open" control with no symmetric close.
+  const toggleSearch = () => {
+    if (showInput) {
+      clearAndClose();
+    } else {
+      openSearch();
+    }
+  };
+
   return (
     <span className="relative inline-flex items-center gap-2">
       <button
         type="button"
-        onClick={openSearch}
-        aria-label={searchActive ? `Search: ${searchQuery}` : 'Search books'}
+        onClick={toggleSearch}
+        aria-label={
+          showInput
+            ? 'Close search'
+            : searchActive
+              ? `Search: ${searchQuery}`
+              : 'Search books'
+        }
         className="inline-flex items-center justify-center transition focus:outline-none"
         style={{
           color: showInput ? INK_NAVY : WALNUT_MUTED,
