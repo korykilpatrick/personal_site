@@ -1,0 +1,135 @@
+/* Torn page — a single ripped scrap of paper rendered once per
+   session, static across quote changes. The only motion on each
+   new quote is the BODY TEXT crossfading (handled by Framer Motion
+   in CommonplaceFrame); the paper itself is visually fixed.
+   Earlier iterations morphed the clip-path between quotes so each
+   card got a fresh silhouette, but that motion competed with the
+   text crossfade and pulled the eye to the paper edges rather
+   than the quote. See TornPageDock.tsx for the rationale.
+
+   Layering:
+     - The plate holds `clip-path` (so the torn shape clips the
+       paper AND its grain overlay).
+     - A thin wrapper around the plate holds the drop-shadow
+       filter — drop-shadow on the same element as clip-path
+       would be clipped too.
+
+   Padding is sized generously so the maximum tear never reaches
+   the quote text — the text safe zone is the intact region
+   always inside the polygon. */
+
+.bookshelf-dock-torn-page-plate-wrap {
+  /* drop-shadow applies to the clipped child (the plate) since
+     it sits on the wrapper, not on the plate itself. Three
+     layered shadows: a tight contact shadow, a broader ambient
+     lift, and a 0.5px hairline for edge definition. */
+  filter:
+    drop-shadow(0 1px 1px rgba(74, 52, 35, 0.22))
+    drop-shadow(0 10px 20px rgba(74, 52, 35, 0.22))
+    drop-shadow(0 0.5px 0 rgba(102, 71, 38, 0.18));
+}
+
+.bookshelf-dock-torn-page-plate {
+  --grain-strength: 0.62;
+  /* Generous padding — larger than the tear depths configured
+     in tornPaperShape.ts so text stays safely inside the
+     intact region.
+       Vertical (3rem = 48px): caps worst-case top/bottom tear
+         at 5% × ~900px expanded plate = 45px. The first text
+         line is always inside the intact zone — important now
+         that the body-stack starts at scrollTop=0 on expand,
+         exposing the very top of the content to whatever the
+         polygon's deepest top tear is.
+       Horizontal (3.5rem desktop, 4.5rem mobile per the
+         media query below): wider on the sides for the in-plate
+         prev/next nav marks; mobile gets extra gutter because
+         the percentage tear is proportionally closer to the
+         centered text line on a narrow plate. */
+  padding: 3rem 3.5rem 3rem;
+  background: linear-gradient(180deg,
+    rgba(249, 238, 199, 1) 0%,
+    rgba(243, 230, 180, 1) 100%
+  );
+  /* No border-radius — the torn polygon is the plate's shape. */
+  border-radius: 0;
+  /* Shadow lives on the wrapper; kill the shared plate shadow. */
+  box-shadow: none;
+  /* Static torn shape — the value of --plate-clip-torn is set
+     once by TornPageDock on mount and never changes. No
+     transition: the paper is a fixed element; only its contents
+     animate. */
+  clip-path: var(
+    --plate-clip-torn,
+    polygon(0 0, 100% 0, 100% 100%, 0 100%)
+  );
+}
+
+/* Wrinkle / crease — a faint diagonal band across the plate,
+   suggesting the page crumpled slightly when torn. Clipped with
+   the plate. */
+.bookshelf-dock-torn-page-plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    112deg,
+    transparent 42%,
+    rgba(102, 71, 38, 0.12) 48%,
+    rgba(102, 71, 38, 0.02) 52%,
+    transparent 58%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bookshelf-dock-torn-page-plate > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Max-width lives on the WRAPPER, not the plate, so the wrapper
+   shrinks to the plate's width and pinned elements (the close ×,
+   the nav marks) land at the paper's actual corners. If
+   max-width lived on the plate, the wrapper would stretch to the
+   content rail (max-w-5xl) and pinned elements would float far
+   off to the right of the paper.
+
+   Width is UNIFORM across density buckets — short and long
+   quotes all live in a paper of the same footprint. Previous
+   iterations tightened the paper for short quotes and widened
+   for long ones, but the resulting width jump between quotes
+   (~96px in practice) read as the paper itself breathing on each
+   change, which the user explicitly called out as unstable.
+   We keep the density attribute so per-density styling (e.g.
+   ghost-echo opacity) still works, just unify max-width. */
+[data-density='light'] .bookshelf-dock-torn-page-plate-wrap,
+[data-density='medium'] .bookshelf-dock-torn-page-plate-wrap,
+[data-density='dense'] .bookshelf-dock-torn-page-plate-wrap {
+  max-width: 34rem;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bookshelf-dock-torn-page-plate {
+    background: #f7eba8;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-density='light'] .bookshelf-dock-torn-page-plate-wrap,
+  [data-density='medium'] .bookshelf-dock-torn-page-plate-wrap,
+  [data-density='dense'] .bookshelf-dock-torn-page-plate-wrap {
+    max-width: calc(100vw - 1.75rem);
+  }
+
+  /* Wider horizontal gutter on mobile so a deep tear at any Y
+     never visually crowds the centered text line. On a 360px-wide
+     plate the polygon's 2.5% horizontal tear is ~9px deep; the
+     extra 16px of plate padding (3.5rem -> 4.5rem) keeps a clean
+     gap between the deepest tear and the leftmost/rightmost
+     character of any line. Vertical padding stays at the desktop
+     3rem since the vertical tear depth is the same percentage
+     either way. */
+  .bookshelf-dock-torn-page-plate {
+    padding: 3rem 4.5rem 3rem;
+  }
+}

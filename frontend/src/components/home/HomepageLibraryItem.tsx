@@ -67,14 +67,14 @@ const HomepageLibraryItem: React.FC<HomepageLibraryItemProps> = ({ item }) => {
               </a>
             </h2>
             {item.created_at && (
-              <div className="text-xs text-stone-500 mt-1" title="Date Added">
+              <div className="text-xs text-textTertiary mt-1" title="Date Added">
                 {new Date(item.created_at).toLocaleDateString()}
               </div>
             )}
           </div>
 
           {item.creators && item.creators.length > 0 && (
-            <p className="text-sm text-stone-700 italic text-left">
+            <p className="text-sm text-textSecondary italic text-left">
               By {item.creators.join(', ')}
             </p>
           )}

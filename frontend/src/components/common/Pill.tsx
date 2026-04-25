@@ -1,11 +1,15 @@
 import React from 'react';
 import Icon from './Icon';
 
+// The former `secondary` Pill variant was unused (grep confirmed zero
+// consumers) and was removed alongside the `secondary` Button variant
+// in the warm-palette cleanup. Primary = navy cloth fill with cream-light
+// text; success/warning/danger are semantic states, unchanged.
 export interface PillProps {
   label: string;
   onRemove?: () => void;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  variant?: 'primary' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md';
   className?: string;
 }
@@ -22,8 +26,7 @@ const Pill: React.FC<PillProps> = ({
     'inline-flex items-center rounded-[12px] border font-mono uppercase tracking-[0.08em] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]';
 
   const variantClasses = {
-    primary: 'border-primary/16 bg-primary/92 text-stone-50',
-    secondary: 'border-[rgba(76,67,56,0.12)] bg-white/60 text-textSecondary',
+    primary: 'border-primary/16 bg-primary/92 text-cream-light',
     success: 'bg-green-100 text-green-800',
     warning: 'bg-yellow-100 text-yellow-800',
     danger: 'bg-red-100 text-red-800',

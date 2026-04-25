@@ -141,7 +141,7 @@ const QuoteForm: React.FC<QuoteFormProps> = ({
           {isLoading ? <><Loading size="small" className="mr-2" /> Saving...</> : initialData ? 'Update Quote' : 'Create Quote'}
         </Button>
         {onCancel && (
-          <Button variant="secondary" type="button" onClick={onCancel} disabled={isLoading}>
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
         )}

@@ -1,0 +1,318 @@
+/* Commonplace paradigm — shared CSS for the torn-paper dock.
+   Responsibilities:
+     - Outer container (fixed, bottom-aligned, reserved height)
+     - Plate-frame wrapper (holds rotation)
+     - Shared plate rules (paper grain, typography bloom, fixed
+       JS-driven height, body-stack scrolling when expanded)
+     - Close × and prev/next nav marks
+
+   Variant-specific rules (e.g. the torn clip-path polygon, the
+   per-variant padding) live in tornPage.css. This file is the
+   stable baseline every commonplace variant inherits.
+
+   Keyboard nav (← / → cycle, ↑ / ↓ expand-collapse, Esc dismiss)
+   is driven from CommonplaceFrame.tsx. This file only styles the
+   UI scaffolding; motion is JS-owned.
+
+   Structural contract:
+     .bookshelf-dock-cp-outer       (fixed bottom-0, z-30,
+                                     data-density=light|medium|dense)
+     .bookshelf-dock-cp-plate-frame (holds rotation)
+     .bookshelf-dock-cp-plate       (variant-specific class ON TOP
+                                     of this — see tornPage.css) */
+
+.bookshelf-dock-cp-outer {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+  pointer-events: none;
+  /* No height / no overflow / no transition here: the plate below
+     is the single source of truth for the dock's visible size. Its
+     height is fixed per `data-expanded` state (see
+     .bookshelf-dock-cp-plate) and transitions smoothly only on
+     expand/collapse. Outer lets its natural (content-driven) height
+     follow the plate so there's no second, desynchronised
+     transition fighting for control. */
+}
+
+/* Ghost echo removed. It used to render the previous quote's first
+   few words as a big blurred typographic ghost behind the paper for
+   "atmospheric" effect, but `max-width: 220%` meant the text bled
+   past the paper's horizontal bounds and showed up in the bookshelf
+   background as hazy letters (most noticeably the first letter of
+   the current quote spelling itself out on the sides). Not worth
+   the visual cost — cleaner to just let the bookshelf breathe. */
+
+/* Paper grain — subtle SVG turbulence noise, tiled. Variants
+   reference it via the CSS custom property; see --grain-strength
+   in tornPage.css for how strongly it's blended. */
+:root {
+  --paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7'/><feColorMatrix type='matrix' values='0 0 0 0 0.29 0 0 0 0 0.20 0 0 0 0 0.14 0 0 0 0.22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+}
+
+/* Plate-frame wrapper — owns the rotation and holds the peek
+   slivers as siblings of the plate. Rotation lives here (not on
+   the plate) so the peek slivers rotate in lockstep with the
+   paper rather than floating at a different angle. */
+.bookshelf-dock-cp-plate-frame {
+  transform: rotate(var(--plate-rotation, 0deg));
+  transform-origin: 50% 50%;
+}
+
+/* Body-stack — single grid cell that holds the AnimatePresence
+   children. When the active quote-transition variant runs in
+   crossfade mode (both old and new bodies mounted simultaneously),
+   both motion.div children occupy the same grid cell so the two
+   quotes OVERLAP at the same position on the paper. When the
+   variant uses mode="wait" only one child is in the cell.
+
+   No min-height here — the plate itself is fixed-height per
+   `data-expanded` state, and flex-centers body-stack within it.
+   An earlier iteration used min-height here to keep the plate
+   stable, but that approach was leaky: a long preview + 2-line
+   meta could still push body-stack past the min, which pushed the
+   plate taller, which triggered a height transition on the outer,
+   which read as the paper jittering on every quote cycle. */
+.bookshelf-dock-cp-body-stack {
+  display: grid;
+  grid-template-areas: 'stack';
+  align-items: center;
+}
+.bookshelf-dock-cp-body-stack > .bookshelf-dock-cp-body-wrap {
+  grid-area: stack;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Shared plate rules — the baseline every variant inherits.
+   The plate is the single source of truth for the dock's visible
+   size. Its height is FIXED per `data-expanded` state; it changes
+   only when the user toggles more/less. On quote cycle (expand
+   state unchanged), the plate stays exactly the same size and only
+   the text inside swaps out. All variable-height content — preview
+   density, meta line-wrapping, ghost echo, etc. — is absorbed inside
+   this fixed box via flex-centered layout + `overflow: hidden`. */
+.bookshelf-dock-cp-plate {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  pointer-events: auto;
+  will-change: transform;
+  /* Hint the browser to composite the plate on its own layer — the
+     drag gesture's continuous transform changes are much smoother
+     on a promoted layer. */
+  transform-style: flat;
+
+  /* Fixed geometry + flex-center so content sits in the middle of
+     the scrap rather than stretching it. Overflow hidden guards
+     against a rare long-meta-plus-long-preview combo pushing past
+     the content area; the torn clip-path polygon would clip it
+     anyway, this just makes layout explicit. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+
+  /* Plate height is JS-controlled via an inline `style.height`
+     pixel value — see CommonplaceFrame's useLayoutEffect. It's
+     the collapsed baseline (11rem mobile / 12rem desktop) when
+     data-expanded is false, and the measured content height
+     (capped at 75vh) when data-expanded is true. CSS contributes
+     only the transition that glides between those pixel values
+     smoothly on more/less. 2.4s is deliberately slow — "homey,
+     library, not enterprise tech" per the user's direction. The
+     page unfolds the way a cloth napkin would, not the way a
+     snappy accordion does. */
+  transition: height 2400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Body-stack — single grid cell that holds the AnimatePresence
+   children (see the comment earlier in this file for how
+   quote-transition variants use grid-stack for overlap).
+   Rules split by expand state:
+     - Collapsed: align-items: center so the preview text sits
+       centered on the scrap (no empty top/bottom).
+     - Expanded: align-items: start + flex: 1 1 auto + min-height: 0
+       + overflow-y: auto so the stack fills the plate's remaining
+       space, anchors content at the top, and scrolls internally
+       when the plate is capped at 75vh but the quote is even longer.
+       That way "the whole quote in view" is the default and the
+       scrollbar only appears when genuinely needed. */
+.bookshelf-dock-cp-plate[data-expanded='true']
+  .bookshelf-dock-cp-body-stack {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: start;
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookshelf-dock-cp-plate {
+    transition: none;
+  }
+}
+
+.bookshelf-dock-cp-plate::after {
+  /* Paper-grain overlay. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--paper-grain);
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+  opacity: var(--grain-strength, 0.55);
+  border-radius: inherit;
+}
+
+.bookshelf-dock-cp-plate .bookshelf-quote-dock__preview,
+.bookshelf-dock-cp-plate .bookshelf-quote-dock__markdown p {
+  text-shadow:
+    0 1px 0 rgba(255, 253, 244, 0.72),
+    0 0 10px rgba(252, 247, 233, 0.34);
+}
+
+/* Navigation marks — tiny italic ‹ / › glyphs at the paper's
+   left and right inner margins, vertically centered. They're
+   TEXT (U+2039 / U+203A single-angle quotes), not icons —
+   rendered in the paper's own typographic palette (italic serif
+   walnut ink) so they read as marks ON the paper rather than
+   controls set on top of it.
+
+   Rest: deliberately under-inked (≈0.22 opacity) so the paper
+   stays visually clean. The reader registers them peripherally
+   as "there's something at the edges," not as buttons vying for
+   attention. Hover/focus brings them to readable walnut (≈0.85)
+   with a tiny lift — reads as the mark getting a little darker
+   under the finger. */
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.8rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Newsreader', 'IBM Plex Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(74, 52, 35, 0.22);
+  transform: translateY(-50%);
+  transition:
+    color 420ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 420ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--prev {
+  left: 0.6rem;
+}
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--next {
+  right: 0.6rem;
+}
+
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark:hover,
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark:focus-visible {
+  color: rgba(74, 52, 35, 0.88);
+  outline: none;
+}
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--prev:hover,
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--prev:focus-visible {
+  transform: translate(-2px, -50%);
+}
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--next:hover,
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark--next:focus-visible {
+  transform: translate(2px, -50%);
+}
+
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark:focus-visible {
+  box-shadow: 0 0 0 2px rgba(158, 58, 42, 0.34);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark {
+    transition: none;
+  }
+  .bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark:hover,
+  .bookshelf-dock-cp-plate > .bookshelf-dock-cp-navmark:focus-visible {
+    transform: translateY(-50%);
+  }
+}
+
+/* Close × — the only control visible on the paper. A single
+   typographic × glyph pinned in the top-right corner, inside the
+   tapered-tear safe zone (see tornPaperShape.ts: the top-right
+   corner of the torn polygon is held near-intact so this glyph
+   sits on solid paper). Walnut ink register, quiet at rest,
+   legible on hover.
+
+   Navigation is keyboard-only (← / →) and auto-advance; there
+   are no visible nav affordances. The user explicitly asked for
+   nothing else on the paper. */
+/* Higher-specificity selector (plate + close) so it overrides the
+   variant's `.bookshelf-dock-*-plate > *` stacking-context rule in
+   tornPage.css, which otherwise forces `position: relative` on
+   every direct child. Keeping the variant rule intact for the
+   wrinkle pseudo and the grain overlay is useful; we just carve
+   out the close button as an exception. */
+.bookshelf-dock-cp-plate > .bookshelf-dock-cp-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.7rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Newsreader', 'IBM Plex Serif', Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: rgba(74, 52, 35, 0.32);
+  /* Avoid the overlay grain/pseudo-elements covering the glyph. */
+  transition: color 240ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 240ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.bookshelf-dock-cp-close:hover,
+.bookshelf-dock-cp-close:focus-visible {
+  color: rgba(74, 52, 35, 0.88);
+  outline: none;
+  transform: scale(1.08);
+}
+.bookshelf-dock-cp-close:focus-visible {
+  box-shadow: 0 0 0 2px rgba(158, 58, 42, 0.34);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookshelf-dock-cp-echo__text {
+    animation: none;
+    transform: none !important;
+  }
+  .bookshelf-dock-cp-close {
+    transition: none;
+  }
+  .bookshelf-dock-cp-close:hover,
+  .bookshelf-dock-cp-close:focus-visible {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bookshelf-dock-cp-plate::after {
+    display: none;
+  }
+}

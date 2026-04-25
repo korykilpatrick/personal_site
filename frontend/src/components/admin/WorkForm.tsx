@@ -153,7 +153,7 @@ const WorkForm: React.FC<WorkFormProps> = ({
           )}
         </Button>
         {onCancel && (
-          <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
         )}

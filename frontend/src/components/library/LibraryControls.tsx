@@ -47,7 +47,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
       <div className="flex flex-wrap items-center gap-3">
         {/* Item Types multi-select dropdown */}
         <div className="flex items-center">
-          <span className="text-xs font-medium text-stone-700 mr-2">Item Types</span>
+          <span className="text-xs font-medium text-textSecondary mr-2">Item Types</span>
           <MultiSelectDropdown
             label="Select Types"
             items={itemTypes.map(t => ({ id: t.id, label: t.name }))}
@@ -59,7 +59,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
 
         {/* Tags multi-select dropdown */}
         <div className="flex items-center">
-          <span className="text-xs font-medium text-stone-700 mr-2">Tags</span>
+          <span className="text-xs font-medium text-textSecondary mr-2">Tags</span>
           <MultiSelectDropdown
             label="Select Tags"
             items={tags.map((t, i) => ({ id: i, label: t }))}
@@ -85,7 +85,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
 
         {/* Right side: item count display */}
         <div className="flex items-center gap-1.5 ml-auto">
-          <span className="text-xs text-stone-500">Showing {itemCount} items</span>
+          <span className="text-xs text-textTertiary">Showing {itemCount} items</span>
         </div>
       </div>
 
@@ -107,7 +107,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
             {selectedTypeIds.length > 1 && (
               <button
                 onClick={onClearTypes}
-                className="text-xs underline text-stone-500 hover:text-stone-700 ml-1"
+                className="text-xs underline text-textTertiary hover:text-textSecondary ml-1"
               >
                 Clear all
               </button>
@@ -128,7 +128,7 @@ const LibraryControls: React.FC<LibraryControlsProps> = ({
             {selectedTags.length > 1 && (
               <button
                 onClick={onClearTags}
-                className="text-xs underline text-stone-500 hover:text-stone-700 ml-1"
+                className="text-xs underline text-textTertiary hover:text-textSecondary ml-1"
               >
                 Clear all
               </button>

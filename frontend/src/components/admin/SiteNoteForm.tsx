@@ -92,7 +92,7 @@ const SiteNoteForm: React.FC<SiteNoteFormProps> = ({
           {isLoading ? <><Loading size="small" className="mr-2" /> Saving...</> : initialData ? 'Update Note' : 'Create Note'}
         </Button>
         {onCancel && (
-          <Button variant="secondary" type="button" onClick={onCancel} disabled={isLoading}>
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
         )}

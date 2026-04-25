@@ -3,7 +3,7 @@ import Card from '@/components/common/Card';
 
 const PersonalNote: React.FC = () => {
   return (
-    <Card variant="default" className="mb-5 border-l-4 border-l-secondary">
+    <Card variant="default" className="mb-5 border-l-4 border-l-oxblood/60">
       <p className="text-base text-textSecondary italic leading-tight">
        Books have been my guides, mentors, and friends. No matter what I&apos;m going through, someone else has faced it before and found just the right words. They&apos;ve opened doors, connected me deeply with souls both living and dead, and been an endless source of wisdom, comfort, and joy. Each one adds a thread to the tapestry of my journey.
       </p>

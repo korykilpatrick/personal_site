@@ -106,7 +106,7 @@ const LinkListInput: React.FC<LinkListInputProps> = ({
       {!disabled && (
         <Button
           type="button"
-          variant="secondary"
+          variant="outline"
           onClick={handleAddLink}
           disabled={disabled}
           className="mt-2"

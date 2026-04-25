@@ -18,11 +18,15 @@ const Card: React.FC<CardProps> = ({
   const baseClasses =
     'site-card overflow-hidden transition duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]';
 
+  // Warm hover: oxblood border at low alpha + walnut drop-shadow so the
+  // card feels like paper lifting off paper rather than a cool-glass chip.
+  // `outline` variant gets a cream field with a walnut shadow (was
+  // cool-blue-tinted white with a navy shadow).
   const variantClasses = {
     default: '',
     hover:
-      'hover:-translate-y-0.5 hover:border-secondary/20 hover:shadow-[0_24px_52px_rgba(21,38,63,0.1)]',
-    outline: 'bg-[rgba(250,252,255,0.72)] shadow-[0_10px_28px_rgba(21,38,63,0.05)]',
+      'hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[0_24px_52px_rgba(74,52,35,0.12)]',
+    outline: 'bg-[rgba(250,245,234,0.72)] shadow-[0_10px_28px_rgba(74,52,35,0.06)]',
   };
 
   const paddingClasses = {

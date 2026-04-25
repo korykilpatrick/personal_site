@@ -180,12 +180,51 @@ const InlineSearch: React.FC<InlineSearchProps> = ({
     setOpen(false);
   };
 
+  // Icon toggles the search affordance: opens the input when closed,
+  // dismisses it (clearing any draft or committed query) when open.
+  // Matches the × button's clear+close semantics so the icon and ×
+  // are interchangeable "dismiss search" affordances rather than the
+  // icon being a one-way "open" control with no symmetric close.
+  //
+  // We branch on `inputRef.current` (the live DOM ref) rather than the
+  // derived `showInput` value because `showInput` would be captured in
+  // the click handler's render closure — and on a mousedown→blur→click
+  // sequence (e.g. clicking the icon while focused in the input), the
+  // intermediate `setOpen(false)` from the input's onBlur can land
+  // between the captured render and the click firing, leaving the
+  // closure value "stale" relative to the event flow. The DOM ref
+  // reflects "is the input element currently mounted" without going
+  // through React state, which sidesteps the race entirely.
+  const toggleSearch = () => {
+    if (inputRef.current) {
+      clearAndClose();
+    } else {
+      openSearch();
+    }
+  };
+
   return (
     <span className="relative inline-flex items-center gap-2">
       <button
         type="button"
-        onClick={openSearch}
-        aria-label={searchActive ? `Search: ${searchQuery}` : 'Search books'}
+        // Prevent the button from stealing focus on mousedown. Without this,
+        // clicking the icon while the input has focus produces a
+        // mousedown→blur→click sequence: the input blurs (firing setOpen(false)
+        // when draft is empty), React 18 commits between blur and click as
+        // separate native events, the input UNMOUNTS, the click handler then
+        // runs with stale state and reopens it. Net effect was a flash + the
+        // input remaining displayed. Suppressing the focus shift on
+        // mousedown keeps the input focused throughout the click, so toggle
+        // sees consistent state and clearAndClose can unmount cleanly.
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={toggleSearch}
+        aria-label={
+          showInput
+            ? 'Close search'
+            : searchActive
+              ? `Search: ${searchQuery}`
+              : 'Search books'
+        }
         className="inline-flex items-center justify-center transition focus:outline-none"
         style={{
           color: showInput ? INK_NAVY : WALNUT_MUTED,
@@ -352,8 +391,18 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   const selectedShelves = allBookshelves.filter((s) => selectedShelfIds.includes(s.id));
 
   return (
-    <div className="relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+    /* Single flex row for the whole filter line. The volume count used
+       to live in a separate right-aligned div pinned to the far edge,
+       which read as orphaned chrome — visitors couldn't tell whether
+       "235 VOLS" was related to the filters or the page in general.
+       Now it sits inline at the end of the same row, prefixed with a
+       `·` separator so it reads as "result of the filters above":
+         RECENT  ALL  🔍  · 235 vols
+         RECENT  BIO-NEURO  🔍  Bio-Neuro✕  · 12 vols
+       The count value (`bookCount`) is already filter-scoped via
+       `filteredAndSortedBooks.length`, so the contextual placement
+       matches the data semantics. */
+    <div className="relative flex flex-wrap items-center gap-x-5 gap-y-2">
         {/* Sort — clickable value ("RECENT") */}
         <TextAnchor
           value={sortLabel}
@@ -465,21 +514,26 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             title="Remove shelf filter"
           />
         ))}
-      </div>
 
-      {/* Volume count — trailing colophon */}
-      <div
-        className="hidden font-mono uppercase sm:block"
-        style={{
-          color: WALNUT_MUTED,
-          fontSize: '0.58rem',
-          letterSpacing: '0.24em',
-          whiteSpace: 'nowrap',
-          fontWeight: 500,
-        }}
-      >
-        {bookCount} {bookCount === 1 ? 'vol' : 'vols'}
-      </div>
+        {/* Volume count — inline trailing colophon. Hidden on mobile to
+            preserve filter-row breathing room on narrow viewports; on
+            tablet and up it sits as the last item in the row, reading
+            as the result of all the filters that precede it. The `·`
+            mid-dot is a typographic separator borrowed from the meta
+            register used elsewhere on the site. */}
+        <span
+          className="hidden font-mono uppercase sm:inline-flex sm:items-center"
+          style={{
+            color: WALNUT_MUTED,
+            fontSize: '0.58rem',
+            letterSpacing: '0.24em',
+            whiteSpace: 'nowrap',
+            fontWeight: 500,
+          }}
+        >
+          <span aria-hidden="true" style={{ marginRight: '0.5rem' }}>·</span>
+          {bookCount} {bookCount === 1 ? 'vol' : 'vols'}
+        </span>
     </div>
   );
 };

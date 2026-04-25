@@ -9,7 +9,7 @@ interface FilterButtonProps extends Omit<ButtonProps, 'variant' | 'children'> {
 
 const FilterButton: React.FC<FilterButtonProps> = ({ label, active, className = '', ...props }) => {
   return (
-    <Button variant={active ? 'primary' : 'secondary'} className={className} {...props}>
+    <Button variant={active ? 'primary' : 'outline'} className={className} {...props}>
       {label}
     </Button>
   );

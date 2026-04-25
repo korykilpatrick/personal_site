@@ -64,14 +64,14 @@ const LibraryItemCard: React.FC<LibraryItemCardProps> = ({ item, onTagClick, onI
                 </a>
               </h2>
               {item.created_at && (
-                <div className="text-xs text-stone-500 whitespace-nowrap ml-2" title="Date Added">
+                <div className="text-xs text-textTertiary whitespace-nowrap ml-2" title="Date Added">
                   {new Date(item.created_at).toLocaleDateString()}
                 </div>
               )}
             </div>
 
             {item.creators && item.creators.length > 0 && (
-              <p className="text-sm text-stone-700 italic">
+              <p className="text-sm text-textSecondary italic">
                 By {item.creators.join(', ')}
               </p>
             )}

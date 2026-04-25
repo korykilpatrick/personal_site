@@ -99,7 +99,7 @@ const TimelineSegment: React.FC<TimelineSegmentProps> = ({
           aria-label={`${item.label} — ${formatDateRange(item.startDate, item.endDate, item.ongoing)}. ${
             isActive ? 'Click to collapse.' : 'Click to expand.'
           }`}
-          className="flex h-full w-full items-center overflow-visible rounded-[16px] border text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="flex h-full w-full items-center overflow-visible rounded-[16px] border text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{
             borderColor: accent.border,
             background: isActive ? accent.activeBackground : accent.background,

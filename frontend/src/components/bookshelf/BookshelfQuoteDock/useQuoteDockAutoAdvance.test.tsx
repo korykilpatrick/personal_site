@@ -34,7 +34,7 @@ describe('useQuoteDockAutoAdvance', () => {
     });
 
     expect(setTimeoutSpy).toHaveBeenCalledTimes(1);
-    expect(setTimeoutSpy).toHaveBeenLastCalledWith(expect.any(Function), 4000);
+    expect(setTimeoutSpy).toHaveBeenLastCalledWith(expect.any(Function), 18000);
 
     rerender(props);
 
