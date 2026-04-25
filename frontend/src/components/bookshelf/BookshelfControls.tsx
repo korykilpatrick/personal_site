@@ -185,8 +185,18 @@ const InlineSearch: React.FC<InlineSearchProps> = ({
   // Matches the × button's clear+close semantics so the icon and ×
   // are interchangeable "dismiss search" affordances rather than the
   // icon being a one-way "open" control with no symmetric close.
+  //
+  // We branch on `inputRef.current` (the live DOM ref) rather than the
+  // derived `showInput` value because `showInput` would be captured in
+  // the click handler's render closure — and on a mousedown→blur→click
+  // sequence (e.g. clicking the icon while focused in the input), the
+  // intermediate `setOpen(false)` from the input's onBlur can land
+  // between the captured render and the click firing, leaving the
+  // closure value "stale" relative to the event flow. The DOM ref
+  // reflects "is the input element currently mounted" without going
+  // through React state, which sidesteps the race entirely.
   const toggleSearch = () => {
-    if (showInput) {
+    if (inputRef.current) {
       clearAndClose();
     } else {
       openSearch();
