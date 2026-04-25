@@ -207,6 +207,16 @@ const InlineSearch: React.FC<InlineSearchProps> = ({
     <span className="relative inline-flex items-center gap-2">
       <button
         type="button"
+        // Prevent the button from stealing focus on mousedown. Without this,
+        // clicking the icon while the input has focus produces a
+        // mousedown→blur→click sequence: the input blurs (firing setOpen(false)
+        // when draft is empty), React 18 commits between blur and click as
+        // separate native events, the input UNMOUNTS, the click handler then
+        // runs with stale state and reopens it. Net effect was a flash + the
+        // input remaining displayed. Suppressing the focus shift on
+        // mousedown keeps the input focused throughout the click, so toggle
+        // sees consistent state and clearAndClose can unmount cleanly.
+        onMouseDown={(e) => e.preventDefault()}
         onClick={toggleSearch}
         aria-label={
           showInput
