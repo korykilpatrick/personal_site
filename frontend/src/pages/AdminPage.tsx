@@ -48,7 +48,7 @@ interface EntityFormWrapperProps<T> {
 
 type EntityPayload<T extends { id: number }> = Omit<T, 'id' | 'created_at' | 'updated_at'>;
 
-function EntityFormWrapper<T extends { id: number }>({
+export function EntityFormWrapper<T extends { id: number }>({
   mode,
   paramKey,
   entityName,
@@ -90,7 +90,7 @@ function EntityFormWrapper<T extends { id: number }>({
         navigate('../');
       } else {
         await adminApi.create<EntityPayload<T>>(apiPath, data);
-        navigate('.');
+        navigate('../');
       }
     } catch (err: unknown) {
       const errorMsg = getErrorMessage(err, `Failed to save ${entityName}`);
@@ -118,7 +118,7 @@ function EntityFormWrapper<T extends { id: number }>({
       initialData={initialData}
       onSubmit={handleSubmit}
       isLoading={isLoading}
-      onCancel={() => navigate(mode === 'edit' ? '../' : '.')}
+      onCancel={() => navigate('../')}
     />
   );
 }

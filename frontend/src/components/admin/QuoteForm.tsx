@@ -23,7 +23,7 @@ const QuoteForm: React.FC<QuoteFormProps> = ({
     author: '',
     source: '',
     display_order: 0,
-    is_active: false
+    is_active: true
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ const QuoteForm: React.FC<QuoteFormProps> = ({
           author: '',
           source: '',
           display_order: 0,
-          is_active: false
+          is_active: true
         });
       }
     } catch (submitErr: unknown) {
