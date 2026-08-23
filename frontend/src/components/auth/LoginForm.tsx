@@ -16,8 +16,13 @@ const LoginForm: React.FC = () => {
   const location = useLocation();
   const { login, isLoading } = useAuth(); // Get login function and loading state from context
 
-  // Determine where to redirect after login
-  const from = location.state?.from?.pathname || "/admin";
+  // Preserve the exact review URL after an expired or missing preview token.
+  const requestedReturn = new URLSearchParams(location.search).get('returnTo');
+  const safeReturn =
+    requestedReturn?.startsWith('/') && !requestedReturn.startsWith('//')
+      ? requestedReturn
+      : undefined;
+  const from = safeReturn || location.state?.from?.pathname || '/admin';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -72,4 +77,4 @@ const LoginForm: React.FC = () => {
   );
 };
 
-export default LoginForm; 
+export default LoginForm;

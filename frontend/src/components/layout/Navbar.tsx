@@ -12,8 +12,11 @@ const ICON_LINK_CLASSNAME =
   'text-slate-100 hover:text-oxblood-light no-underline transition duration-300';
 const EMAIL_HREF = 'mailto:koryrkilpatrick@gmail.com';
 
+const POSTS_ENABLED = process.env.REACT_APP_POSTS_ENABLED === 'true';
+
 const NAV_LINKS = [
   { name: 'About', path: '/' },
+  ...(POSTS_ENABLED ? [{ name: 'Posts', path: '/posts' }] : []),
   { name: 'Bookshelf', path: '/bookshelf' },
 ] as const;
 
@@ -85,14 +88,18 @@ const Navbar: React.FC = () => {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   const isActive = (path: string) => {
     if (path === '/') {
-      return location.pathname === '/';
+      return ['/', '/about'].includes(location.pathname);
     }
     return location.pathname.startsWith(path);
   };
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => setIsMenuOpen((isOpen) => !isOpen);
   const handleBookshelfIntent = () => {
     void warmBookshelfExperience();
   };
@@ -126,6 +133,7 @@ const Navbar: React.FC = () => {
                 to={link.path}
                 onMouseEnter={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
                 onFocus={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
+                aria-current={isActive(link.path) ? 'page' : undefined}
                 className={`rounded-[12px] px-4 py-2 font-mono text-[0.74rem] uppercase tracking-[0.12em] no-underline transition ${
                   isActive(link.path)
                     ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
@@ -168,9 +176,11 @@ const Navbar: React.FC = () => {
               </span>
             </Link>
             <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white focus:outline-none"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood-light"
               onClick={toggleMenu}
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-site-menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
@@ -193,12 +203,16 @@ const Navbar: React.FC = () => {
           </div>
 
           {isMenuOpen && (
-            <div className="mt-3 w-full rounded-[20px] border border-white/16 bg-white/[0.08] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+            <div
+              id="mobile-site-menu"
+              className="mt-3 w-full rounded-[20px] border border-white/16 bg-white/[0.08] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+            >
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   onTouchStart={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
+                  aria-current={isActive(link.path) ? 'page' : undefined}
                   className={`block rounded-[12px] px-3 py-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] no-underline transition ${
                     isActive(link.path)
                       ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white'

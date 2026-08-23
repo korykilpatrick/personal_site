@@ -7,6 +7,7 @@ import authRoutes from './authRoutes';
 import adminRoutes from './adminRoutes';
 import siteNoteRoutes from './site_note.routes';
 import quoteRoutes from './quote.routes';
+import postRoutes from './post.routes';
 import config from '../config/config';
 
 // New library routes
@@ -34,6 +35,7 @@ router.use('/projects', projectRoutes);
 router.use('/work', workEntryRoutes);
 router.use('/site_notes', siteNoteRoutes);
 router.use('/quotes', quoteRoutes);
+router.use('/posts', postRoutes);
 
 // Add library routes
 router.use('/library-item-types', libraryItemTypeRoutes);

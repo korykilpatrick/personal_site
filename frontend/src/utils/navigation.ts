@@ -1,5 +1,6 @@
 export const redirectToLogin = (): void => {
   if (!window.location.pathname.includes('/login')) {
-    window.location.assign('/login');
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    window.location.assign(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 };

@@ -4,7 +4,7 @@
   "description": "Backend server for personal portfolio website",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build ../tsconfig.shared.json tsconfig.json",
     "start": "node dist/src/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
     "lint": "eslint 'src/**/*.{js,ts}'",
@@ -20,7 +20,8 @@
     "postinstall": "npm run init-logs",
     "db:create": "ts-node src/scripts/create-db.ts",
     "db:reset": "ts-node src/scripts/reset-db.ts",
-    "hash:password": "ts-node src/scripts/hash-password.ts"
+    "hash:password": "ts-node src/scripts/hash-password.ts",
+    "posts:import": "ts-node src/scripts/importPrivatePosts.ts"
   },
   "keywords": [
     "portfolio",

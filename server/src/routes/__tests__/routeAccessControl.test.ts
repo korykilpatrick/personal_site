@@ -167,6 +167,14 @@ describe('route access control', () => {
       expect(mockAdminCreateProject).not.toHaveBeenCalled();
     });
 
+    it('rejects unauthenticated post previews', async () => {
+      const archiveResponse = await request(app).get('/admin/posts');
+      const detailResponse = await request(app).get('/admin/posts/private-example');
+
+      expect(archiveResponse.status).toBe(401);
+      expect(detailResponse.status).toBe(401);
+    });
+
     it('allows authenticated admin writes', async () => {
       const token = jwt.sign({ id: 1, username: 'owner' }, config.jwt.secret, {
         expiresIn: '1h',

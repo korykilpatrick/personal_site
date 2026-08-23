@@ -7,6 +7,7 @@ import * as projectController from '../controllers/admin/projectController';
 import * as siteNoteController from '../controllers/admin/siteNoteController';
 import * as quoteController from '../controllers/admin/quoteController';
 import logger from '../utils/logger';
+import { AdminPostController } from '../controllers/admin/postController';
 
 // NEW library controllers
 import { AdminLibraryItemTypeController } from '../controllers/admin/libraryItemTypeController';
@@ -187,5 +188,9 @@ router.put('/library-items/:id', protect, [
   param('id').isInt({ gt: 0 }).withMessage('ID must be positive'),
 ], handleValidationErrors, AdminLibraryItemController.update);
 router.delete('/library-items/:id', protect, validateIdParam, AdminLibraryItemController.delete);
+
+// --- Private post review ---
+router.get('/posts', protect, AdminPostController.getArchive);
+router.get('/posts/:slug', protect, AdminPostController.getBySlug);
 
 export default router;

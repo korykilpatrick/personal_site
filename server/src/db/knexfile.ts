@@ -3,9 +3,12 @@ import path from 'path';
 import { Knex } from 'knex';
 
 // Load and validate env vars (throws if any required are missing)
-dotenv.config({
-  path: path.resolve(__dirname, '../../.env'),
-});
+const serverRoot = path.resolve(__dirname, '../..');
+const environmentFile = process.env.ENV_FILE
+  ? path.resolve(serverRoot, process.env.ENV_FILE)
+  : path.resolve(serverRoot, '.env');
+
+dotenv.config({ path: environmentFile });
 
 // Database configuration for different environments
 interface IKnexConfig {

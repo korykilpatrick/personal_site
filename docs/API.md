@@ -56,6 +56,13 @@ Site notes:
 - `GET /api/site_notes/active`
 - `GET /api/site_notes/summary/count`
 
+Posts:
+- `GET /api/posts/archive` — published metadata, taxonomy, relationships, and layout; never bodies
+- `GET /api/posts/:slug` — one published post with its Markdown body
+
+Draft, future, inactive, and unknown slugs all return the same `404` response. During
+the private review phase, public post responses use `Cache-Control: no-store`.
+
 Library:
 - `GET /api/library-item-types`
 - `GET /api/library-item-types/:id`
@@ -138,6 +145,13 @@ Library item types:
 
 Library extraction:
 - `POST /api/library/extract-metadata`
+
+Private post review:
+- `GET /api/admin/posts` — draft-inclusive archive metadata; never bodies
+- `GET /api/admin/posts/:slug` — one draft or published post with its Markdown body
+
+Both private review routes require a bearer token and return
+`Cache-Control: private, no-store`.
 
 Example extraction request:
 

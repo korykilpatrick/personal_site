@@ -8,11 +8,16 @@ import BookshelfPage from './pages/BookshelfPage';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { ToastProvider } from './context/ToastContext';
+import ScrollToLocation from './components/layout/ScrollToLocation';
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const QuotesPage = lazy(() => import('./pages/QuotesPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const PostsRoutes =
+  process.env.REACT_APP_POSTS_ENABLED === 'true'
+    ? lazy(() => import('./features/posts/PostsRoutes'))
+    : null;
 
 const GlobalImageModal: React.FC = () => {
   const { isOpen, imageUrl, altText, closeModal } = useModal();
@@ -39,11 +44,32 @@ const App: React.FC = () => {
     <ModalProvider>
       <ToastProvider>
         <div className="flex flex-col min-h-screen bg-background">
+          <a
+            href="#main-content"
+            className="fixed left-4 top-3 z-[100] -translate-y-24 rounded-[10px] border border-walnut/25 bg-cream-light px-4 py-2 font-mono text-xs uppercase tracking-[0.12em] text-primary shadow-lg transition focus:translate-y-0"
+          >
+            Skip to content
+          </a>
+          <ScrollToLocation />
           <Navbar />
-          <main className="flex-grow">
+          <main id="main-content" className="flex-grow" tabIndex={-1}>
             <Routes>
-              <Route path="/" element={<Layout><AboutPage /></Layout>} />
-              <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+              <Route
+                path="/"
+                element={
+                  <Layout>
+                    <AboutPage />
+                  </Layout>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <Layout>
+                    <AboutPage />
+                  </Layout>
+                }
+              />
               <Route
                 path="/bookshelf"
                 element={
@@ -62,6 +88,19 @@ const App: React.FC = () => {
                   </Layout>
                 }
               />
+
+              {PostsRoutes ? (
+                <Route
+                  path="/posts/*"
+                  element={
+                    <Layout>
+                      <Suspense fallback={<RouteLoader label="Opening the archive" />}>
+                        <PostsRoutes />
+                      </Suspense>
+                    </Layout>
+                  }
+                />
+              ) : null}
 
               <Route
                 path="/login"

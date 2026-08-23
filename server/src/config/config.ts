@@ -5,16 +5,19 @@ import { z } from 'zod';
 // Define the project root relative to the current file's directory (__dirname)
 // This ensures it works correctly whether running from src/config or dist/config
 const projectRoot = path.resolve(__dirname, '..', '..'); // Goes up two levels to the server/ directory
+const environmentFile = process.env.ENV_FILE
+  ? path.resolve(projectRoot, process.env.ENV_FILE)
+  : path.resolve(projectRoot, '.env');
 
 
 dotenv.config({
-  // Use the explicitly calculated projectRoot path
-  path: path.resolve(projectRoot, '.env'),
+  path: environmentFile,
 });
 
 const envSchema = z.object({
   NODE_ENV: z.string(),
   PORT: z.coerce.number(),
+  HOST: z.string().optional(),
   API_PREFIX: z.string(),
   DB_HOST: z.string(),
   DB_PORT: z.coerce.number(),
@@ -47,6 +50,7 @@ const env = envResult.data;
 interface IConfig {
   env: string;
   port: number;
+  host: string;
   apiPrefix: string;
   db: {
     host: string;
@@ -84,6 +88,7 @@ interface IConfig {
 const config: IConfig = {
   env: env.NODE_ENV,
   port: env.PORT,
+  host: env.HOST ?? '0.0.0.0',
   apiPrefix: env.API_PREFIX,
   db: {
     host: env.DB_HOST,

@@ -1,15 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Personal website showcasing projects, blog, and more." />
+    <% const pageMeta = htmlWebpackPlugin.options.pageMeta || {}; %>
+    <meta
+      name="description"
+      content="<%- pageMeta.description || 'Kory Kilpatrick’s personal website.' %>"
+    />
+    <meta name="robots" content="<%- pageMeta.robots || 'index, follow' %>" />
+    <link rel="canonical" href="<%- pageMeta.canonicalUrl || 'https://korykilpatrick.com/' %>" />
+    <meta property="og:title" content="<%- pageMeta.title || 'Kory Kilpatrick' %>" />
+    <meta
+      property="og:description"
+      content="<%- pageMeta.description || 'Kory Kilpatrick’s personal website.' %>"
+    />
+    <meta property="og:type" content="<%- pageMeta.type || 'website' %>" />
+    <meta
+      property="og:url"
+      content="<%- pageMeta.canonicalUrl || 'https://korykilpatrick.com/' %>"
+    />
+    <% if (pageMeta.socialImage) { %>
+    <meta property="og:image" content="<%- pageMeta.socialImage %>" />
+    <% } %>
+    <meta
+      name="twitter:card"
+      content="<%- pageMeta.socialImage ? 'summary_large_image' : 'summary' %>"
+    />
+    <meta name="twitter:title" content="<%- pageMeta.title || 'Kory Kilpatrick' %>" />
+    <meta
+      name="twitter:description"
+      content="<%- pageMeta.description || 'Kory Kilpatrick’s personal website.' %>"
+    />
+    <% if (pageMeta.socialImage) { %>
+    <meta name="twitter:image" content="<%- pageMeta.socialImage %>" />
+    <% } %> <% if (pageMeta.structuredDataJson) { %>
+    <script type="application/ld+json" data-page-metadata="structured-data">
+      <%= pageMeta.structuredDataJson %>
+    </script>
+    <% } %>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <title>Kory Kilpatrick</title>
+    <title><%- pageMeta.title || 'Kory Kilpatrick' %></title>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>This site needs JavaScript for its interactive reading experience.</noscript>
   </body>
 </html>

@@ -5,12 +5,24 @@ This repo contains the React frontend and Express/Postgres backend for Kory Kilp
 ## Current Product Surface
 
 Active public routes:
+
 - `/`
 - `/about`
 - `/bookshelf`
 - `/quotes`
 
+Posts routes:
+
+- `/posts`
+- `/posts/:slug`
+
+Posts are loaded at runtime from Postgres. Draft bodies, metadata, source maps, and
+media are deliberately absent from this public repository. Public API routes expose
+only published rows; explicit preview builds use authenticated admin endpoints. See
+`frontend/src/content/posts/README.md` for the local import and review workflow.
+
 Private routes:
+
 - `/login`
 - `/admin/*`
 
@@ -27,6 +39,7 @@ The repo also keeps non-production page work for future revival. Dormant pages l
 ## Development
 
 Prerequisites:
+
 - Node.js 20+
 - PostgreSQL 12+
 
@@ -43,10 +56,14 @@ npm run dev:all
 ```
 
 Core checks:
+
 - `npm run lint`
 - `npm run typecheck`
 - `npm test -- --runInBand`
 - `npm run build`
+- `npm run check:public-safety`
+- `npm run validate:posts`
+- `npm run build:posts-preview`
 - `cd server && npm run lint`
 - `cd server && npm test -- --runInBand`
 - `cd server && npm run build`

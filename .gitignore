@@ -148,3 +148,20 @@ venv/
 ENV/
 output/
 phase_*.diff
+
+# Local review artifacts
+.DS_Store
+.playwright-mcp/
+atlas-mobile-dossier.png
+
+# Private writing sources and database import staging.
+# Unpublished posts must never enter this public repository.
+.private/
+writing/
+frontend/src/content/posts/*.md
+frontend/src/content/posts/**/*.md
+!frontend/src/content/posts/README.md
+frontend/src/content/posts/manifest.json
+frontend/src/content/posts/taxonomy.json
+frontend/src/content/posts/graph-layout.json
+public/images/posts/

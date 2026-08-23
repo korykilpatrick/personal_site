@@ -36,10 +36,14 @@ export async function up(knex: Knex): Promise<void> {
     table.index('created_at', 'idx_work_entries_created_at');
   });
 
-  await knex.schema.alterTable('books', (table) => {
-    table.index('date_read', 'idx_books_date_read');
-    table.index('rating', 'idx_books_rating');
-  });
+  // Some clean development databases do not include the legacy books schema,
+  // which predates this migration history.
+  if (await knex.schema.hasTable('books')) {
+    await knex.schema.alterTable('books', (table) => {
+      table.index('date_read', 'idx_books_date_read');
+      table.index('rating', 'idx_books_rating');
+    });
+  }
 
   // Composite indexes for common query patterns
   await knex.schema.alterTable('library_items', (table) => {
@@ -76,8 +80,10 @@ export async function down(knex: Knex): Promise<void> {
     table.dropIndex('created_at', 'idx_work_entries_created_at');
   });
 
-  await knex.schema.alterTable('books', (table) => {
-    table.dropIndex('date_read', 'idx_books_date_read');
-    table.dropIndex('rating', 'idx_books_rating');
-  });
+  if (await knex.schema.hasTable('books')) {
+    await knex.schema.alterTable('books', (table) => {
+      table.dropIndex('date_read', 'idx_books_date_read');
+      table.dropIndex('rating', 'idx_books_rating');
+    });
+  }
 }

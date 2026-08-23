@@ -8,8 +8,11 @@ import type {
   ExtractedContent,
   Quote,
   SiteNote,
+  LoadedPost,
+  PostArchivePayload,
 } from 'types/index';
 import api from '../services/api';
+import config from '../config';
 
 // Centralized API service
 export const apiService = {
@@ -81,6 +84,18 @@ export const apiService = {
 
   getActiveSiteNote: async (): Promise<SiteNote> => {
     const response = await api.get<SiteNote>('/site_notes/active');
+    return response.data;
+  },
+
+  getPostArchive: async (): Promise<PostArchivePayload> => {
+    const endpoint = config.postsPreview ? '/admin/posts' : '/posts/archive';
+    const response = await api.get<PostArchivePayload>(endpoint);
+    return response.data;
+  },
+
+  getPostBySlug: async (slug: string): Promise<LoadedPost> => {
+    const prefix = config.postsPreview ? '/admin/posts' : '/posts';
+    const response = await api.get<LoadedPost>(`${prefix}/${encodeURIComponent(slug)}`);
     return response.data;
   },
 

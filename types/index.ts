@@ -8,6 +8,7 @@
 // Application configuration
 export interface AppConfig {
   apiBaseUrl: string;
+  postsPreview: boolean;
 }
 
 // Authentication
@@ -163,3 +164,4 @@ export type SortOption = {
  * Re-export content extraction types
  */
 export * from './contentExtraction';
+export * from './posts';

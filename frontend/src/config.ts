@@ -10,6 +10,7 @@ import type { AppConfig } from 'types';
 const config: AppConfig = {
   // Default to relative /api path, can be overridden by env var
   apiBaseUrl: process.env.REACT_APP_API_BASE_URL || '/api',
+  postsPreview: process.env.REACT_APP_POSTS_PREVIEW === 'true',
 };
 
 export default config; 

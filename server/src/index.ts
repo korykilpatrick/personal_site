@@ -18,9 +18,9 @@ const startServer = async () => {
     await testConnection();
 
     // Start server
-    app.listen(app.get('port'), () => {
+    app.listen(app.get('port'), config.host, () => {
       logger.info(
-        `Server running at http://localhost:${app.get('port')} in ${config.env} mode`
+        `Server running at http://${config.host}:${app.get('port')} in ${config.env} mode`
       );
       logger.info('Press CTRL-C to stop');
     });
