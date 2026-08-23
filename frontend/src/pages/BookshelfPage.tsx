@@ -10,6 +10,7 @@ import {
   compareReadingTimeline,
   splitBooksByReadingState,
 } from '../components/bookshelf/bookshelfReadingState';
+import PageMetadata from '@/components/layout/PageMetadata';
 
 const sortOptions: SortOption[] = [
   { label: 'Recent', value: 'date_read' },
@@ -24,10 +25,8 @@ const SHELF_BOOK_SIZE = { width: 120, height: 180 };
 const BookshelfPageContent: React.FC = () => {
   const { books: allBooks, loading: booksLoading, error: booksError } = useBooks();
 
-  const {
-    selectedItems: selectedShelves,
-    toggleSelection: toggleShelfSelection,
-  } = useMultiSelect<number>([]);
+  const { selectedItems: selectedShelves, toggleSelection: toggleShelfSelection } =
+    useMultiSelect<number>([]);
 
   const [sortBy, setSortBy] = useState<string>('date_read');
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,17 +94,20 @@ const BookshelfPageContent: React.FC = () => {
     return <Loading className="h-64" />;
   }
   if (booksError) {
-    return <ErrorDisplay error={booksError} />;
+    return <ErrorDisplay error="The bookshelf could not be loaded." />;
   }
 
   return (
     <div
-      className="space-y-4"
+      className="bookshelf-room space-y-4"
       style={{
         paddingBottom:
           'calc(var(--bookshelf-quote-dock-height, 7.5rem) + 1.5rem + env(safe-area-inset-bottom))',
       }}
     >
+      <header className="bookshelf-heading">
+        <h1>Bookshelf</h1>
+      </header>
       <BookshelfGrid
         books={filteredAndSortedBooks}
         currentBooks={currentBooks}
@@ -130,9 +132,16 @@ const BookshelfPageContent: React.FC = () => {
 };
 
 const BookshelfPage: React.FC = () => (
-  <BooksProvider>
-    <BookshelfPageContent />
-  </BooksProvider>
+  <>
+    <PageMetadata
+      title="Bookshelf"
+      description="Books Kory Kilpatrick is reading and has read."
+      path="/bookshelf"
+    />
+    <BooksProvider>
+      <BookshelfPageContent />
+    </BooksProvider>
+  </>
 );
 
 export default BookshelfPage;

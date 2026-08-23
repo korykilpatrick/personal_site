@@ -16,6 +16,16 @@ const relationshipProvenanceLabels = {
   inferred: 'Shared idea',
 } as const;
 
+type PostRequestState =
+  | { slug: string; status: 'loading' }
+  | { slug: string; status: 'loaded'; post: LoadedPost }
+  | { slug: string; status: 'error'; error: Error };
+
+const loadingPostRequest = (slug: string): PostRequestState => ({
+  slug,
+  status: 'loading',
+});
+
 const PostPage: React.FC = () => {
   const { slug = '' } = useParams<{ slug: string }>();
   const location = useLocation();
@@ -27,32 +37,39 @@ const PostPage: React.FC = () => {
     getPost,
     prefetchPost,
   } = usePosts();
-  const [post, setPost] = useState<LoadedPost | null>(null);
-  const [postError, setPostError] = useState<Error | null>(null);
-  const [postLoading, setPostLoading] = useState(true);
+  const [postRequest, setPostRequest] = useState<PostRequestState>(() => loadingPostRequest(slug));
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
-    setPost(null);
-    setPostError(null);
-    setPostLoading(true);
+    setPostRequest(loadingPostRequest(slug));
 
     void getPost(slug)
       .then((loaded) => {
-        if (active) setPost(loaded);
+        if (active) setPostRequest({ slug, status: 'loaded', post: loaded });
       })
       .catch((reason: unknown) => {
-        if (active) setPostError(reason instanceof Error ? reason : new Error(String(reason)));
-      })
-      .finally(() => {
-        if (active) setPostLoading(false);
+        if (active) {
+          setPostRequest({
+            slug,
+            status: 'error',
+            error: reason instanceof Error ? reason : new Error(String(reason)),
+          });
+        }
       });
 
     return () => {
       active = false;
     };
   }, [attempt, getPost, slug]);
+
+  // A route-param change renders before its effect runs. Treat request state
+  // from any other slug as loading so the previous article and metadata can
+  // never appear under the new URL, even for a single committed frame.
+  const currentPostRequest = postRequest.slug === slug ? postRequest : loadingPostRequest(slug);
+  const post = currentPostRequest.status === 'loaded' ? currentPostRequest.post : null;
+  const postError = currentPostRequest.status === 'error' ? currentPostRequest.error : null;
+  const postLoading = currentPostRequest.status === 'loading';
 
   const summary = archive?.postBySlug.get(slug);
   const primaryTheme = summary
@@ -144,27 +161,32 @@ const PostPage: React.FC = () => {
         <p className="mb-6 max-w-[47rem] text-[1.12rem] leading-[1.62] text-textSecondary sm:text-[1.28rem]">
           {post.dek}
         </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="post-header-meta">
           <span className="site-meta">{formatReadingMinutes(post.readingMinutes)}</span>
-          <span className="text-[0.6rem] text-oxblood/75" aria-hidden="true">
-            ◆
-          </span>
-          <span className="site-meta">Drawn from the archive · {post.sourcePeriod}</span>
-          {concepts.map((concept) => (
-            <Link
-              key={concept.id}
-              to={`/posts?concept=${encodeURIComponent(concept.id)}`}
-              className="site-link-chip px-2.5 py-1 text-[0.6rem]"
-              aria-label={`Browse posts about ${concept.label}`}
-            >
-              {concept.label}
-            </Link>
-          ))}
+          <details className="post-about-piece">
+            <summary>About this piece</summary>
+            <div>
+              <p className="site-meta">Source notes · {post.sourcePeriod}</p>
+              {concepts.length > 0 ? (
+                <nav aria-label="Ideas in this post">
+                  {concepts.map((concept) => (
+                    <Link
+                      key={concept.id}
+                      to={`/posts?concept=${encodeURIComponent(concept.id)}`}
+                      aria-label={`Browse posts about ${concept.label}`}
+                    >
+                      {concept.label}
+                    </Link>
+                  ))}
+                </nav>
+              ) : null}
+            </div>
+          </details>
         </div>
         <HouseRule className="mt-9" />
       </header>
 
-      <PostRenderer body={post.body} />
+      <PostRenderer body={post.body} postsOrigin={postsOrigin} onPrefetchPost={prefetchPost} />
 
       <footer className="mx-auto mt-14 max-w-[55rem] sm:mt-20">
         <HouseRule className="mb-10" />

@@ -13,10 +13,8 @@ const Loading: React.FC<LoadingProps> = ({ size = 'medium', className = '' }) =>
   };
 
   return (
-    <div className={`flex justify-center items-center ${className}`}>
-      <div
-        className={`animate-spin rounded-full border-t-2 border-b-2 border-primary ${sizeClasses[size]}`}
-      ></div>
+    <div className={`site-loading-state ${className}`} role="status" aria-label="Loading">
+      <div className={`site-loading-mark ${sizeClasses[size]}`} aria-hidden="true" />
     </div>
   );
 };

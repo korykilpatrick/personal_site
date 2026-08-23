@@ -4,13 +4,14 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
-import BookshelfPage from './pages/BookshelfPage';
+import HomePage from './pages/HomePage';
 import { ModalProvider, useModal } from './context/ModalContext';
 import ImageModal from './components/common/ImageModal';
 import { ToastProvider } from './context/ToastContext';
 import ScrollToLocation from './components/layout/ScrollToLocation';
 
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const BookshelfPage = lazy(() => import('./pages/BookshelfPage'));
 const QuotesPage = lazy(() => import('./pages/QuotesPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -39,26 +40,24 @@ const RouteLoader: React.FC<RouteLoaderProps> = ({ label }) => (
 const App: React.FC = () => {
   const location = useLocation();
   const hideFooter = location.pathname === '/bookshelf';
+  const room = location.pathname.startsWith('/posts') ? 'posts' : 'default';
 
   return (
     <ModalProvider>
       <ToastProvider>
-        <div className="flex flex-col min-h-screen bg-background">
-          <a
-            href="#main-content"
-            className="fixed left-4 top-3 z-[100] -translate-y-24 rounded-[10px] border border-walnut/25 bg-cream-light px-4 py-2 font-mono text-xs uppercase tracking-[0.12em] text-primary shadow-lg transition focus:translate-y-0"
-          >
+        <div className="site-app">
+          <a href="#main-content" className="site-skip-link">
             Skip to content
           </a>
           <ScrollToLocation />
           <Navbar />
-          <main id="main-content" className="flex-grow" tabIndex={-1}>
+          <main id="main-content" className={`site-main site-main--${room}`} tabIndex={-1}>
             <Routes>
               <Route
                 path="/"
                 element={
                   <Layout>
-                    <AboutPage />
+                    <HomePage />
                   </Layout>
                 }
               />
@@ -74,7 +73,9 @@ const App: React.FC = () => {
                 path="/bookshelf"
                 element={
                   <Layout>
-                    <BookshelfPage />
+                    <Suspense fallback={<RouteLoader label="Opening the bookshelf" />}>
+                      <BookshelfPage />
+                    </Suspense>
                   </Layout>
                 }
               />

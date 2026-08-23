@@ -26,33 +26,6 @@ const CURRENT_BOOK_TRANSFORMS = [
   { restX: 2, restY: -2, restRotate: 4, hoverX: 8, hoverY: -5, hoverRotate: 6 },
 ];
 
-// Wood-grain noise SVG, sized to match rowHeight so it tiles in
-// perfect register with the plank gradient. Only the plank Y-range
-// is filled — above and below the plank the SVG is transparent so
-// the page background shows through unchanged.
-//
-// feTurbulence parameters tuned for "wood": low fX (0.018) gives
-// long horizontal features; high fY (0.45) gives thin vertical
-// variation — the streaky read of grain running along the board.
-// numOctaves=2 adds a touch of natural irregularity. Color matrix
-// outputs constant walnut-dark at variable alpha (peaks ~0.45),
-// so the grain reads as subtle dark streaks on top of the WALNUT
-// plank color rather than recoloring it.
-//
-// The SVG width is fixed at 240px and tiles horizontally; at this
-// alpha and frequency the seam between tiles is visually quiet.
-// Encoded inline so there's no extra HTTP request.
-const buildWoodGrainSvg = (rowHeight: number, plankTop: number) => {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="${rowHeight}" preserveAspectRatio="none"><filter id="w"><feTurbulence type="fractalNoise" baseFrequency="0.018 0.45" numOctaves="2" seed="5"/><feColorMatrix type="matrix" values="0 0 0 0 0.10  0 0 0 0 0.06  0 0 0 0 0.03  0 0 0 0.45 0"/></filter><rect x="0" y="${plankTop}" width="100%" height="${SHELF_PLANK_HEIGHT}" filter="url(#w)"/></svg>`;
-  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-};
-
-// Per-row: book sits on top of a walnut plank directly below it.
-// Below the plank is a hairline shadow, then breathing room before the next row.
-// The plank gets a faint wood-grain noise overlay so it reads as a
-// textured wooden surface rather than a flat color band — visually
-// consistent with the dock's paper-grain treatment, where both
-// "physical" surfaces (paper and wood) have a real-material grain.
 const getShelvesStyle = (bookSize: { width: number; height: number }) => {
   const rowHeight = bookSize.height + SHELF_PLANK_HEIGHT + SHELF_GAP_BELOW;
   const plankTop = bookSize.height;
@@ -61,7 +34,6 @@ const getShelvesStyle = (bookSize: { width: number; height: number }) => {
   const shadowEnd = plankTop + SHELF_PLANK_HEIGHT;
   return {
     backgroundImage: `
-      ${buildWoodGrainSvg(rowHeight, plankTop)},
       repeating-linear-gradient(
         to bottom,
         transparent 0,
@@ -76,9 +48,9 @@ const getShelvesStyle = (bookSize: { width: number; height: number }) => {
         transparent ${rowHeight}px
       )
     `,
-    backgroundSize: `100% ${rowHeight}px, 100% ${rowHeight}px`,
-    backgroundPosition: '0 0, 0 0',
-    backgroundRepeat: 'repeat, repeat',
+    backgroundSize: `100% ${rowHeight}px`,
+    backgroundPosition: '0 0',
+    backgroundRepeat: 'repeat',
   };
 };
 
@@ -105,70 +77,70 @@ const BookshelfGrid: React.FC<BookshelfGridProps> = ({
       {isEmpty ? (
         <EmptyState message="No books found with the current filters" />
       ) : (
-      <>
-      {/* Shelves — a series of walnut planks with books resting on top.
+        <>
+          {/* Shelves — a series of walnut planks with books resting on top.
           Overflow is visible so hover/rest transforms, drop shadows, and the
           splayed current-reading rotations don't get clipped at the edges. */}
-      <div
-        className="relative"
-        style={{
-          ...getShelvesStyle(bookSize),
-        }}
-      >
-        <div
-          className="relative grid"
-          style={{
-            // Horizontal inset so first/last column books have room for
-            // negative translateX + rotation + drop-shadow without clipping
-            // against the container edge.
-            paddingLeft: 20,
-            paddingRight: 20,
-            paddingTop: 0,
-            gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
-            gap: `${SHELF_PLANK_HEIGHT + SHELF_GAP_BELOW}px 12px`,
-            perspective: '1000px',
-          }}
-        >
-          {books.map((book) => {
-            const placement = currentBookPlacements.get(book.id);
-            return (
-              <div
-                key={book.id}
-                className={
-                  placement
-                    ? 'relative transition-transform duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] [transform:translate3d(var(--current-rest-x),var(--current-rest-y),0)_rotate(var(--current-rest-r))] hover:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))] focus-within:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))]'
-                    : 'relative'
-                }
-                style={
-                  placement
-                    ? ({
-                        '--current-rest-x': `${placement.restX}px`,
-                        '--current-rest-y': `${placement.restY}px`,
-                        '--current-rest-r': `${placement.restRotate}deg`,
-                        '--current-hover-x': `${placement.hoverX}px`,
-                        '--current-hover-y': `${placement.hoverY}px`,
-                        '--current-hover-r': `${placement.hoverRotate}deg`,
-                        zIndex: currentBooks.length - placement.order + 20,
-                        // Currently-reading books get a warm walnut shadow plus a
-                        // faint oxblood glow — the book is being read, an ember
-                        // under the spine. The glow is small so it doesn't shout.
-                        filter:
-                          'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32)) drop-shadow(0 0 6px rgba(158, 58, 42, 0.18))',
-                      } as React.CSSProperties)
-                    : ({
-                        // Rested books get a plain warm walnut shadow — wood on paper.
-                        filter:
-                          'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32))',
-                      } as React.CSSProperties)
-                }
-              >
-                <BookCard book={book} bookSize={bookSize} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      </>
+          <div
+            className="relative"
+            style={{
+              ...getShelvesStyle(bookSize),
+            }}
+          >
+            <div
+              className="relative grid"
+              style={{
+                // Horizontal inset so first/last column books have room for
+                // negative translateX + rotation + drop-shadow without clipping
+                // against the container edge.
+                paddingLeft: 20,
+                paddingRight: 20,
+                paddingTop: 0,
+                gridTemplateColumns: `repeat(auto-fill, minmax(${bookSize.width}px, 1fr))`,
+                gap: `${SHELF_PLANK_HEIGHT + SHELF_GAP_BELOW}px 12px`,
+                perspective: '1000px',
+              }}
+            >
+              {books.map((book) => {
+                const placement = currentBookPlacements.get(book.id);
+                return (
+                  <div
+                    key={book.id}
+                    className={
+                      placement
+                        ? 'relative transition-transform duration-[820ms] ease-[cubic-bezier(0.19,1,0.22,1)] [transform:translate3d(var(--current-rest-x),var(--current-rest-y),0)_rotate(var(--current-rest-r))] hover:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))] focus-within:[transform:translate3d(var(--current-hover-x),var(--current-hover-y),0)_rotate(var(--current-hover-r))]'
+                        : 'relative'
+                    }
+                    style={
+                      placement
+                        ? ({
+                            '--current-rest-x': `${placement.restX}px`,
+                            '--current-rest-y': `${placement.restY}px`,
+                            '--current-rest-r': `${placement.restRotate}deg`,
+                            '--current-hover-x': `${placement.hoverX}px`,
+                            '--current-hover-y': `${placement.hoverY}px`,
+                            '--current-hover-r': `${placement.hoverRotate}deg`,
+                            zIndex: currentBooks.length - placement.order + 20,
+                            // Currently-reading books get a warm walnut shadow plus a
+                            // faint oxblood glow — the book is being read, an ember
+                            // under the spine. The glow is small so it doesn't shout.
+                            filter:
+                              'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32)) drop-shadow(0 0 6px rgba(158, 58, 42, 0.18))',
+                          } as React.CSSProperties)
+                        : ({
+                            // Rested books get a plain warm walnut shadow — wood on paper.
+                            filter:
+                              'drop-shadow(0 4px 3px rgba(74, 52, 35, 0.22)) drop-shadow(0 1px 0 rgba(74, 52, 35, 0.32))',
+                          } as React.CSSProperties)
+                    }
+                  >
+                    <BookCard book={book} bookSize={bookSize} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

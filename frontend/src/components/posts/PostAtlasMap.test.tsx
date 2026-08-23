@@ -124,9 +124,8 @@ describe('PostAtlasMap', () => {
     fireEvent.keyDown(firstTheme, { key: 'ArrowRight' });
     expect(document.activeElement).toBe(secondTheme);
 
-    expect(screen.getByRole('button', { name: /alpha post/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /alpha post/i })).not.toHaveAttribute(
       'aria-haspopup',
-      'dialog',
     );
   });
 
@@ -145,10 +144,14 @@ describe('PostAtlasMap', () => {
 
   test('opens a nonmodal desktop dossier without disabling map navigation', () => {
     const { container } = render(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: /alpha post/i }));
+    const alpha = screen.getByRole('button', { name: /alpha post/i });
+    act(() => alpha.focus());
+    fireEvent.click(alpha);
 
-    expect(screen.getByRole('dialog', { name: 'Alpha post' })).not.toHaveAttribute('aria-modal');
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close post details' }));
+    expect(screen.getByRole('complementary', { name: 'Alpha post' })).not.toHaveAttribute(
+      'aria-modal',
+    );
+    expect(document.activeElement).toBe(alpha);
     expect(container.querySelector('.post-atlas-field-lines')).toHaveAttribute(
       'aria-hidden',
       'true',
@@ -160,7 +163,9 @@ describe('PostAtlasMap', () => {
   test('turns the compact dossier into a modal bottom sheet', () => {
     render(<Harness compactOverview />);
     fireEvent.click(screen.getByRole('button', { name: '2 posts First theme' }));
-    fireEvent.click(screen.getByRole('button', { name: /alpha post/i }));
+    const alpha = screen.getByRole('button', { name: /alpha post/i });
+    expect(alpha).toHaveAttribute('aria-haspopup', 'dialog');
+    fireEvent.click(alpha);
 
     expect(screen.getByRole('dialog', { name: 'Alpha post' })).toHaveAttribute(
       'aria-modal',
@@ -177,7 +182,9 @@ describe('PostAtlasMap', () => {
     act(() => alpha.focus());
     fireEvent.keyDown(alpha, { key: 'Escape' });
 
-    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Alpha post' })).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole('complementary', { name: 'Alpha post' })).toBeNull(),
+    );
     expect(screen.getByRole('button', { name: 'Return to all themes' })).toBeInTheDocument();
   });
 
@@ -194,10 +201,30 @@ describe('PostAtlasMap', () => {
     render(<Harness showHistoryControl />);
     const alpha = screen.getByRole('button', { name: /alpha post/i });
     fireEvent.click(alpha);
+    act(() => screen.getByRole('button', { name: 'Close post details' }).focus());
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close post details' }));
 
     act(() => screen.getByRole('button', { name: 'Simulate history pop' }).click());
     await waitFor(() => expect(document.activeElement).toBe(alpha));
+  });
+
+  test('keeps keyboard focus anchored while tracing a desktop connection', async () => {
+    render(<Harness />);
+    fireEvent.click(screen.getByRole('button', { name: /alpha post/i }));
+    const connectionsSummary = screen.getByText('Connections').closest('summary');
+    expect(connectionsSummary).not.toBeNull();
+    fireEvent.click(connectionsSummary as HTMLElement);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trace connection to Beta post' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('complementary', { name: 'Beta post' })).toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole('button', { name: 'Close post details' }),
+      ),
+    );
   });
 
   test('restores full emphasis to a focused post outside the active constellation', () => {

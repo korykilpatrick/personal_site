@@ -8,11 +8,15 @@ import { PostFigure, PostPullQuote, PostVideo, TweetEmbed, YouTubeEmbed } from '
 
 interface PostRendererProps {
   body: string;
+  postsOrigin?: string;
+  onPrefetchPost?: (slug: string) => void;
 }
 
 interface PostAnchorProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   children?: React.ReactNode;
   href?: string | null;
+  postsOrigin?: string;
+  onPrefetchPost?: (slug: string) => void;
 }
 
 interface HeadingProps {
@@ -28,7 +32,16 @@ interface MarkdownImageProps {
 interface PostLinkProps {
   children?: React.ReactNode;
   slug?: string;
+  postsOrigin?: string;
+  onPrefetchPost?: (slug: string) => void;
 }
+
+interface PostNavigationContextValue {
+  postsOrigin?: string;
+  onPrefetchPost?: (slug: string) => void;
+}
+
+const PostNavigationContext = React.createContext<PostNavigationContextValue>({});
 
 const SAFE_MARKDOWN_ELEMENTS = new Set([
   'a',
@@ -86,14 +99,32 @@ export function headingId(children: React.ReactNode): string {
     .replace(/^-|-$/g, '');
 }
 
-const PostAnchor: React.FC<PostAnchorProps> = ({ children, href = '', ...props }) => {
+const postSlugFromHref = (href: string) =>
+  href.match(/^\/posts\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:[?#/]|$)/)?.[1];
+
+const PostAnchor: React.FC<PostAnchorProps> = ({
+  children,
+  href = '',
+  postsOrigin,
+  onPrefetchPost,
+  ...props
+}) => {
   if (typeof href !== 'string' || !href.trim()) {
     return <>{children}</>;
   }
 
   if (href.startsWith('/') && !href.startsWith('//')) {
+    const linkedPostSlug = postSlugFromHref(href);
     return (
-      <Link to={href} className={props.className} title={props.title}>
+      <Link
+        to={href}
+        state={linkedPostSlug && postsOrigin ? { postsOrigin } : undefined}
+        className={props.className}
+        title={props.title}
+        onMouseEnter={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+        onFocus={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+        onTouchStart={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+      >
         {children}
       </Link>
     );
@@ -114,12 +145,19 @@ const PostAnchor: React.FC<PostAnchorProps> = ({ children, href = '', ...props }
     return <>{children}</>;
   }
 
-  if (
-    url.protocol === 'https:' &&
-    url.hostname.replace(/^www\./, '') === 'korykilpatrick.com'
-  ) {
+  if (url.protocol === 'https:' && url.hostname.replace(/^www\./, '') === 'korykilpatrick.com') {
+    const internalHref = `${url.pathname}${url.search}${url.hash}`;
+    const linkedPostSlug = postSlugFromHref(internalHref);
     return (
-      <Link to={`${url.pathname}${url.search}${url.hash}`} className={props.className} title={props.title}>
+      <Link
+        to={internalHref}
+        state={linkedPostSlug && postsOrigin ? { postsOrigin } : undefined}
+        className={props.className}
+        title={props.title}
+        onMouseEnter={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+        onFocus={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+        onTouchStart={() => linkedPostSlug && onPrefetchPost?.(linkedPostSlug)}
+      >
         {children}
       </Link>
     );
@@ -144,12 +182,37 @@ const PostAnchor: React.FC<PostAnchorProps> = ({ children, href = '', ...props }
   );
 };
 
-const PostLink: React.FC<PostLinkProps> = ({ children, slug = '' }) => {
+const PostLink: React.FC<PostLinkProps> = ({
+  children,
+  slug = '',
+  postsOrigin,
+  onPrefetchPost,
+}) => {
   const normalizedSlug = slug.replace(/^\/+|\/+$/g, '');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalizedSlug)) {
     return <>{children}</>;
   }
-  return <Link to={`/posts/${normalizedSlug}`}>{children}</Link>;
+  return (
+    <Link
+      to={`/posts/${normalizedSlug}`}
+      state={postsOrigin ? { postsOrigin } : undefined}
+      onMouseEnter={() => onPrefetchPost?.(normalizedSlug)}
+      onFocus={() => onPrefetchPost?.(normalizedSlug)}
+      onTouchStart={() => onPrefetchPost?.(normalizedSlug)}
+    >
+      {children}
+    </Link>
+  );
+};
+
+const MarkdownPostAnchor: React.FC<PostAnchorProps> = (props) => {
+  const { postsOrigin, onPrefetchPost } = React.useContext(PostNavigationContext);
+  return <PostAnchor {...props} postsOrigin={postsOrigin} onPrefetchPost={onPrefetchPost} />;
+};
+
+const MarkdownPostLink: React.FC<PostLinkProps> = (props) => {
+  const { postsOrigin, onPrefetchPost } = React.useContext(PostNavigationContext);
+  return <PostLink {...props} postsOrigin={postsOrigin} onPrefetchPost={onPrefetchPost} />;
 };
 
 const H2: React.FC<HeadingProps> = ({ children }) => {
@@ -174,45 +237,54 @@ const MarkdownImage: React.FC<MarkdownImageProps> = ({ alt = '', src = '', title
   <PostFigure src={src} alt={alt} caption={title} align="body" />
 );
 
-const PostRenderer: React.FC<PostRendererProps> = ({ body }) => (
-  <MarkdownToJsx
-    className="post-flow post-prose"
-    options={{
-      createElement: (tag, props, ...children) => {
-        if (typeof tag === 'string' && !SAFE_MARKDOWN_ELEMENTS.has(tag)) {
-          return null;
-        }
-        const safeProps =
-          typeof tag === 'string'
-            ? Object.fromEntries(
-                Object.entries(props).filter(
-                  ([name]) =>
-                    name !== 'style' &&
-                    name !== 'dangerouslySetInnerHTML' &&
-                    !/^on/i.test(name),
-                ),
-              )
-            : props;
-        return React.createElement(tag, safeProps, ...children);
-      },
-      forceBlock: true,
-      overrides: {
-        a: { component: PostAnchor },
-        h2: { component: H2 },
-        h3: { component: H3 },
-        img: { component: MarkdownImage },
-        Figure: { component: PostFigure },
-        Footnote: { component: FootnoteBubble },
-        PostLink: { component: PostLink },
-        PullQuote: { component: PostPullQuote },
-        Tweet: { component: TweetEmbed },
-        Video: { component: PostVideo },
-        YouTube: { component: YouTubeEmbed },
-      },
-    }}
-  >
-    {numberFootnotes(body)}
-  </MarkdownToJsx>
-);
+const PostRenderer: React.FC<PostRendererProps> = ({ body, postsOrigin, onPrefetchPost }) => {
+  const navigation = React.useMemo(
+    () => ({ postsOrigin, onPrefetchPost }),
+    [onPrefetchPost, postsOrigin],
+  );
+
+  return (
+    <PostNavigationContext.Provider value={navigation}>
+      <MarkdownToJsx
+        className="post-flow post-prose"
+        options={{
+          createElement: (tag, props, ...children) => {
+            if (typeof tag === 'string' && !SAFE_MARKDOWN_ELEMENTS.has(tag)) {
+              return null;
+            }
+            const safeProps =
+              typeof tag === 'string'
+                ? Object.fromEntries(
+                    Object.entries(props).filter(
+                      ([name]) =>
+                        name !== 'style' &&
+                        name !== 'dangerouslySetInnerHTML' &&
+                        !/^on/i.test(name),
+                    ),
+                  )
+                : props;
+            return React.createElement(tag, safeProps, ...children);
+          },
+          forceBlock: true,
+          overrides: {
+            a: { component: MarkdownPostAnchor },
+            h2: { component: H2 },
+            h3: { component: H3 },
+            img: { component: MarkdownImage },
+            Figure: { component: PostFigure },
+            Footnote: { component: FootnoteBubble },
+            PostLink: { component: MarkdownPostLink },
+            PullQuote: { component: PostPullQuote },
+            Tweet: { component: TweetEmbed },
+            Video: { component: PostVideo },
+            YouTube: { component: YouTubeEmbed },
+          },
+        }}
+      >
+        {numberFootnotes(body)}
+      </MarkdownToJsx>
+    </PostNavigationContext.Provider>
+  );
+};
 
 export default PostRenderer;

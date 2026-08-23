@@ -93,10 +93,7 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
         .filter((post): post is (typeof posts)[number] => Boolean(post)),
     [loadedBySlug, state.conceptId, state.query, state.themeId],
   );
-  const visibleSlugs = useMemo(
-    () => new Set(resultPosts.map((post) => post.slug)),
-    [resultPosts],
-  );
+  const visibleSlugs = useMemo(() => new Set(resultPosts.map((post) => post.slug)), [resultPosts]);
 
   useEffect(() => {
     const focusedPost = state.focusSlug ? loadedBySlug.get(state.focusSlug) : undefined;
@@ -129,8 +126,7 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
     () =>
       taxonomy.concepts
         .filter(
-          (concept) =>
-            (conceptCounts.get(concept.id) ?? 0) >= 2 || concept.id === state.conceptId,
+          (concept) => (conceptCounts.get(concept.id) ?? 0) >= 2 || concept.id === state.conceptId,
         )
         .sort((left, right) => left.label.localeCompare(right.label)),
     [conceptCounts, state.conceptId],
@@ -223,10 +219,7 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
               value={state.query}
               placeholder="Search posts…"
               onChange={(event) =>
-                commitState(
-                  { query: event.target.value, focusSlug: undefined },
-                  { replace: true },
-                )
+                commitState({ query: event.target.value, focusSlug: undefined }, { replace: true })
               }
             />
             {state.query && (
@@ -257,7 +250,7 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
             </select>
           </label>
 
-          <div className="posts-explorer-view-switch" aria-label="Choose view">
+          <div className="posts-explorer-view-switch" role="group" aria-label="Choose view">
             <button
               type="button"
               aria-pressed={state.view === 'map'}
@@ -276,7 +269,7 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
         </div>
 
         {state.view === 'list' && (
-          <div className="posts-explorer-themes" aria-label="Filter by theme">
+          <div className="posts-explorer-themes" role="group" aria-label="Filter by theme">
             {taxonomy.themes.map((theme) => {
               const selected = state.themeId === theme.id;
               return (
@@ -331,12 +324,8 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
             focusedSlug={state.focusSlug}
             compactOverview={compact}
             onFocusPost={handleFocusPost}
-            onSelectTheme={(themeId) =>
-              commitState({ themeId, focusSlug: undefined })
-            }
-            onSelectConcept={(conceptId) =>
-              commitState({ conceptId, focusSlug: undefined })
-            }
+            onSelectTheme={(themeId) => commitState({ themeId, focusSlug: undefined })}
+            onSelectConcept={(conceptId) => commitState({ conceptId, focusSlug: undefined })}
             postsOrigin={postsOrigin}
             onPrefetchPost={onPrefetchPost}
           />
@@ -346,7 +335,12 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
             <button
               type="button"
               onClick={() =>
-                commitState({ themeId: undefined, conceptId: undefined, query: '', focusSlug: undefined })
+                commitState({
+                  themeId: undefined,
+                  conceptId: undefined,
+                  query: '',
+                  focusSlug: undefined,
+                })
               }
             >
               Clear filters
@@ -357,7 +351,9 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
         <section className="posts-ledger" aria-labelledby="post-ledger-heading">
           <div className="posts-ledger-heading">
             <div>
-              <h2 id="post-ledger-heading">{hasFilters ? resultLabel : `All ${posts.length} posts`}</h2>
+              <h2 id="post-ledger-heading">
+                {hasFilters ? resultLabel : `All ${posts.length} posts`}
+              </h2>
             </div>
           </div>
           {resultPosts.length > 0 ? (
@@ -367,9 +363,6 @@ const PostsExplorer: React.FC<PostsExplorerProps> = ({
                   key={post.slug}
                   post={post}
                   themeTitle={themeById.get(post.themes.primary)?.title ?? post.themes.primary}
-                  conceptLabels={post.conceptIds.map(
-                    (conceptId) => conceptById.get(conceptId)?.label ?? conceptId,
-                  )}
                   postsOrigin={postsOrigin}
                   onPrefetch={onPrefetchPost}
                 />

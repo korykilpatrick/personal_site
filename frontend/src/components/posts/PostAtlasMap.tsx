@@ -122,6 +122,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
   const themeButtonRefs = useRef(new Map<string, HTMLButtonElement>());
   const focusReturnSlugRef = useRef<string>();
   const lastDossierSlugRef = useRef<string>();
+  const tracedDossierSlugRef = useRef<string>();
   const cameraAnimationsRef = useRef<Array<ReturnType<typeof animate>>>([]);
   const panSessionRef = useRef<AtlasPanSession>();
   const cameraX = useMotionValue(0);
@@ -455,7 +456,9 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
         focusReturnSlugRef.current = undefined;
       }
       lastDossierSlugRef.current = focusedPost.slug;
-      closeButtonRef.current?.focus({ preventScroll: true });
+      if (compactOverview) {
+        closeButtonRef.current?.focus({ preventScroll: true });
+      }
       const dossier = closeButtonRef.current?.closest<HTMLElement>('.post-atlas-dossier');
       return () => {
         if (dossier?.contains(document.activeElement) && !focusReturnSlugRef.current) {
@@ -472,7 +475,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
       nodeButtonRefs.current.get(slug)?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(frame);
-  }, [focusedPost]);
+  }, [compactOverview, focusedPost]);
 
   const closeDossier = useCallback(() => {
     focusReturnSlugRef.current = focusedSlug;
@@ -485,6 +488,16 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
       onSelectConcept(conceptId);
     },
     [focusedSlug, onSelectConcept],
+  );
+
+  const traceConnection = useCallback(
+    (slug: string) => {
+      const targetNode = nodeButtonRefs.current.get(slug);
+      if (targetNode && !targetNode.disabled) targetNode.focus({ preventScroll: true });
+      tracedDossierSlugRef.current = slug;
+      onFocusPost(slug);
+    },
+    [onFocusPost],
   );
 
   useEffect(() => {
@@ -809,7 +822,6 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                       style={{ strokeWidth: 0.65 + Math.min(bridge.count, 4) * 0.17 }}
                       initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
                       animate={{
-                        d: curve,
                         pathLength: atlasSeen ? 1 : 0,
                         opacity: atlasSeen ? 1 : 0,
                       }}
@@ -838,7 +850,6 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                     className="post-atlas-theme-path is-active"
                     initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
                     animate={{
-                      d: curve,
                       pathLength: atlasSeen ? 1 : 0,
                       opacity: atlasSeen ? 1 : 0,
                     }}
@@ -876,7 +887,6 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                       data-tone={tone}
                       initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
                       animate={{
-                        d: curve,
                         pathLength: atlasSeen ? 1 : 0,
                         opacity: atlasSeen ? 1 : 0,
                       }}
@@ -890,7 +900,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                         className="post-atlas-relation-pulse"
                         data-tone={tone}
                         initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                        animate={{ d: curve, pathLength: 1, opacity: 1 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
                         transition={
                           reduceMotion
                             ? { duration: 0 }
@@ -1036,7 +1046,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                         }${contextNeighbor ? ' is-context-neighbor' : ''}`}
                         data-tone={theme?.tone}
                         aria-label={`${post.title}. ${theme?.title ?? 'Post'}. Opens details.`}
-                        aria-haspopup="dialog"
+                        aria-haspopup={compactOverview ? 'dialog' : undefined}
                         aria-hidden={disabled ? 'true' : undefined}
                         disabled={disabled}
                         tabIndex={!disabled && activePostTabSlug === post.slug ? 0 : -1}
@@ -1067,7 +1077,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                           scale: atlasSeen && selected ? 1.18 : atlasSeen ? 1 : 0.62,
                         }}
                         transition={{
-                          delay: reduceMotion || !atlasSeen ? 0 : Math.min(index * 0.009, 0.36),
+                          delay: reduceMotion || !atlasSeen ? 0 : Math.min(index * 0.003, 0.12),
                           duration: 0.28,
                         }}
                         whileHover={reduceMotion || !visible ? undefined : { scale: 1.16 }}
@@ -1144,6 +1154,22 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
             </button>
           </div>
 
+          <details className="post-atlas-key">
+            <summary>Map key</summary>
+            <div>
+              <p>
+                <span className="is-clearing" aria-hidden="true" /> Theme clearing
+              </p>
+              <p>
+                <span className="is-post" aria-hidden="true" /> Post
+              </p>
+              <p>
+                <span className="is-connection" aria-hidden="true" /> Connection
+              </p>
+              <small>Drag to pan · scroll to zoom · arrow keys to move</small>
+            </div>
+          </details>
+
           <p className="sr-only" aria-live="polite">
             {focusedPost ? `Selected ${focusedPost.title}. Press Escape to close the details.` : ''}
           </p>
@@ -1175,14 +1201,19 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
               transition={
                 reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 310, damping: 32 }
               }
-              role="dialog"
+              onAnimationComplete={() => {
+                if (tracedDossierSlugRef.current !== focusedPost.slug) return;
+                tracedDossierSlugRef.current = undefined;
+                closeButtonRef.current?.focus({ preventScroll: true });
+              }}
+              role={compactOverview ? 'dialog' : 'complementary'}
               aria-modal={compactOverview ? 'true' : undefined}
               aria-labelledby={`post-atlas-dossier-title-${focusedPost.slug}`}
             >
               <button
                 ref={closeButtonRef}
                 type="button"
-                autoFocus
+                autoFocus={compactOverview}
                 className="post-atlas-dossier-close"
                 onClick={closeDossier}
                 aria-label="Close post details"
@@ -1195,31 +1226,40 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
               </p>
               <h3 id={`post-atlas-dossier-title-${focusedPost.slug}`}>{focusedPost.title}</h3>
               <p className="post-atlas-dossier-dek">{focusedPost.dek}</p>
-              <div
-                className="post-atlas-dossier-concepts"
-                role="group"
-                aria-label="Concepts in this post"
-              >
-                {focusedPost.conceptIds.slice(0, 5).map((conceptId) => (
-                  <button
-                    key={conceptId}
-                    type="button"
-                    onClick={() => selectConceptFromDossier(conceptId)}
+              {focusedPost.conceptIds.length > 0 ? (
+                <details className="post-atlas-dossier-section">
+                  <summary>
+                    Ideas <span>{focusedPost.conceptIds.length}</span>
+                  </summary>
+                  <div
+                    className="post-atlas-dossier-concepts"
+                    role="group"
+                    aria-label="Concepts in this post"
                   >
-                    {conceptById.get(conceptId)?.label ?? conceptId}
-                  </button>
-                ))}
-              </div>
+                    {focusedPost.conceptIds.slice(0, 5).map((conceptId) => (
+                      <button
+                        key={conceptId}
+                        type="button"
+                        onClick={() => selectConceptFromDossier(conceptId)}
+                      >
+                        {conceptById.get(conceptId)?.label ?? conceptId}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
               {relatedPosts.length > 0 && (
-                <div className="post-atlas-dossier-relations">
-                  <p className="post-atlas-dossier-label">Related posts</p>
+                <details className="post-atlas-dossier-section post-atlas-dossier-relations">
+                  <summary>
+                    Connections <span>{relatedPosts.length}</span>
+                  </summary>
                   <ul>
                     {relatedPosts.map((relation) => (
                       <li key={relation.post.slug}>
                         <button
                           type="button"
                           className="post-atlas-trace-button"
-                          onClick={() => onFocusPost(relation.post.slug)}
+                          onClick={() => traceConnection(relation.post.slug)}
                           aria-label={`Trace connection to ${relation.post.title}`}
                         >
                           <span aria-hidden="true">↝</span>
@@ -1247,7 +1287,7 @@ const PostAtlasMap: React.FC<PostAtlasMapProps> = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </details>
               )}
               <Link
                 className="post-atlas-read-link"

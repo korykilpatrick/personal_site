@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import PostRenderer, { headingId } from './PostRenderer';
 
 const renderPost = (body: string) =>
@@ -17,6 +17,47 @@ describe('PostRenderer', () => {
 
     expect(screen.getByRole('link', { name: 'Internal' })).not.toHaveAttribute('target');
     expect(screen.getByRole('link', { name: 'External' })).toHaveAttribute('target', '_blank');
+  });
+
+  test('preserves the atlas origin through body-level post links', async () => {
+    const user = userEvent.setup();
+    const LocationState = () => {
+      const location = useLocation();
+      return <output>{JSON.stringify(location.state)}</output>;
+    };
+
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PostRenderer
+          body={'<PostLink slug="second-post">Keep tracing</PostLink>'}
+          postsOrigin="/posts?view=map&focus=first-post"
+        />
+        <LocationState />
+      </MemoryRouter>,
+    );
+
+    await act(async () => user.click(screen.getByRole('link', { name: 'Keep tracing' })));
+    expect(screen.getByRole('status')).toHaveTextContent('/posts?view=map&focus=first-post');
+  });
+
+  test('keeps markdown links mounted across parent rerenders', () => {
+    const body = '[Keep tracing](/posts/second-post)';
+    const view = render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PostRenderer body={body} postsOrigin="/posts?view=map" />
+      </MemoryRouter>,
+    );
+    const link = screen.getByRole('link', { name: 'Keep tracing' });
+    link.focus();
+
+    view.rerender(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PostRenderer body={body} postsOrigin="/posts?view=map" />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: 'Keep tracing' })).toBe(link);
+    expect(link).toHaveFocus();
   });
 
   test('renders rejected link protocols as inert text instead of crashing', () => {
@@ -108,9 +149,7 @@ describe('PostRenderer', () => {
     await act(async () => user.tab());
 
     expect(trigger).toHaveFocus();
-    expect(screen.getByRole('note', { name: 'Footnote 1' })).toHaveTextContent(
-      'A keyboard aside.',
-    );
+    expect(screen.getByRole('note', { name: 'Footnote 1' })).toHaveTextContent('A keyboard aside.');
 
     await act(async () => user.keyboard('{Enter}'));
     expect(screen.getByRole('dialog', { name: 'Footnote 1' })).toBeInTheDocument();

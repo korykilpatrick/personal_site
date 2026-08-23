@@ -6,7 +6,6 @@ import { formatReadingMinutes } from '@/content/posts/postText';
 interface PostIndexItemProps {
   post: PostSummary;
   themeTitle: string;
-  conceptLabels?: readonly string[];
   postsOrigin: string;
   onPrefetch: (slug: string) => void;
 }
@@ -14,7 +13,6 @@ interface PostIndexItemProps {
 const PostIndexItem: React.FC<PostIndexItemProps> = ({
   post,
   themeTitle,
-  conceptLabels = [],
   postsOrigin,
   onPrefetch,
 }) => (
@@ -36,11 +34,6 @@ const PostIndexItem: React.FC<PostIndexItemProps> = ({
         </span>
         <span className="post-index-title">{post.title}</span>
         <span className="post-index-dek">{post.dek}</span>
-        {conceptLabels.length > 0 && (
-          <span className="post-index-concepts" aria-label="Concepts">
-            {conceptLabels.slice(0, 4).join(' · ')}
-          </span>
-        )}
       </span>
       <span className="post-index-arrow" aria-hidden="true">
         →

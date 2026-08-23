@@ -135,6 +135,6 @@ test.describe('About page', () => {
   test('renders without errors', async ({ page }) => {
     await page.goto('/about');
     await expect(page.locator('img[alt*="Kory"]')).toBeVisible();
-    await expect(page.locator('text=solving problems')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /top-ranked poker player/i })).toBeVisible();
   });
 });

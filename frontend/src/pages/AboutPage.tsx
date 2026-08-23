@@ -1,82 +1,49 @@
-import React, { useState } from 'react';
-import ImageModal from '../components/common/ImageModal';
+import React from 'react';
+import PageMetadata from '@/components/layout/PageMetadata';
 
 const imageUrl =
   'https://korykilpatrick-bucket.s3.us-west-1.amazonaws.com/kory_winnie_mountains.jpg';
 const altText = 'Kory Kilpatrick with his dog Winnie in the Canadian Rockies';
 
-const AboutPage: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const AboutPage: React.FC = () => (
+  <article className="about-room">
+    <PageMetadata
+      title="About"
+      description="Kory Kilpatrick on poker, software, AI, reading, tennis, and cleaning the lens through which he sees the world."
+      path="/about"
+    />
 
-  return (
-    <div className="mx-auto flex w-full max-w-[62rem] flex-col lg:min-h-[calc(100vh-10rem)] lg:justify-center">
-      <div className="grid gap-10 lg:grid-cols-[21rem_minmax(0,1fr)] lg:items-center lg:gap-14 xl:gap-16">
-        <div className="mx-auto w-full max-w-[21rem] lg:mx-0">
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="group block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood/30"
-            aria-label={`View larger image: ${altText}`}
+    <figure className="about-portrait">
+      <img src={imageUrl} alt={altText} />
+      <figcaption>Kory and Winnie · Canadian Rockies</figcaption>
+    </figure>
+
+    <div className="about-copy">
+      <p className="site-eyebrow">About</p>
+      <h1>My first career was as a top-ranked poker player.</h1>
+      <div className="about-prose">
+        <p>
+          In 2015 I read{' '}
+          <a
+            href="https://waitbutwhy.com/2015/01/artificial-intelligence-revolution-1.html"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            {/* Cream-paper frame around the photo — like a mounted print on a library wall.
-                Walnut hairline border + warm shadow sits the photo on the page rather than
-                floating it in a cool-glass vignette. */}
-            <img
-              src={imageUrl}
-              alt={altText}
-              className="aspect-[4/5] w-full rounded-[28px] border border-[rgba(74,52,35,0.22)] object-cover shadow-[0_24px_52px_rgba(74,52,35,0.18)] transition duration-700 group-hover:scale-[1.01]"
-            />
-          </button>
-        </div>
-
-        <div className="max-w-[36rem]">
-          {/* Signature eyebrow — the house mark ◆ between walnut hairlines.
-              Same mark appears under the navbar wordmark and as the selection
-              marker in the bookshelf's filter popover. The repetition is the point;
-              it says "this site has a hand" without having to announce it in words. */}
-          <div aria-hidden="true" className="mb-7 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[rgba(74,52,35,0.22)]" />
-            <span className="text-[0.65rem] leading-none text-oxblood/85">◆</span>
-            <span className="h-px flex-1 bg-[rgba(74,52,35,0.22)]" />
-          </div>
-          <div className="space-y-5 text-[1.04rem] leading-[1.88] sm:text-[1.1rem] sm:leading-[1.92]">
-            <p className="text-textPrimary">
-              I like solving problems, helping people, and cleaning the lens
-              through which I see the world. My first career was as a top-ranked
-              poker player. In 2015 I read{' '}
-              <a
-                href="https://waitbutwhy.com/2015/01/artificial-intelligence-revolution-1.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary underline decoration-walnut/40 underline-offset-2 transition hover:text-oxblood hover:decoration-oxblood/60"
-              >
-                this article
-              </a>{' '}
-              and became convinced AI was going to be the most important
-              technology in history, so I taught myself to code and built a
-              SaaS business to get up to speed. I&rsquo;m now working
-              in AI, taking entrepreneurial swings at products while
-              also advising executives on how to use it for themselves
-              and across their companies.
-            </p>
-            <p className="text-textSecondary">
-              When I&rsquo;m not working, I&rsquo;m doing physical
-              activities (&#127934; being the current favorite), reading,
-              trying to be a good role model, or enjoying the company of
-              people and animals I love.
-            </p>
-          </div>
-        </div>
+            this article
+          </a>{' '}
+          and became convinced AI was going to be the most important technology in history, so I
+          taught myself to code and built a SaaS business to get up to speed. I&rsquo;m now working
+          in AI, taking entrepreneurial swings at products while also advising executives on how to
+          use it for themselves and across their companies.
+        </p>
+        <p>
+          When I&rsquo;m not working, I&rsquo;m doing physical activities (&#127934; being the
+          current favorite), reading, trying to be a good role model, or enjoying the company of
+          people and animals I love.
+        </p>
       </div>
-
-      <ImageModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        imageUrl={isModalOpen ? imageUrl : null}
-        altText={altText}
-      />
     </div>
-  );
-};
+  </article>
+);
 
 export default AboutPage;

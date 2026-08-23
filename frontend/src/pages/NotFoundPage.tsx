@@ -1,21 +1,22 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import PageMetadata from '@/components/layout/PageMetadata';
 
 const NotFoundPage: React.FC = () => {
+  const { pathname } = useLocation();
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <h1 className="text-6xl font-bold text-primary mb-6">404</h1>
-      <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-      <p className="text-textSecondary mb-8 max-w-md">
-        Sorry, the page you are looking for doesn&apos;t exist or has been moved.
-      </p>
-      <Link
-        to="/"
-        className="px-6 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-primary/90 transition"
-      >
-        Back to Home
-      </Link>
-    </div>
+    <section className="not-found-room">
+      <PageMetadata
+        title="Page not found"
+        description="That page does not exist."
+        path={pathname}
+        noIndex
+      />
+      <p className="site-eyebrow">404</p>
+      <h1>Page not found.</h1>
+      <Link to="/">Return home</Link>
+    </section>
   );
 };
 

@@ -1,243 +1,158 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Icon, { IconName } from '@/components/common/Icon';
 import { warmBookshelfExperience } from '@/pages/bookshelfWarmup';
 
-// Icon size constants
-const MOBILE_ICON_CLASSNAME = 'h-[18px] w-[18px]';
-const DESKTOP_ICON_CLASSNAME = 'h-7 w-7';
-
-// Icon style constants
-const ICON_LINK_CLASSNAME =
-  'text-slate-100 hover:text-oxblood-light no-underline transition duration-300';
 const EMAIL_HREF = 'mailto:koryrkilpatrick@gmail.com';
-
 const POSTS_ENABLED = process.env.REACT_APP_POSTS_ENABLED === 'true';
 
 const NAV_LINKS = [
-  { name: 'About', path: '/' },
   ...(POSTS_ENABLED ? [{ name: 'Posts', path: '/posts' }] : []),
   { name: 'Bookshelf', path: '/bookshelf' },
+  { name: 'About', path: '/about' },
 ] as const;
 
-const SOCIAL_LINKS: Array<{
-  href: string;
-  label: string;
-  icon: IconName;
-  external?: boolean;
-}> = [
+const ELSEWHERE_LINKS = [
+  { label: 'Quotes', href: '/quotes', internal: true },
   {
-    href: 'https://x.com/kory_kilpatrick',
-    label: 'X (formerly Twitter)',
-    icon: 'twitter',
+    label: 'Five Hour Consulting',
+    href: 'https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e',
   },
-  {
-    href: 'https://github.com/korykilpatrick',
-    label: 'GitHub',
-    icon: 'github',
-  },
-  {
-    href: 'https://www.linkedin.com/in/kory-kilpatrick-b60707243/',
-    label: 'LinkedIn',
-    icon: 'linkedin',
-  },
-  {
-    href: EMAIL_HREF,
-    label: 'Email Kory',
-    icon: 'email',
-    external: false,
-  },
-];
-
-interface SocialLinksProps {
-  iconClassName: string;
-}
-
-const SocialLinks: React.FC<SocialLinksProps> = ({ iconClassName }) => (
-  <>
-    {SOCIAL_LINKS.map((link) => (
-      <a
-        key={link.label}
-        href={link.href}
-        target={link.external === false ? undefined : '_blank'}
-        rel={link.external === false ? undefined : 'noopener noreferrer'}
-        className={ICON_LINK_CLASSNAME}
-        aria-label={link.label}
-      >
-        <Icon name={link.icon} className={iconClassName} />
-      </a>
-    ))}
-  </>
-);
+  { label: 'X', href: 'https://x.com/kory_kilpatrick' },
+  { label: 'GitHub', href: 'https://github.com/korykilpatrick' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/kory-kilpatrick-b60707243/' },
+  { label: 'Email', href: EMAIL_HREF },
+] as const;
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLElement>(null);
   const location = useLocation();
-
-  useEffect(() => {
-    if (!['/', '/about'].includes(location.pathname)) {
-      return;
-    }
-
-    const warmupId = window.setTimeout(() => {
-      void warmBookshelfExperience();
-    }, 300);
-
-    return () => {
-      window.clearTimeout(warmupId);
-    };
-  }, [location.pathname]);
+  const warmBookshelf = () => {
+    void warmBookshelfExperience().catch(() => undefined);
+  };
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return ['/', '/about'].includes(location.pathname);
-    }
-    return location.pathname.startsWith(path);
-  };
+  useEffect(() => {
+    if (!isMenuOpen) return;
 
-  const toggleMenu = () => setIsMenuOpen((isOpen) => !isOpen);
-  const handleBookshelfIntent = () => {
-    void warmBookshelfExperience();
-  };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setIsMenuOpen(false);
+      requestAnimationFrame(() => menuButtonRef.current?.focus());
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isMenuOpen]);
 
+  useEffect(() => {
+    mobileMenuRef.current?.toggleAttribute('inert', !isMenuOpen);
+  }, [isMenuOpen]);
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
   return (
-    <header className="sticky top-0 z-40 mb-2 border-b border-[rgba(137,181,255,0.12)] bg-[linear-gradient(180deg,rgba(15,29,48,0.97),rgba(10,19,33,0.93))] text-white shadow-[0_16px_46px_rgba(10,19,33,0.24)] backdrop-blur-md">
-      <nav className="container py-3 sm:py-4">
-        {/* Desktop */}
-        <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          {/* Logo (no name) */}
-          <div className="justify-self-start">
+    <header className="site-header">
+      <nav className="site-nav" aria-label="Primary navigation">
+        <Link to="/" className="site-wordmark" aria-label="Kory Kilpatrick, home">
+          <span className="site-wordmark-mark" aria-hidden="true">
+            K
+          </span>
+          <span>Kory Kilpatrick</span>
+        </Link>
+
+        <div className="site-nav-links">
+          {NAV_LINKS.map((link) => (
             <Link
-              to="/"
-              className="flex items-center gap-3 text-white no-underline transition hover:text-oxblood-light"
-              aria-label="Homepage"
+              key={link.path}
+              to={link.path}
+              className="site-nav-link"
+              aria-current={isActive(link.path) ? 'page' : undefined}
+              onMouseEnter={link.path === '/bookshelf' ? warmBookshelf : undefined}
+              onFocus={link.path === '/bookshelf' ? warmBookshelf : undefined}
             >
-              <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                <img src="/images/logo.png" alt="" className="h-12 w-12" />
-              </span>
-              <span className="hidden font-mono text-[0.68rem] uppercase tracking-[0.18em] text-slate-100 lg:inline">
-                Kory Kilpatrick
-              </span>
+              {link.name}
             </Link>
-          </div>
+          ))}
 
-          {/* Links */}
-          <div className="justify-self-center flex items-center gap-2 rounded-[16px] border border-white/22 bg-white/[0.08] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onMouseEnter={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
-                onFocus={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
-                aria-current={isActive(link.path) ? 'page' : undefined}
-                className={`rounded-[12px] px-4 py-2 font-mono text-[0.74rem] uppercase tracking-[0.12em] no-underline transition ${
-                  isActive(link.path)
-                    ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
-                    : '!text-slate-100 hover:bg-white/[0.12] hover:!text-white'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Social icons */}
-          <div className="justify-self-end flex items-center gap-4">
-            <a
-              href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.64rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-oxblood/50 hover:bg-white/[0.12] hover:text-oxblood-light"
-              aria-label="Five Hour Consulting profile"
-            >
-              5HC
-            </a>
-            <SocialLinks iconClassName={DESKTOP_ICON_CLASSNAME} />
-          </div>
+          <details className="site-elsewhere">
+            <summary>Elsewhere</summary>
+            <div className="site-elsewhere-menu">
+              {ELSEWHERE_LINKS.map((link) =>
+                'internal' in link && link.internal ? (
+                  <Link key={link.label} to={link.href}>
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.href === EMAIL_HREF ? undefined : '_blank'}
+                    rel={link.href === EMAIL_HREF ? undefined : 'noopener noreferrer'}
+                  >
+                    {link.label}
+                    {link.href === EMAIL_HREF ? null : <span aria-hidden="true">↗</span>}
+                  </a>
+                ),
+              )}
+            </div>
+          </details>
         </div>
 
-        {/* Mobile */}
-        <div className="md:hidden flex flex-col items-center">
-          <div className="w-full flex justify-between items-center">
-            <Link
-              to="/"
-              className="flex items-center gap-3 text-white no-underline"
-              aria-label="Homepage"
-            >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/18 bg-white/[0.06]">
-                <img src="/images/logo.png" alt="" className="h-9 w-9" />
-              </span>
-              <span className="font-mono text-[0.64rem] uppercase tracking-[0.12em] text-slate-100">
-                Kory Kilpatrick
-              </span>
-            </Link>
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood-light"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-site-menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
+        <button
+          ref={menuButtonRef}
+          type="button"
+          className="site-menu-button"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-site-menu"
+        >
+          <span />
+          <span />
+        </button>
+      </nav>
 
-          {isMenuOpen && (
-            <div
-              id="mobile-site-menu"
-              className="mt-3 w-full rounded-[20px] border border-white/16 bg-white/[0.08] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+      <nav
+        ref={mobileMenuRef}
+        id="mobile-site-menu"
+        className={`site-mobile-menu${isMenuOpen ? ' is-open' : ''}`}
+        aria-label="Mobile navigation"
+        aria-hidden={!isMenuOpen}
+      >
+        <div className="site-mobile-menu-inner">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              tabIndex={isMenuOpen ? undefined : -1}
+              aria-current={isActive(link.path) ? 'page' : undefined}
+              onTouchStart={link.path === '/bookshelf' ? warmBookshelf : undefined}
             >
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  onTouchStart={link.path === '/bookshelf' ? handleBookshelfIntent : undefined}
-                  aria-current={isActive(link.path) ? 'page' : undefined}
-                  className={`block rounded-[12px] px-3 py-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] no-underline transition ${
-                    isActive(link.path)
-                      ? 'border border-oxblood/50 bg-[rgba(158,58,42,0.28)] !text-white'
-                      : '!text-slate-100 hover:bg-white/[0.12] hover:!text-white'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.name}
+              {link.name}
+            </Link>
+          ))}
+          <div className="site-mobile-elsewhere">
+            {ELSEWHERE_LINKS.map((link) =>
+              'internal' in link && link.internal ? (
+                <Link key={link.label} to={link.href} tabIndex={isMenuOpen ? undefined : -1}>
+                  {link.label}
                 </Link>
-              ))}
-              {/* Social icons for mobile */}
-              <div className="mt-3 flex items-center justify-center gap-4 border-t border-white/10 pt-3">
+              ) : (
                 <a
-                  href="https://www.5hc.ai/l/kory-kilpatrick/6930b6b6-baa7-419a-a441-eac0a7225a6e"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-[12px] border border-white/20 bg-white/[0.08] px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-[0.1em] !text-slate-100 no-underline transition duration-300 hover:border-oxblood/50 hover:bg-white/[0.12] hover:text-oxblood-light"
-                  aria-label="Five Hour Consulting profile"
+                  key={link.label}
+                  href={link.href}
+                  tabIndex={isMenuOpen ? undefined : -1}
+                  target={link.href === EMAIL_HREF ? undefined : '_blank'}
+                  rel={link.href === EMAIL_HREF ? undefined : 'noopener noreferrer'}
                 >
-                  5HC
+                  {link.label}
                 </a>
-                <SocialLinks iconClassName={MOBILE_ICON_CLASSNAME} />
-              </div>
-            </div>
-          )}
+              ),
+            )}
+          </div>
         </div>
       </nav>
     </header>

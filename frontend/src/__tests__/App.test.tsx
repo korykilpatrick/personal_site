@@ -19,6 +19,11 @@ jest.mock('../pages/AboutPage', () => {
   MockAboutPage.displayName = 'MockAboutPage';
   return MockAboutPage;
 });
+jest.mock('../pages/HomePage', () => {
+  const MockHomePage = () => <div>Home Page</div>;
+  MockHomePage.displayName = 'MockHomePage';
+  return MockHomePage;
+});
 jest.mock('../pages/BookshelfPage', () => {
   const MockBookshelfPage = () => <div>Bookshelf Page</div>;
   MockBookshelfPage.displayName = 'MockBookshelfPage';
@@ -45,11 +50,11 @@ describe('App component', () => {
     window.history.pushState({}, '', '/');
   });
 
-  test('renders the about page on the home route and shows the footer', () => {
+  test('renders the home page on the home route and shows the footer', () => {
     renderApp();
 
     expect(screen.getByTestId('navbar')).toBeInTheDocument();
-    expect(screen.getByText('About Page')).toBeInTheDocument();
+    expect(screen.getByText('Home Page')).toBeInTheDocument();
     expect(screen.getByTestId('footer')).toBeInTheDocument();
   });
 

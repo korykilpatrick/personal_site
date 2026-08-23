@@ -4,21 +4,31 @@ This is the aesthetic contract for the personal site. `/design-loop` measures ev
 
 ## Emotional register
 
-**Site-wide.** Warm, professional but personal. Authentic, creative, grounded, polished. A visitor (often a professional peer evaluating the site) should come away thinking: "this person has real taste — sharp, intentional, interesting, not sloppy." The quality-without-a-name is the target; every screen should feel alive and whole, not assembled.
+**Site-wide.** A living study: warm, personal, grounded, and exact. The quality-without-a-name is the target; every screen should feel alive and whole, not assembled. Restraint should make Kory's thinking more present, not make the site feel empty.
 
-**Bookshelf page.** Analog library — the felt sense of standing among books, the quiet magic of a collection, the hum of accumulated reading life. Not a list of titles. The page is internet-native, so modern restraint is welcome, but the *feel* leans analog: paper, cloth, ribbon, stamped ink.
+**Bookshelf page.** Analog library — the felt sense of standing among books, the quiet magic of a collection, the hum of accumulated reading life. Not a list of titles. The page is internet-native, so modern restraint is welcome, but the _feel_ leans analog: paper, cloth, ribbon, stamped ink.
 
 ## North stars
 
 - **Analog library / archive** — card catalogs, Dewey drawers, stamped date-due slips, ribbon markers, cloth-bound spines. Borrow the vocabulary of physical books without photographing them.
-- **Christopher Alexander's *The Nature of Order*** — centers, wholeness, the quality-without-a-name. Strong, unambiguous centers; parts that feel necessary, not decorative.
+- **Christopher Alexander's _The Nature of Order_** — centers, wholeness, the quality-without-a-name. Strong, unambiguous centers; parts that feel necessary, not decorative.
 - **Small-press book design** — Everyman's Library, New Directions, Fitzcarraldo — paper-first typography, quiet confidence, restraint as a design choice.
 - **Craig Mod / Robin Sloan / Maggie Appleton-adjacent personal sites** — text-forward, pattern-rich, slightly irregular in a human way, never corporate.
+
+## One house, several rooms
+
+The shell is a quiet compass. Each destination keeps the same paper, ink, rules, and typographic proportions, but has a distinct spatial job:
+
+- **Home is a threshold.** One statement, one image, and three paths. No résumé summary or product copy.
+- **Posts are a field and a study.** The map should feel drawn on the page; the reader should feel composed for sustained attention.
+- **Bookshelf is a library.** Books and reading state may carry more material detail than the rest of the site, but never faux texture.
+- **About is a biographical room.** A strong first sentence, an actual photograph, and an unhurried narrative.
+- **Quotes are a commonplace book.** One complete passage at a time, advanced by the reader rather than a timer.
 
 ## Hard no's
 
 - **Generic SaaS chrome** — Stripe/Vercel-style glassy cards, default brand-blue CTAs, dashboard shadows, "app" feel. This is not an app.
-- **Skeuomorphic kitsch** — overwrought paper textures, faux wood grain, stitched dashed borders, excessive drop shadows, satin gradients. Evocative of physicality is good; *imitation* of physicality is embarrassing. The bookshelf should *feel* analog, not cosplay it.
+- **Skeuomorphic kitsch** — overwrought paper textures, faux wood grain, stitched dashed borders, excessive drop shadows, satin gradients. Evocative of physicality is good; _imitation_ of physicality is embarrassing. The bookshelf should _feel_ analog, not cosplay it.
 - **Sterile flatness** — pure flat Material-style minimalism with no warmth or material hint. Grounded, not sterile.
 - **Visual noise** — competing accents, decorative bloat, too many colors, busy textures behind text.
 
@@ -37,15 +47,17 @@ Temperature alignment is the whole point — warm ground plus one warm neutral p
 
 Names for patterns as they emerge and get validated. New additions require earning their keep — reach for existing ones first.
 
-- **Paper-slip popover** — extends `site-card-soft`. Cream-paper background (`rgba(250,245,234,0.94)` over backdrop-blur), 14px radius, walnut hairline border (`rgba(74,52,35,0.18)`), warm drop-shadow with a cream inset highlight, navy body ink. Use for transient surfaces that sit atop content and should read as a slip of paper laid on the page. Selected rows get a walnut whisper tint (`rgba(74,52,35,0.08)`) and a small oxblood `◆` marker; hover rows get a walnut breath tint (`rgba(74,52,35,0.04)`).
-- **Paper-slip chip** — extends `site-link-chip` for removable selections. Cream-paper fill, 12px radius, walnut hairline border, mono caps at ~0.64rem / 0.14em tracking, trailing `×` in quiet walnut ink that warms to oxblood on hover. Reads as a small index slip inline with surrounding typography.
-- **House dingbat (◆)** — a small oxblood diamond used as the house mark across the site. Appears as: the selection marker inside the paper-slip popover; the signature eyebrow on the About page (walnut rule + ◆ + walnut rule); the ember glow beneath currently-reading books (same ink, different form). The repetition is the signature — new uses should extend this vocabulary rather than invent alternatives.
-- **Warm navbar pill** — navy-glass active pill with oxblood-tinted border and fill (`border-oxblood/50 bg-[rgba(158,58,42,0.28)]`), white text. Used for the active nav link. This is the single warm-on-dark treatment on the site and serves as the navbar's "lifted" element.
-- **Navy-cloth tooltip** — small Radix tooltip styled as a navy-glass panel (matches the navbar material) with cream/90 text and cream-tinted shelf pills inside. Reads as a navy-cloth-bound bookmark floating next to the content.
+- **Paper field** — cream ground with barely visible grain and contour, never a card sitting on another card. The atlas and large reading surfaces use the page itself as their container.
+- **Rule as joinery** — walnut hairlines connect and separate regions. Prefer a rule, alignment, or change in measure before adding a box, radius, or shadow.
+- **Quiet compass** — the sticky header is slim, legible, and subordinate. Active destinations use an oxblood underline; secondary destinations live under one `Elsewhere` disclosure.
+- **Marginal note** — contextual detail attaches to its source. The atlas dossier is a light paper margin on desktop and a compact bottom sheet on small screens. Footnotes open beside their marker.
+- **House dingbat (◆)** — a small oxblood diamond used sparingly at major thresholds and reading breaks. Repetition makes it a signature; proliferation makes it decoration.
+- **Mono furniture** — labels, counts, controls, and provenance use small IBM Plex Mono. They should orient the reader, never compete with Newsreader titles or body copy.
 
 ## Notes
 
 - The bookshelf is the flagship page for "signal-your-taste." It carries more weight than other pages; hold a higher bar.
-- When a detail tempts you toward literal physical imitation, ask: "is this evoking the *feeling* of a library, or cosplaying a library?" If the latter, pull back.
-- Ribbons, tabs, spines, stamps, cloth, paper-cream — all fair game as *inspiration*. Satin gradients, dashed stitching, and faux-fabric textures are the cliff edge — use them only if the result feels genuinely Alexander-whole, not crafty.
+- When a detail tempts you toward literal physical imitation, ask: "is this evoking the _feeling_ of a library, or cosplaying a library?" If the latter, pull back.
+- Ribbons, tabs, spines, stamps, cloth, and paper are fair game as _inspiration_. Satin gradients, dashed stitching, faux wood grain, and faux-fabric textures cross the line into cosplay.
+- Progressive disclosure is the default for provenance, concepts, map instructions, and secondary destinations. It should reduce noise without hiding the next meaningful action.
 - This file should get sharper each loop. Edit freely.
