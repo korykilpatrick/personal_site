@@ -10,6 +10,7 @@ import {
   compareReadingTimeline,
   splitBooksByReadingState,
 } from '../components/bookshelf/bookshelfReadingState';
+import { getShelfBookCounts } from '../components/bookshelf/bookshelfCounts';
 
 const sortOptions: SortOption[] = [
   { label: 'Recent', value: 'date_read' },
@@ -45,6 +46,8 @@ const BookshelfPageContent: React.FC = () => {
 
     return Array.from(shelvesById.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [allBooks]);
+
+  const shelfBookCounts = useMemo(() => getShelfBookCounts(allBooks), [allBooks]);
 
   const filteredAndSortedBooks = useMemo(() => {
     let result = [...(allBooks || [])];
@@ -116,6 +119,7 @@ const BookshelfPageContent: React.FC = () => {
             selectedSortBy={sortBy}
             onSortChange={setSortBy}
             allBookshelves={bookshelves}
+            shelfBookCounts={shelfBookCounts}
             selectedShelfIds={selectedShelves}
             onToggleShelf={toggleShelfSelection}
             bookCount={filteredAndSortedBooks.length}

@@ -7,6 +7,7 @@ interface BookshelfControlsProps {
   selectedSortBy: string;
   onSortChange: (value: string) => void;
   allBookshelves: Bookshelf[];
+  shelfBookCounts: ReadonlyMap<number, number>;
   selectedShelfIds: number[];
   onToggleShelf: (id: number) => void;
   bookCount: number;
@@ -355,6 +356,7 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
   selectedSortBy,
   onSortChange,
   allBookshelves,
+  shelfBookCounts,
   selectedShelfIds,
   onToggleShelf,
   bookCount,
@@ -466,12 +468,16 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
             <ul className="max-h-72 overflow-y-auto py-1.5" role="menu">
               {allBookshelves.map((shelf) => {
                   const selected = selectedShelfIds.includes(shelf.id);
+                  const shelfBookCount = shelfBookCounts.get(shelf.id) ?? 0;
                   return (
                     <li key={shelf.id}>
                       <button
                         type="button"
                         role="menuitemcheckbox"
                         aria-checked={selected}
+                        aria-label={`${shelf.name}, ${shelfBookCount} ${
+                          shelfBookCount === 1 ? 'book' : 'books'
+                        }`}
                         onClick={() => onToggleShelf(shelf.id)}
                         className="flex w-full items-center gap-2 px-3.5 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] transition"
                         style={{
@@ -488,7 +494,19 @@ const BookshelfControls: React.FC<BookshelfControlsProps> = ({
                         <span aria-hidden="true" style={{ width: '0.7rem', color: OXBLOOD }}>
                           {selected ? '◆' : ''}
                         </span>
-                        {shelf.name}
+                        <span style={{ whiteSpace: 'nowrap' }}>
+                          {shelf.name}{' '}
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              color: WALNUT_MID,
+                              fontSize: '0.62rem',
+                              letterSpacing: '0.08em',
+                            }}
+                          >
+                            ({shelfBookCount})
+                          </span>
+                        </span>
                       </button>
                     </li>
                   );
