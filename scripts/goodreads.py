@@ -13,9 +13,9 @@ Environment variables (or .env file):
 """
 
 import os
-import sys
 import xml.etree.ElementTree as ET
 from collections import namedtuple, defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 
@@ -63,9 +63,6 @@ def parse_rss_date(date_str):
     except (ValueError, TypeError):
         return None
 
-# Load environment variables from .env file
-load_env_file(os.path.join(os.path.dirname(__file__), '..', 'server', '.env'))
-
 # Data models (matching existing database schema)
 Book = namedtuple('Book', [
     'goodreads_id', 'img_url', 'img_url_small', 'title', 'book_link',
@@ -75,10 +72,55 @@ Book = namedtuple('Book', [
 Bookshelf = namedtuple('Bookshelf', ['name'])
 BooksShelves = namedtuple('BooksShelves', ['book_id', 'shelf_id'])
 
+
+@dataclass(frozen=True)
+class ShelfSnapshot:
+    """A shelf feed that reached a valid empty terminal page."""
+
+    shelf: str
+    books: tuple
+    book_shelves: dict
+    terminal_page: int
+    complete: bool = True
+
+
+@dataclass(frozen=True)
+class GoodreadsSnapshot:
+    """The complete, authoritative union of every configured shelf feed."""
+
+    books: dict
+    book_shelves: dict
+    completed_shelves: frozenset
+
+
+class GoodreadsSyncError(RuntimeError):
+    """Base class for errors that make a Goodreads snapshot unsafe to apply."""
+
+
+class FeedFetchError(GoodreadsSyncError):
+    """Raised when an RSS page cannot be fetched successfully."""
+
+
+class FeedParseError(GoodreadsSyncError):
+    """Raised when an RSS page or item cannot be parsed completely."""
+
+
+class FeedPaginationError(GoodreadsSyncError):
+    """Raised when a feed never reaches a valid empty terminal page."""
+
+
+class PruneSafetyError(GoodreadsSyncError):
+    """Raised when a snapshot could cause an unexpectedly destructive prune."""
+
+
 # Configuration
 PROFILE_ID = '76731654'
 RSS_BASE_URL = f'https://www.goodreads.com/review/list_rss/{PROFILE_ID}'
 SHELVES_TO_SYNC = ['currently-reading', 'read']
+MAX_RSS_PAGES = 50
+# Automated syncs may delete at most 20% of existing Goodreads-backed books.
+# Larger intentional reductions require the --allow-large-prune CLI override.
+MAX_PRUNE_FRACTION = 0.20
 
 # HTTP headers to avoid 403 errors
 REQUEST_HEADERS = {
@@ -113,12 +155,12 @@ class Database:
             return conn
         except psycopg2.Error as e:
             print(f"Error connecting to database: {e}")
-            sys.exit(1)
+            raise
 
     def execute(self, query, args=(), many=False):
-        """Execute a query and return results."""
+        """Execute a query without committing the surrounding transaction."""
+        cursor = self.connection.cursor()
         try:
-            cursor = self.connection.cursor()
             if many:
                 cursor.executemany(query, args)
             else:
@@ -128,18 +170,41 @@ class Database:
             if cursor.description:
                 columns = [d[0] for d in cursor.description]
                 Row = namedtuple('Row', columns)
-                results = [Row(*row) for row in cursor.fetchall()]
-                self.connection.commit()
-                cursor.close()
-                return results
+                return [Row(*row) for row in cursor.fetchall()]
 
-            self.connection.commit()
+            return None
+        finally:
             cursor.close()
-            return None
-        except psycopg2.Error as e:
-            print(f"Database error: {e}")
-            self.connection.rollback()
-            return None
+
+    def commit(self):
+        """Commit the complete Goodreads reconciliation."""
+        self.connection.commit()
+
+    def rollback(self):
+        """Roll back the complete Goodreads reconciliation."""
+        self.connection.rollback()
+
+    def get_goodreads_books(self):
+        """Return database books managed by the Goodreads sync."""
+        return self.execute("""
+            SELECT id, goodreads_id
+            FROM books
+            WHERE goodreads_id IS NOT NULL
+        """)
+
+    def get_bookshelves(self):
+        """Return all shelf IDs and names."""
+        return self.execute('SELECT id, name FROM bookshelves')
+
+    def get_book_shelf_assignments(self):
+        """Return shelf assignments for Goodreads-backed books."""
+        return self.execute("""
+            SELECT books_shelves.book_id, books_shelves.shelf_id, bookshelves.name
+            FROM books_shelves
+            JOIN books ON books.id = books_shelves.book_id
+            JOIN bookshelves ON bookshelves.id = books_shelves.shelf_id
+            WHERE books.goodreads_id IS NOT NULL
+        """)
 
     def upsert_books(self, books):
         """Insert new books and refresh existing Goodreads-backed records."""
@@ -180,7 +245,7 @@ class Database:
 
         query = """
             INSERT INTO bookshelves (name) VALUES (%s)
-            ON CONFLICT (name) DO NOTHING
+            ON CONFLICT DO NOTHING
         """
         self.execute(query, [(s.name,) for s in shelves], many=True)
         print(f"Inserted {len(shelves)} shelves (duplicates ignored)")
@@ -209,6 +274,26 @@ class Database:
         self.execute(query, assignments, many=True)
         print(f"Deleted {len(assignments)} stale shelf assignments")
 
+    def delete_books(self, book_ids):
+        """Delete junction rows before Goodreads-backed books.
+
+        Production foreign keys use NO ACTION, so this ordering is required even
+        though some local schema declarations historically specified cascades.
+        """
+        book_ids = sorted(set(book_ids))
+        if not book_ids:
+            return
+
+        self.execute(
+            'DELETE FROM books_shelves WHERE book_id = ANY(%s)',
+            (book_ids,),
+        )
+        self.execute(
+            'DELETE FROM books WHERE id = ANY(%s)',
+            (book_ids,),
+        )
+        print(f"Deleted {len(book_ids)} books no longer present on Goodreads")
+
     def close(self):
         if self.connection:
             self.connection.close()
@@ -222,20 +307,37 @@ def fetch_rss(shelf, page=1):
         response.raise_for_status()
         return response.content
     except requests.RequestException as e:
-        print(f"Error fetching RSS for {shelf} page {page}: {e}")
-        return None
+        raise FeedFetchError(
+            f"Failed to fetch Goodreads shelf {shelf!r} page {page}"
+        ) from e
+
+
+def _element_text(parent, tag, default=''):
+    """Return a child element's text without treating optional fields as errors."""
+    element = parent.find(tag)
+    if element is None or element.text is None:
+        return default
+    return element.text
+
+
+def _required_element_text(parent, tag):
+    """Return required child text or reject the incomplete RSS item."""
+    value = _element_text(parent, tag).strip()
+    if not value:
+        raise FeedParseError(f"RSS item is missing required <{tag}> text")
+    return value
 
 
 def parse_rss_item(item):
     """Parse a single RSS item into a Book namedtuple."""
     try:
-        goodreads_id = int(item.find('book_id').text)
-        title = item.find('title').text or ''
-        author = item.find('author_name').text or ''
+        goodreads_id = int(_required_element_text(item, 'book_id'))
+        title = _required_element_text(item, 'title')
+        author = _required_element_text(item, 'author_name')
 
         # Image URLs
-        img_url_small = item.find('book_small_image_url').text or ''
-        img_url = item.find('book_large_image_url').text or img_url_small
+        img_url_small = _element_text(item, 'book_small_image_url')
+        img_url = _element_text(item, 'book_large_image_url', img_url_small)
 
         # Book link
         book_link = f'https://www.goodreads.com/book/show/{goodreads_id}'
@@ -252,22 +354,22 @@ def parse_rss_item(item):
                 except ValueError:
                     pass
 
-        avg_rating_text = item.find('average_rating').text
+        avg_rating_text = _element_text(item, 'average_rating')
         avg_rating = float(avg_rating_text) if avg_rating_text else 0.0
 
         num_ratings = 0  # Not available in RSS
 
-        date_pub = item.find('book_published').text
+        date_pub = _element_text(item, 'book_published') or None
 
         # User-specific data
-        rating_text = item.find('user_rating').text
+        rating_text = _element_text(item, 'user_rating')
         rating = int(rating_text) if rating_text and rating_text != '0' else None
 
         blurb_elem = item.find('user_review')
         blurb = blurb_elem.text.strip() if blurb_elem is not None and blurb_elem.text else ''
 
         # Parse dates from RSS RFC 2822 format to ISO format (YYYY-MM-DD)
-        date_added = parse_rss_date(item.find('user_date_added').text)
+        date_added = parse_rss_date(_element_text(item, 'user_date_added'))
         date_started = None  # Not available in RSS
         date_read_elem = item.find('user_read_at')
         date_read = parse_rss_date(date_read_elem.text if date_read_elem is not None else None)
@@ -285,82 +387,180 @@ def parse_rss_item(item):
         )
         return book, shelves
 
-    except Exception as e:
-        print(f"Error parsing RSS item: {e}")
-        return None, []
+    except FeedParseError:
+        raise
+    except (AttributeError, TypeError, ValueError) as e:
+        raise FeedParseError("Could not parse a complete Goodreads RSS item") from e
 
 
-def get_all_books_from_shelf(shelf):
-    """Fetch all books from a shelf, handling pagination."""
+def _local_name(tag):
+    """Strip an optional XML namespace from a tag."""
+    return tag.rsplit('}', 1)[-1]
+
+
+def parse_rss_page(content, shelf, page):
+    """Parse and validate one Goodreads RSS page."""
+    try:
+        root = ET.fromstring(content)
+    except (ET.ParseError, TypeError) as e:
+        raise FeedParseError(
+            f"Invalid RSS XML for shelf {shelf!r} page {page}"
+        ) from e
+
+    if _local_name(root.tag).lower() != 'rss':
+        raise FeedParseError(
+            f"Unexpected RSS document for shelf {shelf!r} page {page}"
+        )
+
+    channel = next(
+        (child for child in root if _local_name(child.tag).lower() == 'channel'),
+        None,
+    )
+    if channel is None:
+        raise FeedParseError(
+            f"RSS channel missing for shelf {shelf!r} page {page}"
+        )
+
+    return [
+        child for child in channel
+        if _local_name(child.tag).lower() == 'item'
+    ]
+
+
+def get_all_books_from_shelf(shelf, allow_empty=False):
+    """Fetch a complete shelf, requiring a valid empty terminal RSS page."""
     all_books = []
     book_shelves = {}  # goodreads_id -> list of shelf names
-    page = 1
+    seen_ids = set()
 
-    while page <= 50:  # Safety limit
+    for page in range(1, MAX_RSS_PAGES + 1):
         content = fetch_rss(shelf, page)
-        if not content:
-            break
-
-        try:
-            root = ET.fromstring(content)
-        except ET.ParseError as e:
-            print(f"Error parsing RSS XML: {e}")
-            break
-
-        items = root.findall('.//item')
+        items = parse_rss_page(content, shelf, page)
         if not items:
-            break
+            if page == 1 and not allow_empty:
+                raise PruneSafetyError(
+                    f"Shelf {shelf!r} returned an empty first page; refusing to "
+                    "treat it as authoritative without --allow-large-prune"
+                )
+
+            return ShelfSnapshot(
+                shelf=shelf,
+                books=tuple(all_books),
+                book_shelves=book_shelves,
+                terminal_page=page,
+            )
 
         for item in items:
             book, shelves = parse_rss_item(item)
-            if book:
-                all_books.append(book)
-                book_shelves[book.goodreads_id] = shelves
+            if book.goodreads_id in seen_ids:
+                raise FeedPaginationError(
+                    f"Duplicate Goodreads book {book.goodreads_id} while paginating "
+                    f"shelf {shelf!r} at page {page}"
+                )
 
-        page += 1
+            seen_ids.add(book.goodreads_id)
+            all_books.append(book)
+            book_shelves[book.goodreads_id] = shelves
 
-    return all_books, book_shelves
+    raise FeedPaginationError(
+        f"Shelf {shelf!r} did not reach an empty terminal page within "
+        f"{MAX_RSS_PAGES} pages"
+    )
 
 
-def sync_books(db):
-    """Sync books from Goodreads to database."""
-    # Get existing books
-    existing = db.execute('SELECT goodreads_id FROM books')
-    existing_ids = {b.goodreads_id for b in existing} if existing else set()
-
-    # Fetch books from all shelves
+def fetch_goodreads_snapshot(allow_large_prune=False):
+    """Fetch every tracked shelf before any database reconciliation begins."""
     all_books = {}
-    all_book_shelves = {}
+    all_book_shelves = defaultdict(set)
+    completed_shelves = set()
 
     for shelf in SHELVES_TO_SYNC:
         print(f"Fetching shelf: {shelf}")
-        books, book_shelves = get_all_books_from_shelf(shelf)
-        print(f"  Found {len(books)} books")
+        shelf_snapshot = get_all_books_from_shelf(
+            shelf,
+            allow_empty=allow_large_prune,
+        )
+        if not shelf_snapshot.complete:
+            raise GoodreadsSyncError(f"Shelf {shelf!r} returned an incomplete snapshot")
+        if (
+            shelf_snapshot.terminal_page == 1
+            and not shelf_snapshot.books
+            and not allow_large_prune
+        ):
+            raise PruneSafetyError(
+                f"Shelf {shelf!r} returned an empty first page; refusing to "
+                "treat it as authoritative without --allow-large-prune"
+            )
 
-        for book in books:
-            if book.goodreads_id not in all_books:
-                all_books[book.goodreads_id] = book
-        all_book_shelves.update(book_shelves)
+        completed_shelves.add(shelf)
+        print(
+            f"  Found {len(shelf_snapshot.books)} books; "
+            f"terminal page {shelf_snapshot.terminal_page}"
+        )
 
-    # Insert new books and refresh existing records.
-    books_to_sync = list(all_books.values())
+        for book in shelf_snapshot.books:
+            all_books.setdefault(book.goodreads_id, book)
+            # A book returned by a shelf feed necessarily belongs to that shelf,
+            # even if Goodreads omits it from the user_shelves text field.
+            all_book_shelves[book.goodreads_id].add(shelf)
+            all_book_shelves[book.goodreads_id].update(
+                shelf_snapshot.book_shelves.get(book.goodreads_id, [])
+            )
+
+    expected_shelves = set(SHELVES_TO_SYNC)
+    if completed_shelves != expected_shelves:
+        missing = sorted(expected_shelves - completed_shelves)
+        raise GoodreadsSyncError(
+            f"Refusing to reconcile an incomplete Goodreads snapshot; missing {missing}"
+        )
+
+    return GoodreadsSnapshot(
+        books=all_books,
+        book_shelves={
+            goodreads_id: sorted(shelf_names)
+            for goodreads_id, shelf_names in all_book_shelves.items()
+        },
+        completed_shelves=frozenset(completed_shelves),
+    )
+
+
+def sync_books(db, books, allow_large_prune=False):
+    """Upsert present books and delete Goodreads books absent from the snapshot."""
+    existing = db.get_goodreads_books() or []
+    present_goodreads_ids = set(books)
+    missing_book_ids = [
+        book.id for book in existing
+        if book.goodreads_id not in present_goodreads_ids
+    ]
+
+    # Validate the complete deletion plan before the first database write. The
+    # existing-book count is the stable baseline for the destructive fraction.
+    if existing and not allow_large_prune:
+        prune_fraction = len(missing_book_ids) / len(existing)
+        if prune_fraction > MAX_PRUNE_FRACTION:
+            raise PruneSafetyError(
+                f"Refusing to delete {len(missing_book_ids)} of {len(existing)} "
+                f"Goodreads-backed books ({prune_fraction:.1%}); the automatic "
+                f"limit is {MAX_PRUNE_FRACTION:.0%}. Re-run with "
+                "--allow-large-prune if this reduction is intentional."
+            )
+
+    books_to_sync = list(books.values())
     if books_to_sync:
         db.upsert_books(books_to_sync)
     else:
         print("No books returned from Goodreads")
 
-    # Report books in DB but not on Goodreads (we don't delete them)
-    missing_from_goodreads = existing_ids - set(all_books.keys())
-    if missing_from_goodreads:
-        print(f"Skipping {len(missing_from_goodreads)} books not found on Goodreads (keeping in DB)")
-
-    return all_book_shelves
+    if missing_book_ids:
+        db.delete_books(missing_book_ids)
+    else:
+        print("No books to delete")
 
 
 def sync_bookshelves(db, book_shelves):
     """Sync bookshelves from collected shelf names."""
     # Get existing shelves
-    existing = db.execute('SELECT name FROM bookshelves')
+    existing = db.get_bookshelves()
     existing_names = {s.name for s in existing} if existing else set()
 
     # Collect all unique shelf names
@@ -381,20 +581,16 @@ def sync_bookshelves(db, book_shelves):
 def sync_books_shelves(db, book_shelves):
     """Sync book-shelf relationships."""
     # Get book ID lookup
-    books = db.execute('SELECT id, goodreads_id FROM books')
+    books = db.get_goodreads_books()
     book_id_lookup = {b.goodreads_id: b.id for b in books} if books else {}
 
     # Get shelf ID lookup
-    shelves = db.execute('SELECT id, name FROM bookshelves')
+    shelves = db.get_bookshelves()
     shelf_id_lookup = {s.name: s.id for s in shelves} if shelves else {}
 
     # Build a per-book view of current assignments so Goodreads can be the source of truth
     # for books that still appear in the synced feeds.
-    existing = db.execute("""
-        SELECT books_shelves.book_id, books_shelves.shelf_id, bookshelves.name
-        FROM books_shelves
-        JOIN bookshelves ON bookshelves.id = books_shelves.shelf_id
-    """)
+    existing = db.get_book_shelf_assignments()
     existing_assignments = defaultdict(dict)
     if existing:
         for assignment in existing:
@@ -431,23 +627,51 @@ def sync_books_shelves(db, book_shelves):
         print("No stale shelf assignments to delete")
 
 
-def dry_run():
+def reconcile_database(db, snapshot, allow_large_prune=False):
+    """Apply one complete Goodreads snapshot to the database."""
+    expected_shelves = set(SHELVES_TO_SYNC)
+    if set(snapshot.completed_shelves) != expected_shelves:
+        raise GoodreadsSyncError(
+            "Refusing to reconcile a snapshot that did not complete every tracked shelf"
+        )
+
+    sync_books(
+        db,
+        snapshot.books,
+        allow_large_prune=allow_large_prune,
+    )
+    sync_bookshelves(db, snapshot.book_shelves)
+    sync_books_shelves(db, snapshot.book_shelves)
+
+
+def sync_from_goodreads(db, allow_large_prune=False):
+    """Fetch a complete snapshot and apply it as one atomic transaction."""
+    try:
+        snapshot = fetch_goodreads_snapshot(
+            allow_large_prune=allow_large_prune,
+        )
+        reconcile_database(
+            db,
+            snapshot,
+            allow_large_prune=allow_large_prune,
+        )
+        db.commit()
+        return snapshot
+    except Exception:
+        db.rollback()
+        raise
+
+
+def dry_run(allow_large_prune=False):
     """Test fetching without database connection."""
     print(f"Starting Goodreads dry run at {datetime.now().isoformat()}")
     print("-" * 50)
 
-    all_books = {}
-    all_book_shelves = {}
-
-    for shelf in SHELVES_TO_SYNC:
-        print(f"Fetching shelf: {shelf}")
-        books, book_shelves = get_all_books_from_shelf(shelf)
-        print(f"  Found {len(books)} books")
-
-        for book in books:
-            if book.goodreads_id not in all_books:
-                all_books[book.goodreads_id] = book
-        all_book_shelves.update(book_shelves)
+    snapshot = fetch_goodreads_snapshot(
+        allow_large_prune=allow_large_prune,
+    )
+    all_books = snapshot.books
+    all_book_shelves = snapshot.book_shelves
 
     print("-" * 50)
     print(f"Total unique books: {len(all_books)}")
@@ -473,22 +697,16 @@ def dry_run():
     print(f"Dry run complete at {datetime.now().isoformat()}")
 
 
-def main():
+def main(allow_large_prune=False):
     """Main sync function."""
     print(f"Starting Goodreads sync at {datetime.now().isoformat()}")
     print("-" * 50)
 
+    load_env_file(os.path.join(os.path.dirname(__file__), '..', 'server', '.env'))
     db = Database()
 
     try:
-        # Sync books and collect shelf data
-        book_shelves = sync_books(db)
-
-        # Sync bookshelves
-        sync_bookshelves(db, book_shelves)
-
-        # Sync book-shelf relationships
-        sync_books_shelves(db, book_shelves)
+        sync_from_goodreads(db, allow_large_prune=allow_large_prune)
 
         print("-" * 50)
         print(f"Sync complete at {datetime.now().isoformat()}")
@@ -497,13 +715,26 @@ def main():
         db.close()
 
 
-if __name__ == '__main__':
+def build_argument_parser():
+    """Build the command-line interface for the Goodreads sync."""
     import argparse
     parser = argparse.ArgumentParser(description='Sync Goodreads books to database')
     parser.add_argument('--dry-run', action='store_true', help='Test fetching without database')
-    args = parser.parse_args()
+    parser.add_argument(
+        '--allow-large-prune',
+        action='store_true',
+        help=(
+            'Allow an intentional empty shelf or deletion of more than 20%% '
+            'of Goodreads-backed books'
+        ),
+    )
+    return parser
+
+
+if __name__ == '__main__':
+    args = build_argument_parser().parse_args()
 
     if args.dry_run:
-        dry_run()
+        dry_run(allow_large_prune=args.allow_large_prune)
     else:
-        main()
+        main(allow_large_prune=args.allow_large_prune)

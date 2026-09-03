@@ -35,7 +35,7 @@ async function createDatabase(): Promise<void> {
       // Create books table
       await db.schema.createTable('books', (table) => {
         table.increments('id').primary();
-        table.integer('goodreads_id').notNullable();
+        table.integer('goodreads_id').notNullable().unique();
         table.string('img_url', 255).nullable();
         table.string('img_url_small', 255).nullable();
         table.string('title', 255).notNullable();
@@ -59,7 +59,7 @@ async function createDatabase(): Promise<void> {
       // Create bookshelves table
       await db.schema.createTable('bookshelves', (table) => {
         table.increments('id').primary();
-        table.string('name', 50).notNullable();
+        table.string('name', 50).notNullable().unique();
         table.timestamp('created_at').nullable().defaultTo(db.fn.now());
       });
       logger.info('Bookshelves table created');
@@ -67,8 +67,12 @@ async function createDatabase(): Promise<void> {
       // Create books_shelves junction table
       await db.schema.createTable('books_shelves', (table) => {
         table.increments('id').primary();
-        table.integer('book_id').nullable().references('id').inTable('books').onDelete('CASCADE');
-        table.integer('shelf_id').nullable().references('id').inTable('bookshelves').onDelete('CASCADE');
+        // Match production's NO ACTION foreign keys. Callers must delete junction
+        // rows explicitly before deleting a book or shelf, keeping cleanup behavior
+        // consistent across environments.
+        table.integer('book_id').nullable().references('id').inTable('books');
+        table.integer('shelf_id').nullable().references('id').inTable('bookshelves');
+        table.unique(['book_id', 'shelf_id']);
         table.timestamp('created_at').nullable().defaultTo(db.fn.now());
       });
       logger.info('Books_shelves junction table created');

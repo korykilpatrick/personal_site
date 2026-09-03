@@ -22,10 +22,26 @@ interface BooksProviderProps {
 }
 
 let booksCache: BookWithShelves[] | null = null;
+let booksCachedAt: number | null = null;
 let booksRequest: Promise<BookWithShelves[]> | null = null;
 
+/**
+ * Keep route remounts instant while bounding an open tab's stale bookshelf data.
+ * Goodreads syncs are infrequent, so a five-minute refresh avoids noisy polling.
+ */
+export const BOOKS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const getBooksCacheTtlRemaining = (): number => {
+  if (booksCache === null || booksCachedAt === null) {
+    return 0;
+  }
+
+  const cacheAge = Math.max(0, Date.now() - booksCachedAt);
+  return Math.max(0, BOOKS_CACHE_TTL_MS - cacheAge);
+};
+
 const loadBooks = async (): Promise<BookWithShelves[]> => {
-  if (booksCache) {
+  if (booksCache !== null && getBooksCacheTtlRemaining() > 0) {
     return booksCache;
   }
 
@@ -34,6 +50,7 @@ const loadBooks = async (): Promise<BookWithShelves[]> => {
       .getBooks(true)
       .then((fetched) => {
         booksCache = fetched as BookWithShelves[];
+        booksCachedAt = Date.now();
         return booksCache;
       })
       .finally(() => {
@@ -48,6 +65,7 @@ export const prefetchBooks = (): Promise<BookWithShelves[]> => loadBooks();
 
 export const resetBooksCache = (): void => {
   booksCache = null;
+  booksCachedAt = null;
   booksRequest = null;
 };
 
@@ -62,15 +80,19 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let isMounted = true;
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
-    if (booksCache) {
-      setBooks(booksCache);
-      setLoading(false);
-      setError(null);
-      return () => {
-        isMounted = false;
-      };
-    }
+    const scheduleNextRefresh = () => {
+      if (!isMounted) {
+        return;
+      }
+
+      const remainingTtl = getBooksCacheTtlRemaining();
+      const refreshDelay = remainingTtl > 0 ? remainingTtl : BOOKS_CACHE_TTL_MS;
+      refreshTimer = setTimeout(() => {
+        void fetchBooks();
+      }, refreshDelay);
+    };
 
     const fetchBooks = async () => {
       try {
@@ -82,11 +104,16 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
       } catch (err) {
         if (isMounted) {
           const e = err instanceof Error ? err : new Error(String(err));
-          setError(e);
+          // Keep rendering the last successful snapshot when a background
+          // revalidation fails. Only the initial load has no usable fallback.
+          if (booksCache === null) {
+            setError(e);
+          }
         }
       } finally {
         if (isMounted) {
           setLoading(false);
+          scheduleNextRefresh();
         }
       }
     };
@@ -95,6 +122,9 @@ export const BooksProvider: React.FC<BooksProviderProps> = ({ children }) => {
 
     return () => {
       isMounted = false;
+      if (refreshTimer) {
+        clearTimeout(refreshTimer);
+      }
     };
   }, []);
 
